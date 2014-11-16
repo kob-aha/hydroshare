@@ -2,10 +2,24 @@ from __future__ import absolute_import
 
 from django.core.exceptions import PermissionDenied
 from django.core import exceptions
+from django.contrib.auth.models import User
 from hs_core import hydroshare
-from ga_resources.utils import get_user
 import json
 
+def get_user(request):
+    """
+    Determine the user from the request object.
+
+    TODO: Add support for API keys
+    :param request: HTTP request object
+    :return: Django User object instance representing the user
+    """
+    user = None
+    if request.user.is_authenticated():
+        user = User.objects.get(pk=request.user.pk)
+    else:
+        user = request.user
+    return user
 
 def authorize(request, res_id, edit=False, view=False, full=False, superuser=False, raises_exception=True):
     """
@@ -13,6 +27,7 @@ def authorize(request, res_id, edit=False, view=False, full=False, superuser=Fal
     the parameter list, then this returns True else False.
     """
     user = get_user(request)
+
     res = hydroshare.utils.get_resource_by_shortkey(res_id)
 
     has_edit = res.edit_users.filter(pk=user.pk).exists()

@@ -7,16 +7,17 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 import json
 from mezzanine.generic.models import Keyword
-from ga_resources.utils import get_user, json_or_jsonp
+from ga_resources.utils import json_or_jsonp
 from hs_core import hydroshare
-from hs_core.api import UserResource, GroupResource
 from hs_core.hydroshare.utils import group_from_id, user_from_id
 from hs_core.models import GroupOwnership
 from hs_core.views import utils
+from hs_core.views.utils import get_user
 from .utils import authorize, validate_json
 from django.views.generic import View
 from django.core import exceptions
 from django.conf import settings
+from django.core import serializers
 
 
 class SetAccessRules(View):
@@ -285,12 +286,13 @@ class CreateOrListAccounts(View):
         params = utils.create_form(CreateOrListAccounts.ListUsersForm, self.request)
         if params.is_valid():
             r = params.cleaned_data
-            res = UserResource()
-            bundles = []
-            for u in hydroshare.list_users(r['query'], r['status'], r['start'], r['count']):
-                bundle = res.build_bundle(obj=u, request=self.request)
-                bundles.append(res.full_dehydrate(bundle, for_list=True))
-            list_json = res.serialize(None, bundles, "application/json")
+            # res = UserResource()
+            # bundles = []
+            list_json = serializers.serialize("json", hydroshare.list_users(r['query'], r['status'], r['start'], r['count']))
+            # for u in hydroshare.list_users(r['query'], r['status'], r['start'], r['count']):
+            #     bundle = res.build_bundle(obj=u, request=self.request)
+            #     bundles.append(res.full_dehydrate(bundle, for_list=True))
+            # list_json = res.serialize(None, bundles, "application/json")
 
             return json_or_jsonp(self.request, list_json)
         else:
@@ -338,7 +340,7 @@ class UpdateAccountOrUserInfo(View):
     Exception.ServiceFailure - The service is unable to process the request
 
     As Built Notes:
-    The GET method returns the results of a Tastypie serialization of a user. See api.py for more details.
+    The GET method returns a serialization of a user. See api.py for more details.
     """
 
     @method_decorator(csrf_exempt)
@@ -459,12 +461,13 @@ class CreateOrListGroups(View):
         params = utils.create_form(CreateOrListGroups.ListGroupsForm, self.request)
         if params.is_valid():
             r = params.cleaned_data
-            res = GroupResource()
-            bundles = []
-            for g in hydroshare.list_groups(r['query'], r['start'], r['count']):
-                bundle = res.build_bundle(obj=g, request=self.request)
-                bundles.append(res.full_dehydrate(bundle, for_list=True))
-            list_json = res.serialize(None, bundles, "application/json")
+            # res = GroupResource()
+            # bundles = []
+            list_json = serializers.serialize("json", hydroshare.list_groups(r['query'], r['start'], r['count']))
+            # for g in hydroshare.list_groups(r['query'], r['start'], r['count']):
+            #     bundle = res.build_bundle(obj=g, request=self.request)
+            #     bundles.append(res.full_dehydrate(bundle, for_list=True))
+            # list_json = res.serialize(None, bundles, "application/json")
 
             return json_or_jsonp(self.request, list_json)
         else:
@@ -498,12 +501,13 @@ class ListGroupMembers(View):
         return self.list_group_members(pk)
 
     def list_group_members(self, pk):
-        res = UserResource()
-        bundles = []
-        for u in hydroshare.list_group_members(pk):
-            bundle = res.build_bundle(obj=u, request=self.request)
-            bundles.append(res.full_dehydrate(bundle, for_list=True))
-        list_json = res.serialize(None, bundles, "application/json")
+        # res = UserResource()
+        # bundles = []
+        list_json = serializers.serialize("json", hydroshare.list_group_members(pk))
+        # for u in hydroshare.list_group_members(pk):
+        #     bundle = res.build_bundle(obj=u, request=self.request)
+        #     bundles.append(res.full_dehydrate(bundle, for_list=True))
+        # list_json = res.serialize(None, bundles, "application/json")
 
         return json_or_jsonp(self.request, list_json)
 
@@ -610,8 +614,7 @@ class GetResourceList(View):
     Exceptions.NotFound - The group identified by groupID does not exist
     Exception.ServiceFailure - The service is unable to process the request
 
-    Note:  See http://django-tastypie.readthedocs.org/en/latest/resources.html#basic-filtering for implementation
-    details and example. We may want to modify this method to return more than just the pids for resources so that some
+    We may want to modify this method to return more than just the pids for resources so that some
     metadata for the list of resources returned could be displayed without having to call
     HydroShare.getScienceMetadata() and HydroShare.GetSystemMetadata() for every resource in the returned list.
 

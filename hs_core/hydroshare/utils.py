@@ -9,6 +9,7 @@ from dublincore.models import QualifiedDublinCoreElement
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.models import User, Group
 from django.core.serializers import get_serializer
+from django.core import serializers
 from . import hs_bagit
 #from hs_scholar_profile.models import *
 
@@ -404,20 +405,6 @@ def serialize_science_metadata_xml(res):
 
     return XML_HEADER + '\n' + etree.tostring(RDF_ROOT, pretty_print=True)
 
-#def serialize_resource_map(res):
-#    pass
-    #serializer = get_serializer(res)
-    #bundle = serializer.build_bundle(obj=res)
-    #return serializer.serialize(None, serializer.full_dehydrate(bundle), 'application/json')
-
-#def get_serializer(resource):
-#    pass
-    #tastypie_module = resource._meta.app_label + '.api'        # the module name should follow this convention
-    #tastypie_name = resource._meta.object_name + 'Resource'    # the classname of the Resource seralizer
-    #tastypie_api = importlib.import_module(tastypie_module)    # import the module
-    #return getattr(tastypie_api, tastypie_name)()        # make an instance of the tastypie resource
-
-
 def resource_modified(resource, by_user=None):
     resource.last_changed_by = by_user
     QualifiedDublinCoreElement.objects.filter(term='DM', object_id=resource.pk).delete()
@@ -433,11 +420,12 @@ def _get_dc_term_objects(resource_dc_elements, term):
     return [cr_dict for cr_dict in resource_dc_elements if cr_dict['term'] == term]
 
 def _get_user_info(user):
-    from hs_core.api import UserResource
-
-    ur = UserResource()
-    ur_bundle = ur.build_bundle(obj=user)
-    return json.loads(ur.serialize(None, ur.full_dehydrate(ur_bundle), 'application/json'))
+    # from hs_core.api import UserResource
+    #
+    # ur = UserResource()
+    # ur_bundle = ur.build_bundle(obj=user)
+    # return json.loads(ur.serialize(None, ur.full_dehydrate(ur_bundle), 'application/json'))
+    return serializers.serialize("json", user)
 
 def _validate_email( email ):
     from django.core.validators import validate_email

@@ -24,27 +24,12 @@ from languages_iso import languages as iso_languages
 from dateutil import parser
 from django.utils import simplejson as json
 
+from views.utils import get_user
+
 class GroupOwnership(models.Model):
     group = models.ForeignKey(Group)
     owner = models.ForeignKey(User)
 
-
-def get_user(request):
-    """authorize user based on API key if it was passed, otherwise just use the request's user.
-
-    :param request:
-    :return: django.contrib.auth.User
-    """
-
-    from tastypie.models import ApiKey
-
-    if 'api_key' in request.REQUEST:
-        api_key = ApiKey.objects.get(key=request.REQUEST['api_key'])
-        return api_key.user
-    elif request.user.is_authenticated():
-        return User.objects.get(pk=request.user.pk)
-    else:
-        return request.user
 
 class ResourcePermissionsMixin(Ownable):
     creator = models.ForeignKey(User,

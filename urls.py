@@ -47,12 +47,6 @@ if getattr(settings, "PACKAGE_NAME_FILEBROWSER") in settings.INSTALLED_APPS:
 # Put API URLs before Mezzanine so that Mezzanine doesn't consume them
 urlpatterns += patterns('',
                         (r'^api/', include(v1_api.urls) ),
-                        url("^api/%s/doc/" % (v1_api.api_name,),
-                            include('tastypie_swagger.urls', 
-                                    namespace='tastypie_swagger'),
-                            kwargs={'tastypie_api_module':'hs_core.api.v1_api',
-                                    'namespace':'tastypie_swagger'}
-                            ),
                         url('^hsapi/', include('hs_core.urls')),
                         url('^party/', include('hs_party.urls')),
                         url('^hsapi/', include('ref_ts.urls')),

@@ -1,10 +1,10 @@
 from django.core.exceptions import MultipleObjectsReturned
 from django.contrib.auth.models import User, Group
-from tastypie.models import ApiKey
 from hs_core.models import GroupOwnership
 from .utils import get_resource_by_shortkey, user_from_id, group_from_id, get_resource_types
 from django.core import exceptions
 import json
+from django.core import serializers
 
 def set_resource_owner(pk, user):
     """
@@ -187,7 +187,6 @@ def create_account(
     u.save()
 
     u.groups = groups
-    ApiKey.objects.get_or_create(user=u)
 
     try:
         u.email_user(
@@ -293,11 +292,12 @@ def get_user_info(user):
     Exceptions.NotFound - The user identified by userID does not exist
     Exception.ServiceFailure - The service is unable to process the request
     """
-    from hs_core.api import UserResource
-
-    ur = UserResource()
-    ur_bundle = ur.build_bundle(obj=user)
-    return json.loads(ur.serialize(None, ur.full_dehydrate(ur_bundle), 'application/json'))
+    # from hs_core.api import UserResource
+    #
+    # ur = UserResource()
+    # ur_bundle = ur.build_bundle(obj=user)
+    # return json.loads(ur.serialize(None, ur.full_dehydrate(ur_bundle), 'application/json'))
+    return serializers.serialize("json", user)
 
 
 def list_users(query=None, status=None, start=None, count=None):
@@ -565,8 +565,7 @@ def get_resource_list(
     Exceptions.NotFound - The group identified by groupID does not exist
     Exception.ServiceFailure - The service is unable to process the request
 
-    Note:  See http://django-tastypie.readthedocs.org/en/latest/resources.html#basic-filtering for implementation
-    details and example. We may want to modify this method to return more than just the pids for resources so that some
+    We may want to modify this method to return more than just the pids for resources so that some
     metadata for the list of resources returned could be displayed without having to call
     HydroShare.getScienceMetadata() and HydroShare.GetSystemMetadata() for every resource in the returned list.
 

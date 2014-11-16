@@ -262,13 +262,12 @@ INSTALLED_APPS = (
     "mezzanine.accounts",
     "mezzanine.mobile",
     "autocomplete_light",
-    "tastypie",
-    "tastypie_swagger",
+    "tastypie", # Needed for Geoanalytics pieces
     "dublincore",
     "hs_core",
     "hs_party",
     "hs_metrics",
-	"hs_rhessys_inst_resource",
+    "hs_rhessys_inst_resource",
     "django_docker_processes"
 )
 
@@ -387,8 +386,6 @@ else:
     set_dynamic_settings(globals())
 
 INSTALLED_APPS += HYDROSHARE_APPS
-
-TASTYPIE_SWAGGER_API_MODULE = 'hydroshare.urls.v1_api'
 
 #
 AUTH_PROFILE_MODULE = "theme.UserProfile"

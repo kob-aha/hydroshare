@@ -51,8 +51,8 @@ def get_resource(pk):
     # 2. Check to see if a bagit file exists on IRODS for that resource
     # 3.T.1. Return the bagit file
     # 3.T.1. Return the bagit file
-    # 3.F.1. look up the resource serialization (tastypie) class in the resource type map
-    # 3.F.2. Serialize the resource to disk using TastyPie.
+    # 3.F.1. look up the resource serialization class in the resource type map
+    # 3.F.2. Serialize the resource to disk
     # 3.F.3. Create a bagit file from the serialized resource.
     # 3.F.4. Return the bagit file
     return utils.get_resource_by_shortkey(pk).bags.first()

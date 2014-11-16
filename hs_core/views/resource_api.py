@@ -9,9 +9,10 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 import json
 from mezzanine.generic.models import Keyword
-from ga_resources.utils import get_user, json_or_jsonp
+from ga_resources.utils import json_or_jsonp
 from hs_core import hydroshare
 from hs_core.views import utils
+from hs_core.views.utils import get_user
 from .utils import authorize, validate_json
 from django.views.generic import View
 from django.core import exceptions
@@ -157,6 +158,7 @@ class ResourceCRUD(View):
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        print request
         return super(ResourceCRUD, self).dispatch(request, *args, **kwargs)
 
     def get(self, _, pk=None):
@@ -206,11 +208,12 @@ class ResourceCRUD(View):
         return HttpResponse(pk, content_type=None, status=204)
 
     def create_resource(self):
-        if not get_user(self.request).is_authenticated():
-            print self.request.user
-            raise exceptions.PermissionDenied('user must be logged in.')
+        # if not get_user(self.request).is_authenticated():
+        #     #print self.request.user
+        #     raise exceptions.PermissionDenied('user must be logged in.')
 
         params = utils.create_form(ResourceCRUD.CreateResourceForm, self.request)
+        #print self.request
         if params.is_valid():
             r = params.cleaned_data
             res = hydroshare.create_resource(
