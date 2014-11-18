@@ -268,8 +268,9 @@ INSTALLED_APPS = (
     "ga_resources",
     "dublincore",
     "hs_core",
+    "hs_party",
     "hs_metrics",
-    "hs_rhessys_inst_resource",
+	"hs_rhessys_inst_resource",
     "django_docker_processes",
     "djcelery",
     "ref_ts"
@@ -288,7 +289,6 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     "django.core.context_processors.request",
     "django.core.context_processors.tz",
     "mezzanine.conf.context_processors.settings",
-    "mezzanine.pages.context_processors.page",
 )
 
 # List of middleware classes to use. Order is important; in the request phase,
