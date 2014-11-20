@@ -83,7 +83,7 @@ local_settings_module = os.environ.get('LOCAL_SETTINGS', 'hydroshare.local_setti
 
 # If True, the south application will be automatically added to the
 # INSTALLED_APPS setting.
-USE_SOUTH = True
+USE_SOUTH = False
 
 
 ########################
@@ -263,12 +263,14 @@ INSTALLED_APPS = (
     "mezzanine.mobile",
     "autocomplete_light",
     "tastypie", # Needed for Geoanalytics pieces
+    "ga_ows",
+    "ga_resources",
     "dublincore",
     "hs_core",
-    "hs_party",
     "hs_metrics",
-    "hs_rhessys_inst_resource",
-    "django_docker_processes"
+	"hs_rhessys_inst_resource",
+    "django_docker_processes",
+    "djcelery",
 )
 
 # List of processors used by RequestContext to populate the context.
@@ -284,6 +286,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     "django.core.context_processors.request",
     "django.core.context_processors.tz",
     "mezzanine.conf.context_processors.settings",
+    "mezzanine.pages.context_processors.page",
 )
 
 # List of middleware classes to use. Order is important; in the request phase,
@@ -385,7 +388,6 @@ except ImportError:
 else:
     set_dynamic_settings(globals())
 
-INSTALLED_APPS += HYDROSHARE_APPS
 
 #
 AUTH_PROFILE_MODULE = "theme.UserProfile"

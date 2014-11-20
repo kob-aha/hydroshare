@@ -12,12 +12,12 @@ NEVERCACHE_KEY = "7b205669-41dd-40db-9b96-c6f93b66123496a56be1-607f-4dbf-bf62-33
 ALLOWED_HOSTS = "*"
 
 #RABBITMQ_HOST = 'rabbitmq'
-RABBITMQ_HOST = os.environ.get('RABBITMQ_PORT_5672_TCP_ADDR', 'localhost')
+RABBITMQ_HOST = os.environ.get('RABBITMQ_PORT_5672_TCP_ADDR', 'rabbitmq')
 RABBITMQ_PORT = '5672'
 
-REDIS_HOST = os.environ.get('REDIS_PORT_6379_TCP_ADDR', 'localhost')
+REDIS_HOST = os.environ.get('REDIS_PORT_6379_TCP_ADDR', 'redis')
 REDIS_PORT = 6379 
-POSTGIS_HOST = os.environ.get('POSTGIS_PORT_5432_TCP_ADDR', 'localhost')
+POSTGIS_HOST = os.environ.get('POSTGIS_PORT_5432_TCP_ADDR', 'postgis')
 POSTGIS_PORT = 5432
 POSTGIS_DB = os.environ.get('POSTGIS_DB', 'postgres')
 POSTGIS_PASSWORD = os.environ.get('POSTGIS_PASSWORD', 'postgres')
@@ -98,29 +98,21 @@ DATABASES = {
 }
 POSTGIS_VERSION=(2,1,1)
 
-HYDROSHARE_APPS = (
-    "tastypie",
-    "djcelery",
-    "ga_ows",
-    "ga_resources",
-    "django_irods",
-    "ga_interactive",
-    "hs_core"
-)
-
+# iRODS proxy user configuration
 USE_IRODS=False
 IRODS_ROOT='/tmp'
 IRODS_ICOMMANDS_PATH='/usr/bin'
-IRODS_HOST='data.hydroshare.org'
+IRODS_HOST=''
 IRODS_PORT='1247'
-IRODS_DEFAULT_RESOURCE='hsDevResource'
-IRODS_HOME_COLLECTION='/hydroZone/home/hsdev'
-IRODS_CWD='/hydroZone/home/hsdev'
-IRODS_ZONE='hydroZone'
-IRODS_USERNAME='hsdev'
-IRODS_AUTH='devwater1'
+IRODS_DEFAULT_RESOURCE=''
+IRODS_HOME_COLLECTION=''
+IRODS_CWD=''
+IRODS_ZONE=''
+IRODS_USERNAME=''
+IRODS_AUTH=''
 IRODS_GLOBAL_SESSION=False
 
+# Email configuration
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST_USER = 'hydroshare@hydroshare.org'
 EMAIL_HOST_PASSWORD = 'zR=D~QBxU&}+'

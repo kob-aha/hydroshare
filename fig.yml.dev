@@ -16,9 +16,10 @@ hydroshare:
     POSTGIS_USER: postgres
     PGPASSWORD: postgres
   volumes:
-    - "media:/home/docker/hydroshare/hydroshare/static/media"
-    # Share the volume on hydrodev with the hydroshare container
-    #- "/home/hydro/hydroshare:/home/docker/hydroshare"
+    # Use when NOT sharing the entire host hydroshare directory
+    #- "media:/home/docker/hydroshare/hydroshare/static/media"
+    # Specific to hydro user on the hydrodev Xubuntu VM
+    - "/home/hydro/hydroshare:/home/docker/hydroshare"
   ports:
     - "1338:22"
     - "8000:8000"
@@ -26,7 +27,7 @@ hydroshare:
     - postgis:postgis
     - redis:redis
     - rabbitmq:rabbitmq
-  command: /bin/bash init
+  command: python manage.py runserver 0.0.0.0:8000
 defaultworker:
   build: .
   environment:

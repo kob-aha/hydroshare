@@ -16,7 +16,7 @@ from hs_core import hydroshare
 from hs_core.hydroshare import get_resource_list
 from hs_core.hydroshare.utils import get_resource_by_shortkey, resource_modified
 from .utils import authorize
-from hs_core.models import ResourceFile, GenericResource
+from hs_core.models import ResourceFile, GenericResource, resource_processor
 import requests
 from django.core import exceptions as ex
 from mezzanine.pages.page_processors import processor_for
@@ -337,7 +337,6 @@ def add_dublin_core(request, page):
         'add_edit_group_form' : AddGroupForm(),
     }
 
-
 class CreateResourceForm(forms.Form):
     title = forms.CharField(required=True)
     creators = forms.CharField(required=False, min_length=0)
@@ -392,4 +391,14 @@ def get_file(request, *args, **kwargs):
     session.runCmd('iget', [ name, 'tempfile.' + name ])
     return HttpResponse(open(name), content_type='x-binary/octet-stream')
 
+processor_for(GenericResource)(resource_processor)
+
+@processor_for('resources')
+def resource_listing_processor(request, page):
+    owned_resources = list(GenericResource.objects.filter(owners__pk=request.user.pk))
+    editable_resources = list(GenericResource.objects.filter(owners__pk=request.user.pk))
+    viewable_resources = list(GenericResource.objects.filter(public=True))
+    return locals()   
+
 # FIXME need a task somewhere that amounts to checking inactive accounts and deleting them after 30 days.
+

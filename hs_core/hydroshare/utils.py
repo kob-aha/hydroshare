@@ -435,3 +435,7 @@ def _validate_email( email ):
         return True
     except ValidationError:
         return False
+
+def get_profile(user):
+    return user.userprofile
+
