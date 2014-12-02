@@ -1,26 +1,27 @@
 from __future__ import absolute_import
 from collections import defaultdict
-from django.contrib.auth import login, authenticate
+
+from django import forms
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group, User
 from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import get_object_or_404, render_to_response
-from django.template import RequestContext
 from django.utils.timezone import now
+from django.core import exceptions as ex
+from django.template import RequestContext
+
 from mezzanine.conf import settings
-from django import forms
-from mezzanine.generic.models import Keyword
+from mezzanine.pages.page_processors import processor_for
+
+import autocomplete_light
+import requests
+
 from hs_core import hydroshare
 from hs_core.hydroshare import get_resource_list
 from hs_core.hydroshare.utils import get_resource_by_shortkey, resource_modified
 from .utils import authorize
-from hs_core.models import ResourceFile, GenericResource, resource_processor
-import requests
-from django.core import exceptions as ex
-from mezzanine.pages.page_processors import processor_for
-from django.template import RequestContext
 
 from . import users_api
 from . import discovery_api
@@ -28,7 +29,12 @@ from . import resource_api
 from . import social_api
 from hs_core.hydroshare import file_size_limit_for_display
 
-import autocomplete_light
+# Import the following in each function they are used in to avoid circular imports,
+# and AppRegistryNotReady exception due to imports in code used by Django before
+# the app registry has loaded:
+#   from hs_core.models import ResourceFile
+#   from hs_core.models import GenericResource
+#   from hs_core.models import resource_processor
 
 
 def short_url(request, *args, **kwargs):
@@ -51,6 +57,7 @@ def verify(request, *args, **kwargs):
 
 
 def add_file_to_resource(request, *args, **kwargs):
+    from hs_core.models import ResourceFile
     try:
         shortkey = kwargs['shortkey']
     except KeyError:
@@ -295,7 +302,7 @@ def my_resources(request, page):
 
 
 
-@processor_for(GenericResource)
+@processor_for('GenericResource')
 def add_dublin_core(request, page):
 
     class AddUserForm(forms.Form):
@@ -391,10 +398,12 @@ def get_file(request, *args, **kwargs):
     session.runCmd('iget', [ name, 'tempfile.' + name ])
     return HttpResponse(open(name), content_type='x-binary/octet-stream')
 
-processor_for(GenericResource)(resource_processor)
+# This is just dangling here.  Is it needed?
+#processor_for('GenericResource')(resource_processor)
 
 @processor_for('resources')
 def resource_listing_processor(request, page):
+    from hs_core.models import GenericResource
     owned_resources = list(GenericResource.objects.filter(owners__pk=request.user.pk))
     editable_resources = list(GenericResource.objects.filter(owners__pk=request.user.pk))
     viewable_resources = list(GenericResource.objects.filter(public=True))

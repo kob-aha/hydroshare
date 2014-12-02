@@ -1,21 +1,24 @@
 from __future__ import absolute_import
+import json
 import arrow
 
+from django.views.generic import View
+from django.core import exceptions
 from django import forms
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.models import Group, User
 from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
-import json
+
 from mezzanine.generic.models import Keyword
+
 from ga_resources.utils import json_or_jsonp
+
 from hs_core import hydroshare
 from hs_core.views import utils
 from hs_core.views.utils import get_user
 from .utils import authorize, validate_json
-from django.views.generic import View
-from django.core import exceptions
 
 
 class ResourceCRUD(View):
@@ -131,12 +134,17 @@ class ResourceCRUD(View):
 
     class UpdateResourceForm(forms.Form):
         title = forms.CharField(required=False)
-        keywords = forms.ModelMultipleChoiceField(Keyword.objects.all(), required=False)
+        # Set queryset to None to avoid AppRegistryNotReady exception
+        keywords = forms.ModelMultipleChoiceField(queryset=None, required=False)
         dublin_metadata = forms.CharField(validators=[validate_json], required=False)
         edit_users = forms.ModelMultipleChoiceField(User.objects.all(), required=False)
         edit_groups = forms.ModelMultipleChoiceField(Group.objects.all(), required=False)
         view_users = forms.ModelMultipleChoiceField(User.objects.all(), required=False)
         view_groups = forms.ModelMultipleChoiceField(Group.objects.all(), required=False)
+
+        def __init__(self, *args, **kwargs):
+            super(UpdateResourceForm, self).__init__(*args, **kwargs)
+            self.fields['keywords'].queryset = Keyword.objects.all()
 
     class GetResourceListForm(forms.Form):
         group = forms.ModelChoiceField(Group.objects.all(), required=False)

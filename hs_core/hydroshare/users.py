@@ -1,10 +1,17 @@
+import json
+
 from django.core.exceptions import MultipleObjectsReturned
 from django.contrib.auth.models import User, Group
-from hs_core.models import GroupOwnership
-from .utils import get_resource_by_shortkey, user_from_id, group_from_id, get_resource_types, get_profile
 from django.core import exceptions
-import json
 from django.core import serializers
+
+from .utils import get_resource_by_shortkey, user_from_id, group_from_id, get_resource_types, get_profile
+
+# Import the following in each function they are used in to avoid circular imports,
+# and AppRegistryNotReady exception due to imports in code used by Django before
+# the app registry has loaded:
+#   from hs_core.models import GroupOwnership
+
 
 def set_resource_owner(pk, user):
     """
@@ -396,6 +403,7 @@ def create_group(name, members=None, owners=None):
     verification step to avoid automated creation of fake groups. The creating user would automatically be set as the
     owner of the created group.
     """
+    from hs_core.models import GroupOwnership
     g = Group.objects.create(name=name)
 
 
@@ -443,7 +451,7 @@ def update_group(group, members=None, owners=None):
 
     Note:  This would be done via a JSON object (group) that is in the PUT request.
     """
-
+    from hs_core.models import GroupOwnership
     if owners:
         GroupOwnership.objects.filter(group=group).delete()
         owners = [user_from_id(owner) for owner in owners]
@@ -507,6 +515,7 @@ def set_group_owner(group, user):
     Exceptions.NotFound - The user identified by userID does not exist
     Exception.ServiceFailure - The service is unable to process the request
     """
+    from hs_core.models import GroupOwnership
     if not GroupOwnership.objects.filter(group=group, owner=user).exists():
         GroupOwnership.objects.create(group=group, owner=user)
 
@@ -535,6 +544,7 @@ def delete_group_owner(group, user):
 
     Note:  A group must have at least one owner.
     """
+    from hs_core.models import GroupOwnership
     GroupOwnership.objects.filter(group=group, owner=user).delete()
 
 

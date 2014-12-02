@@ -1,26 +1,34 @@
 from __future__ import absolute_import
 
-from django.db.models import get_model, get_models
-from django.http import Http404
-from django.shortcuts import get_object_or_404
-from django.utils.timezone import now
-from hs_core.models import AbstractResource
-from dublincore.models import QualifiedDublinCoreElement
-from django.core.exceptions import ObjectDoesNotExist
-from django.contrib.auth.models import User, Group
-from django.core.serializers import get_serializer
-from django.core import serializers
-from . import hs_bagit
-#from hs_scholar_profile.models import *
-
-import importlib
 import json
 from lxml import etree
 import arrow
 
+from django.db.models import get_model, get_models
+from django.http import Http404
+from django.shortcuts import get_object_or_404
+from django.utils.timezone import now
+
+from django.core.exceptions import ObjectDoesNotExist
+from django.contrib.auth.models import User, Group
+from django.core.serializers import get_serializer
+from django.core import serializers
+from django.db.models.loading import get_model
+
+from dublincore.models import QualifiedDublinCoreElement
+
+from . import hs_bagit
+
+# Import the following in each function they are used in to avoid circular imports,
+# and AppRegistryNotReady exception due to imports in code used by Django before
+# the app registry has loaded:
+#   from hs_core.models import AbstractResource
+
+
 cached_resource_types = None
 
 def get_resource_types():
+    from hs_core.models import AbstractResource
     global cached_resource_types
     cached_resource_types = filter(lambda x: issubclass(x, AbstractResource), get_models()) if\
         not cached_resource_types else cached_resource_types

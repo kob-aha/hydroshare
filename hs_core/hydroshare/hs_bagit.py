@@ -1,14 +1,20 @@
-import arrow
-import bagit
-from django.core.files import File
 import os
 import shutil
-from hs_core.models import Bags, ResourceFile
-from mezzanine.conf import settings
-import importlib
 import zipfile
+
+from django.core.files import File
+from mezzanine.conf import settings
+
+import arrow
+import bagit
 from foresite import *
 from rdflib import URIRef, Namespace
+
+# Import the following in each function they are used in to avoid AppRegistryNotReady exception
+# due to imports in code used by Django before the app registry has loaded:
+#   from hs_core.models import Bags
+#   from hs_core.models import ResourceFile
+
 
 def make_zipfile(output_filename, source_dir):
     """
@@ -40,7 +46,8 @@ def create_bag(resource):
 
     :return: the hs_core.models.Bags instance associated with the new bag.
     """
-
+    from hs_core.models import Bags
+    from hs_core.models import ResourceFile
     dest_prefix = getattr(settings, 'BAGIT_TEMP_LOCATION', '/tmp/hydroshare/')
     bagit_path = os.path.join(dest_prefix, resource.short_id, arrow.get(resource.updated).format("YYYY.MM.DD.HH.mm.ss"))
     visualization_path = os.path.join(bagit_path, 'visualization')

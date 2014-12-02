@@ -1,16 +1,23 @@
+import os
 ### resource API
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.files import File
 from django.core.files.uploadedfile import UploadedFile
 import django.dispatch
-from django.contrib.auth.models import User
+
 from mezzanine.generic.models import Keyword, AssignedKeyword
+
 from dublincore.models import QualifiedDublinCoreElement
+
 from hs_core.hydroshare import hs_bagit
 from hs_core.hydroshare.utils import get_resource_types
-from hs_core.models import ResourceFile
 from . import utils
-import os
+
+# Import the following in each function they are used in to avoid circular imports,
+# and AppRegistryNotReady exception due to imports in code used by Django before
+# the app registry has loaded:
+#   from hs_core.models import ResourceFile
+
 
 pre_create_resource = django.dispatch.Signal(providing_args=['dublin_metadata', 'files'])
 post_create_resource = django.dispatch.Signal(providing_args=['resource'])
@@ -159,6 +166,7 @@ def get_resource_file(pk, filename):
     Exceptions.NotFound - The resource identified does not exist or the file identified by filename does not exist
     Exception.ServiceFailure - The service is unable to process the request
     """
+    from hs_core.models import ResourceFile
     resource = utils.get_resource_by_shortkey(pk)
     for f in ResourceFile.objects.filter(object_id=resource.id):
         if os.path.basename(f.resource_file.name) == filename:
@@ -187,6 +195,7 @@ def update_resource_file(pk, filename, f):
     Exceptions.NotFound - The resource identified does not exist or the file identified by filename does not exist
     Exception.ServiceFailure - The service is unable to process the request
     """
+    from hs_core.models import ResourceFile
     resource = utils.get_resource_by_shortkey(pk)
     for rf in ResourceFile.objects.filter(object_id=resource.id):
         if os.path.basename(rf.resource_file.name) == filename:
@@ -314,6 +323,7 @@ def create_resource(
 
     :return: a new resource which is an instance of resource_type.
     """
+    from hs_core.models import ResourceFile
     for tp in get_resource_types():
         if resource_type == tp.__name__:
             cls = tp
@@ -446,6 +456,7 @@ def update_resource(
     systems pick up the changes when filtering on SystmeMetadata.dateSysMetadataModified. A formally published resource
     can only be obsoleted by one newer version. Once a resource is obsoleted, no other resources can obsolete it.
     """
+    from hs_core.models import ResourceFile
     resource = utils.get_resource_by_shortkey(pk)
 
     if files:
@@ -544,6 +555,7 @@ def add_resource_files(pk, *files):
     Once a resource is obsoleted, no other resources can obsolete it.
 
     """
+    from hs_core.models import ResourceFile
     resource = utils.get_resource_by_shortkey(pk)
     ret = []
     for file in files:
@@ -684,6 +696,7 @@ def delete_resource_file(pk, filename):
     SystmeMetadata.dateSysMetadataModified. A formally published resource can only be obsoleted by one newer
     version. Once a resource is obsoleted, no other resources can obsolete it.
     """
+    from hs_core.models import ResourceFile
     resource = utils.get_resource_by_shortkey(pk)
     for f in ResourceFile.objects.filter(object_id=resource.id):
         if os.path.basename(f.resource_file.name) == filename:

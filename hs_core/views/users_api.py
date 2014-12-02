@@ -1,23 +1,31 @@
 from __future__ import absolute_import
+import json
 
 from django import forms
-from django.contrib.auth.models import Group, User
-from django.http import HttpResponse, HttpResponseBadRequest
-from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_exempt
-import json
-from mezzanine.generic.models import Keyword
-from ga_resources.utils import json_or_jsonp
-from hs_core import hydroshare
-from hs_core.hydroshare.utils import group_from_id, user_from_id
-from hs_core.models import GroupOwnership
-from hs_core.views import utils
-from hs_core.views.utils import get_user
-from .utils import authorize, validate_json
 from django.views.generic import View
 from django.core import exceptions
 from django.conf import settings
 from django.core import serializers
+from django.contrib.auth.models import Group, User
+from django.http import HttpResponse, HttpResponseBadRequest
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
+
+from mezzanine.generic.models import Keyword
+
+from ga_resources.utils import json_or_jsonp
+
+from hs_core import hydroshare
+from hs_core.hydroshare.utils import group_from_id, user_from_id
+
+from hs_core.views import utils
+from hs_core.views.utils import get_user
+from .utils import authorize, validate_json
+
+# Import the following in each function they are used in to avoid circular imports,
+# and AppRegistryNotReady exception due to imports in code used by Django before
+# the app registry has loaded:
+#   from hs_core.models import GroupOwnership
 
 
 class SetAccessRules(View):
@@ -575,6 +583,7 @@ class SetOrDeleteGroupOwner(View):
         return self.delete_group_owner(g, u)
 
     def delete_group_owner(self, g, u):
+        from hs_core.models import GroupOwnership
         originator = get_user(self.request)
         g = group_from_id(g)
 
@@ -585,6 +594,7 @@ class SetOrDeleteGroupOwner(View):
             return HttpResponse(g.name, content_type='text/plain', status='204')
 
     def set_group_owner(self, g, u):
+        from hs_core.models import GroupOwnership
         originator = get_user(self.request)
         g = group_from_id(g)
 

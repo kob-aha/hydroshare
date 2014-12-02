@@ -1,11 +1,16 @@
-
-
+# social API
 from . import utils
-from mezzanine.generic.models import Rating, ThreadedComment
+
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.contenttypes.models import ContentType
-from hs_core.models import GenericResource
-# social API
+
+from mezzanine.generic.models import Rating, ThreadedComment
+
+# Import the following in each function they are used in to avoid circular imports,
+# and AppRegistryNotReady exception due to imports in code used by Django before
+# the app registry has loaded:
+#   from hs_core.models import GenericResource
+
 
 def endorse_resource(resource_short_id, user, endorse=True):
     """
@@ -15,6 +20,7 @@ def endorse_resource(resource_short_id, user, endorse=True):
     :param user: The user id or username or user instance for the user who is endorsing
     :param endorse: True for a +1.  False to remove any previous endorsement.
     """
+    from hs_core.models import GenericResource
     res = utils.get_resource_by_shortkey(resource_short_id)
     user = utils.user_from_id(user)
     # first check this user has not already endorsed this resource
@@ -177,7 +183,7 @@ def get_endorsements(for_object):
     :param for_object an object of a resource or a comment
 
     """
-
+    from hs_core.models import GenericResource
     if isinstance(for_object, GenericResource):
         resource_type = ContentType.objects.get_for_model(GenericResource)
         endorsements = Rating.objects.filter(content_type=resource_type, object_pk=for_object.id)
