@@ -264,8 +264,8 @@ INSTALLED_APPS = (
     "autocomplete_light",
     "tastypie",
     # "tastypie_swagger",
-    # "ga_ows",
-    # "ga_resources",
+    "ga_ows",
+    "ga_resources",
     "dublincore",
     "hs_core",
     "hs_metrics",
@@ -328,7 +328,7 @@ OPTIONAL_APPS = (
     "debug_toolbar",
     "django_extensions",
     # "compressor",
-    PACKAGE_NAME_FILEBROWSER,
+    # PACKAGE_NAME_FILEBROWSER,
     PACKAGE_NAME_GRAPPELLI,
 )
 

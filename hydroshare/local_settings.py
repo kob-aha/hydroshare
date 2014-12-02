@@ -1,6 +1,6 @@
-# beta.hydroshare.org - local_settings.py
+# sandbox.hydroshare.org - local_settings.py
 #    - This file should be copied to ~/hydroshare/hydroshare/local_settings.py
-#    - The iRODS specific contents of this file contain username and password informaiton 
+#    - The iRODS specific contents of this file contain username and password informaiton
 #      that is used for a HydroShare proxy user
 
 import redis
@@ -39,8 +39,7 @@ WMS_CACHE_DB = redis.Redis(
 PERMISSIONS_DB= redis.Redis(
     host=REDIS_HOST,
     port=REDIS_PORT,
-    db=6)
-   
+    db=6) 
 
 IPYTHON_SETTINGS=[]
 IPYTHON_BASE='/home/docker/hydroshare/static/media/ipython-notebook'
@@ -75,7 +74,7 @@ DOCKER_API_VERSION = '1.12'
 CARTO_HOME='/home/docker/node_modules/carto'
 
 
-USE_SOUTH = False
+USE_SOUTH = True
 SITE_TITLE = "Hydroshare"
 
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
@@ -104,18 +103,18 @@ DATABASES = {
 POSTGIS_VERSION=(2,1,1)
 
 # iRODS proxy user configuration
-USE_IRODS=False
+USE_IRODS=True
 IRODS_ROOT='/tmp'
 IRODS_ICOMMANDS_PATH='/usr/bin'
-IRODS_HOST=''
+IRODS_HOST='data.hydroshare.org'
 IRODS_PORT='1247'
-IRODS_DEFAULT_RESOURCE=''
-IRODS_HOME_COLLECTION=''
-IRODS_CWD=''
-IRODS_ZONE=''
-IRODS_USERNAME=''
-IRODS_AUTH=''
-IRODS_GLOBAL_SESSION=False
+IRODS_DEFAULT_RESOURCE='hydroResource'
+IRODS_HOME_COLLECTION='/hydroZone/home/hssandbox'
+IRODS_CWD='/hydroZone/home/hssandbox'
+IRODS_ZONE='hydroZone'
+IRODS_USERNAME='hssandbox'
+IRODS_AUTH='sandboxwater1'
+IRODS_GLOBAL_SESSION=True
 
 # Email configuration
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
