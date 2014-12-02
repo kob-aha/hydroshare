@@ -72,3 +72,11 @@ def create_initial_pages():
     
     HomePageFactory.create()
 
+def create_test_resources(*args, **kwargs):
+    """
+    all apps that define new hydroshare resource types should define this 
+    function.  Each app that defines this function in its factories.py will 
+    create a set of resources for testing purposes when the user executes 
+    python manage.py create_test_resources
+    """
+    print "No resources to define"
