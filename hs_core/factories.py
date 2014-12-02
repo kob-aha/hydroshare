@@ -74,7 +74,7 @@ def create_initial_data(*args, **kwargs):
         title='Verify Account',
         content="""
 <p>Thank you for signing up for HydroShare! We have sent you an email from hydroshare.org to verify your account. &nbsp;Please click on the link within the email and verify your account with us and you can get started sharing data and models with HydroShare.</p>
-<p><a href="/hsapi/_internal/resend_verification_email/">Please click here if you do not receive a verification email within 1 hour.</a></p>""",
+<p><a href="/hsapi/_internal/resend_verification_email/">Please click here if you do not receive a verification email within 1 hour.</a></p>""")
        
     
     HomePageFactory.create()

@@ -1,4 +1,3 @@
-from hs_core.factories import create_initial_pages
 from mezzanine.pages.models import Page
 import importlib
 from django.core.management.base import BaseCommand, CommandError
@@ -16,8 +15,8 @@ class Command(BaseCommand):
                   f.create_initial_data(*args, **options)
                   print 'Creating initial data for ' + app + '.'
            except ImportError:
-              print app + " has no module factories"
-        print "Created all available test resources"
+              pass
+        print "Created all available initial data.  To add new initial data, define a create_initial_data() function in your app's factories.py"
 
        
 
