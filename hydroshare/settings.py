@@ -262,7 +262,8 @@ INSTALLED_APPS = (
     "mezzanine.accounts",
     "mezzanine.mobile",
     "autocomplete_light",
-    "tastypie", # Needed for Geoanalytics pieces
+    #"tastypie", # Needed for Geoanalytics pieces
+    #"tastypie_swagger",
     "ga_ows",
     "ga_resources",
     "dublincore",
@@ -388,6 +389,8 @@ except ImportError:
 else:
     set_dynamic_settings(globals())
 
+
+#TASTYPIE_SWAGGER_API_MODULE = 'hydroshare.urls.v1_api'
 
 #
 AUTH_PROFILE_MODULE = "theme.UserProfile"
