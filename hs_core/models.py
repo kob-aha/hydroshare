@@ -931,29 +931,15 @@ class Coverage(AbstractMetaDataElement):
      string depends on the type of coverage as shown below. All keys shown in json string are required.
 
      For coverage type: period
-         _value = "{'name':coverage name value here (optional), 'start':start date value, 'end':end date value, 'scheme':'W3C-DTF}"
+         _value = "{'name':coverage name value here, 'start':start date value, 'end':end date value, 'scheme':'W3C-DTF}"
 
      For coverage type: point
-         _value = "{'east':east coordinate value,
-                    'north':north coordinate value,
-                    'units:units applying to (east. north),
-                    'name':coverage name value here (optional),
-                    'elevation': coordinate in the vertical direction (optional),
-                    'zunits': units for elevation (optional),
-                    'projection': name of the projection (optional),
-                    }"
+         _value = "{'name':coverage name value here, 'east':east coordinate value, 'north':north coordinate value}"
 
      For coverage type: box
-         _value = "{'northlimit':northenmost coordinate value,
-                    'eastlimit':easternmost coordinate value,
-                    'southlimit':southernmost coordinate value,
-                    'westlimit':westernmost coordinate value,
-                    'units:units applying to 4 limits (north, east, south & east),
-                    'name':coverage name value here (optional),
-                    'uplimit':uppermost coordinate value (optional),
-                    'downlimit':lowermost coordinate value (optional),
-                    'zunits': units for uplimit/downlimit (optional),
-                    'projection': name of the projection (optional)}"
+         _value = "{'name':coverage name value here, 'northlimit':northenmost coordinate value,
+                    'eastlimit':easternmost coordinate value, 'southlimit':southernmost coordinate value,
+                    'westlimit':westernmost coordinate value}"
     """
     _value = models.CharField(max_length=1024)
 
@@ -1058,12 +1044,11 @@ class Coverage(AbstractMetaDataElement):
                         if item_name in kwargs['value']:
                             value_dict[item_name] = kwargs['value'][item_name]
                 elif cov.type == 'point':
-                    for item_name in ('east', 'north', 'units', 'elevation', 'zunits', 'projection'):
+                    for item_name in ('east', 'north'):
                         if item_name in kwargs['value']:
                             value_dict[item_name] = kwargs['value'][item_name]
                 elif cov.type == 'box':
-                    for item_name in ('units', 'northlimit', 'eastlimit', 'southlimit', 'westlimit', 'uplimit',
-                                      'downlimit', 'zunits', 'projection'):
+                    for item_name in ('northlimit', 'eastlimit', 'southlimit', 'westlimit'):
                         if item_name in kwargs['value']:
                             value_dict[item_name] = kwargs['value'][item_name]
 
@@ -1081,7 +1066,6 @@ class Coverage(AbstractMetaDataElement):
     @classmethod
     def _validate_coverage_type_value_attributes(cls, coverage_type, value_dict):
         if coverage_type == 'period':
-            # check that all the required sub-elements exist
             if not 'start' in value_dict or not 'end' in value_dict:
                 raise ValidationError("For coverage of type 'period' values for both start date and end date are needed.")
             else:
@@ -1095,14 +1079,12 @@ class Coverage(AbstractMetaDataElement):
                 except TypeError:
                     raise TypeError("Invalid end date. Not a valid date value.")
         elif coverage_type == 'point':
-            # check that all the required sub-elements exist
-            if not 'east' in value_dict or not 'north' in value_dict or not 'units' in value_dict:
-                raise ValidationError("For coverage of type 'point' values for 'east', 'north' and 'units' are needed.")
+            if not 'east' in value_dict or not 'north' in value_dict:
+                raise ValidationError("For coverage of type 'point' values for both 'east' and 'north' are needed.")
         elif coverage_type == 'box':
-            # check that all the required sub-elements exist
-            for value_item in ['units', 'northlimit', 'eastlimit', 'southlimit', 'westlimit']:
+            for value_item in ['name', 'northlimit', 'eastlimit', 'southlimit', 'westlimit']:
                 if not value_item in value_dict:
-                    raise ValidationError("For coverage of type 'box' values for one or more bounding box limits or 'units' is missing.")
+                    raise ValidationError("For coverage of type 'box' values for one or more bounding box limits is missing.")
 
 class Format(AbstractMetaDataElement):
     term = 'Format'
@@ -1182,7 +1164,7 @@ class Subject(AbstractMetaDataElement):
                 if sub.value != kwargs['value']:
                     # check this new subject not already exists
                     if Subject.objects.filter(value__iexact=kwargs['value'], object_id=sub.object_id,
-                                             content_type__pk=sub.content_type.id).count()> 0:
+                                             content_type__pk=sub.content_type.id).count() > 0:
                         raise ValidationError('Subject:%s already exists for this resource.' % kwargs['value'])
 
                 sub.value = kwargs['value']
@@ -1216,7 +1198,7 @@ class Source(AbstractMetaDataElement):
             # check the source doesn't already exists - source needs to be unique per resource
             metadata_obj = kwargs['content_object']
             metadata_type = ContentType.objects.get_for_model(metadata_obj)
-            src = Source.objects.filter(derived_from= kwargs['derived_from'], object_id=metadata_obj.id, content_type=metadata_type).first()
+            src = Source.objects.filter(derived_from=kwargs['derived_from'], object_id=metadata_obj.id, content_type=metadata_type).first()
             if src:
                 raise ValidationError('Source:%s already exists for this resource.' % kwargs['derived_from'])
 
@@ -1323,7 +1305,7 @@ class AbstractResource(ResourcePermissionsMixin):
     )
     files = generic.GenericRelation('hs_core.ResourceFile', help_text='The files associated with this resource')
     bags = generic.GenericRelation('hs_core.Bags', help_text='The bagits created from versions of this resource')
-    short_id = models.CharField(max_length=32, default=short_id, db_index=True)
+    short_id = models.CharField(max_length=32, default=short_id(), db_index=True)
     doi = models.CharField(max_length=1024, blank=True, null=True, db_index=True,
                            help_text='Permanent identifier. Never changes once it\'s been set.')
     comments = CommentsField()
@@ -1674,9 +1656,13 @@ class CoreMetaData(models.Model):
             hsterms_homepage = etree.SubElement(dc_person_rdf_Description, '{%s}homepage' % self.NAMESPACES['hsterms'])
             hsterms_homepage.set('{%s}resource' % self.NAMESPACES['rdf'], person.homepage)
 
-        for link in person.external_links.all():
-            hsterms_link_type = etree.SubElement(dc_person_rdf_Description, '{%s}' % self.NAMESPACES['hsterms'] + link.type)
-            hsterms_link_type.set('{%s}resource' % self.NAMESPACES['rdf'], link.url)
+        if person.researcherID:
+            hsterms_researcherID = etree.SubElement(dc_person_rdf_Description, '{%s}researcherID' % self.NAMESPACES['hsterms'])
+            hsterms_researcherID.set('{%s}resource' % self.NAMESPACES['rdf'], person.researcherID)
+
+        if person.researchGateID:
+            hsterms_researchGateID = etree.SubElement(dc_person_rdf_Description, '{%s}researchGateID' % self.NAMESPACES['hsterms'])
+            hsterms_researchGateID.set('{%s}resource' % self.NAMESPACES['rdf'], person.researcherID)
 
     def create_element(self, element_model_name, **kwargs):
         element_model_name = element_model_name.lower()
@@ -1685,14 +1671,14 @@ class CoreMetaData(models.Model):
                                   % element_model_name)
 
         try:
-            model = ContentType.objects.get(app_label=self._meta.app_label, model=element_model_name)
+            model_type = ContentType.objects.get(app_label=self._meta.app_label, model=element_model_name)
         except ObjectDoesNotExist:
-            model = ContentType.objects.get(app_label='hs_core', model=element_model_name)
+            model_type = ContentType.objects.get(app_label='hs_core', model=element_model_name)
 
-        if model:
-            if issubclass(model.model_class(), AbstractMetaDataElement):
+        if model_type:
+            if issubclass(model_type.model_class(), AbstractMetaDataElement):
                 kwargs['content_object'] = self
-                element = model.model_class().create(**kwargs)
+                element = model_type.model_class().create(**kwargs)
                 element.save()
             else:
                 raise ValidationError("Metadata element type:%s is not supported." % element_model_name)
@@ -1701,10 +1687,14 @@ class CoreMetaData(models.Model):
 
     def update_element(self, element_model_name, element_id, **kwargs):
         element_model_name = element_model_name.lower()
-        model_type = ContentType.objects.get(model=element_model_name)
+        try:
+            model_type = ContentType.objects.get(app_label=self._meta.app_label, model=element_model_name)
+        except ObjectDoesNotExist:
+            model_type = ContentType.objects.get(app_label='hs_core', model=element_model_name)
+
         if model_type:
             if issubclass(model_type.model_class(), AbstractMetaDataElement):
-                kwargs['metadata_obj']= self
+                kwargs['content_object']= self
                 model_type.model_class().update(element_id, **kwargs)
             else:
                 raise ValidationError("Metadata element type:%s is not supported." % element_model_name)
@@ -1713,7 +1703,11 @@ class CoreMetaData(models.Model):
 
     def delete_element(self, element_model_name, element_id):
         element_model_name = element_model_name.lower()
-        model_type = ContentType.objects.get(model=element_model_name)
+        try:
+            model_type = ContentType.objects.get(app_label=self._meta.app_label, model=element_model_name)
+        except ObjectDoesNotExist:
+            model_type = ContentType.objects.get(app_label='hs_core', model=element_model_name)
+
         if model_type:
             if issubclass(model_type.model_class(), AbstractMetaDataElement):
                 model_type.model_class().remove(element_id)
