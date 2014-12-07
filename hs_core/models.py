@@ -1656,13 +1656,9 @@ class CoreMetaData(models.Model):
             hsterms_homepage = etree.SubElement(dc_person_rdf_Description, '{%s}homepage' % self.NAMESPACES['hsterms'])
             hsterms_homepage.set('{%s}resource' % self.NAMESPACES['rdf'], person.homepage)
 
-        if person.researcherID:
-            hsterms_researcherID = etree.SubElement(dc_person_rdf_Description, '{%s}researcherID' % self.NAMESPACES['hsterms'])
-            hsterms_researcherID.set('{%s}resource' % self.NAMESPACES['rdf'], person.researcherID)
-
-        if person.researchGateID:
-            hsterms_researchGateID = etree.SubElement(dc_person_rdf_Description, '{%s}researchGateID' % self.NAMESPACES['hsterms'])
-            hsterms_researchGateID.set('{%s}resource' % self.NAMESPACES['rdf'], person.researcherID)
+        for link in person.external_links.all():
+            hsterms_link_type = etree.SubElement(dc_person_rdf_Description, '{%s}' % self.NAMESPACES['hsterms'] + link.type)
+            hsterms_link_type.set('{%s}resource' % self.NAMESPACES['rdf'], link.url)
 
     def create_element(self, element_model_name, **kwargs):
         element_model_name = element_model_name.lower()
@@ -1734,7 +1730,7 @@ def resource_creation_signal_handler(sender, instance, created, **kwargs):
         if created:
             from hs_core.hydroshare import utils
             import json
-            #instance.metadata.create_element('title', value=instance.title)
+            # instance.metadata.create_element('title', value=instance.title)
             # if instance.content:
             #     instance.metadata.create_element('description', abstract=instance.content)
             # else:
