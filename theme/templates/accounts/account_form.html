@@ -33,11 +33,11 @@
         </div>
         <div class="row">
             {% include "includes/form_field.html" with field=form.username  field_classes="col-md-6" %}
-            {% include "includes/form_field.html" with field=form.email field_classes="col-md-6" readonly="true" %}
+            {% include "includes/form_field.html" with field=form.email field_classes="col-md-6" %}
         </div>
         <div class="row">
             {% include "includes/form_field.html" with field=form.title field_classes="col-md-6" %}
-            {#{% include "includes/form_field.html" with field=form.profession  field_classes="col-md-6" %}#}
+            {% include "includes/form_field.html" with field=form.profession  field_classes="col-md-6" %}
         </div>
         <div class="row">
             {% include "includes/form_field.html" with field=form.subject_areas field_classes="col-md-12" %}
