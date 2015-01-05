@@ -33,7 +33,7 @@
         </div>
         <div class="row">
             {% include "includes/form_field.html" with field=form.username  field_classes="col-md-6" %}
-            {% include "includes/form_field.html" with field=form.email field_classes="col-md-6" %}
+            {% include "includes/form_field.html" with field=form.email field_classes="col-md-6" readonly="true" %}
         </div>
         <div class="row">
             {% include "includes/form_field.html" with field=form.title field_classes="col-md-6" %}
@@ -110,6 +110,6 @@
         {% block account_form_actions %}
         <input class="hl-btn hl-btn-green" type="submit" value="{{ title }}">
         {% endblock %}
-    </fieldset>
+
 </form>
 {% endblock %}
