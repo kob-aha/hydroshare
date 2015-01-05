@@ -407,8 +407,6 @@ def create_resource(request, *args, **kwargs):
     source_formset = SourceFormSet(request.POST or None, prefix='source')
     rights_form = RightsForm(request.POST or None)
     language_form = LanguageForm(request.POST or None)
-    #creator_profilelink_formset = ProfileLinksFormset(request.POST or None, prefix='creators_links')
-    #contributor_profilelink_formset = ProfileLinksFormset(request.POST or None, prefix='contributors_links')
 
     if request.method == "GET":
         #ext_md_layout = Layout(HTML('<h3>Testing extended metadata layout</h3>'))
@@ -424,7 +422,6 @@ def create_resource(request, *args, **kwargs):
         creator_formset = CreatorFormSet(initial=[{'name': first_creator_name, 'email': first_creator_email}], prefix='creator')
         contributor_formset = ContributorFormSet(prefix='contributor')
         relation_formset = RelationFormSet(prefix='relation')
-        #source_form = SourceForm()
 
         context = {'metadata_form': metadata_form, 'creator_formset': creator_formset,
                    'creator_profilelink_formset': None,
@@ -449,16 +446,13 @@ def create_resource(request, *args, **kwargs):
         form.profile_link_formset = ProfileLinksFormset(request.POST, prefix='contributor_links-%s' % index)
         index += 1
 
-    #source_form = SourceValidationForm(request.POST)
     rights_form = RightsValidationForm(request.POST)
-    language_form = LanguageValidationForm(request.POST)
 
     if frm.is_valid() and creator_formset.is_valid() and \
             contributor_formset.is_valid() and \
             relation_formset.is_valid() and \
             source_formset.is_valid() and \
-            rights_form.is_valid() and \
-            language_form.is_valid():
+            rights_form.is_valid():
 
         core_metadata = []
 
@@ -481,8 +475,6 @@ def create_resource(request, *args, **kwargs):
             core_metadata.append(metadata_dict)
 
         core_metadata.append(rights_form.get_metadata())
-        core_metadata.append(language_form.get_metadata())
-        #core_metadata.append(contributor_formset.get_metadata())
 
         subjects = [k.strip() for k in frm.cleaned_data['keywords'].split(',')] if frm.cleaned_data['keywords'] else None
         for subject_value in subjects:
@@ -490,15 +482,6 @@ def create_resource(request, *args, **kwargs):
 
         core_metadata.append({'title': {'value': frm.cleaned_data['title']}})
         core_metadata.append({'description': {'abstract': frm.cleaned_data['abstract'] or frm.cleaned_data['title']}})
-
-        # if files are uploaded, then generate the format metadata element data
-        # file_format_types = []
-        # for uploaded_file_obj in request.FILES.values():
-        #     file_format_type = uploaded_file_obj.content_type
-        #     # create format metadata element for each unique file format type
-        #     if file_format_type not in file_format_types:
-        #         file_format_types.append(file_format_type)
-        #         core_metadata.append({'format': {'value': file_format_type}})
 
         dcterms = [
             { 'term': 'T', 'content': frm.cleaned_data['title'] },

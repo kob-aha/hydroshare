@@ -395,85 +395,169 @@ class MetaDataForm(forms.Form):
         self.helper.form_method = 'post'
         self.helper.form_action = "/hsapi/_internal/create-resource/"
         self.helper.form_tag = False
-        self.helper.layout = Layout(
-            TabHolder(
-                Tab("Core Metadata",
-                    HTML('<div class="form-group">'
-                         '<label for="" control-label">Title</label>'
-                         '<input type="text" class="form-control input-sm" name="title" id="" placeholder="Title" value="{{ title }}">'
-                         '</div>'),
 
-                    HTML('<div class="form-group">'
-                         '<label for="" control-label">Abstract</label>'
-                         '<textarea class="mceEditor charfield" cols="40" id="" name="abstract" rows="10" placeholder="Abstract">{{ abstract }}</textarea>'
-                         '</div>'),
+        if resource_mode == 'new':
+            layout = Layout(
+                TabHolder(
+                    Tab("Core Metadata",
+                        HTML('<div class="form-group">'
+                             '<label for="" control-label">Title</label>'
+                             '<input type="text" class="form-control input-sm" name="title" id="" placeholder="Title" value="{{ title }}">'
+                             '</div>'),
 
-                    HTML('<div class="form-group">'
-                         '<label for="" control-label">Keywords</label>'
-                         '<input type="text" class="form-control" id="" name="keywords" placeholder="Keywords">'
-                         '</div>'),
-                    Accordion(
-                        AccordionGroup('Creators (required)',
-                            HTML("<div class='form-group' id='creator'>"),
-                            HTML("{{ creator_formset.management_form }}"),
-                            creator_layout,
-                            HTML("</div>"),
-                        ),
-                        AccordionGroup('Contributors (optional)',
-                            HTML("<div class='form-group' id='contributor'>"),
-                            HTML("{{ contributor_formset.management_form }}"),
-                            contributor_layout,
-                            HTML("</div>"),
-                        ),
-                        AccordionGroup('Relations (optional)',
-                            HTML("<div class='form-group' id='relation'>"),
-                            HTML("{{ relation_formset.management_form }}"),
-                            relation_layout,
-                            HTML("</div>"),
-                        ),
-                        AccordionGroup('Sources (optional)',
-                            HTML("<div class='form-group' id='source'>"),
-                            HTML("{{ source_formset.management_form }}"),
-                            source_layout,
-                            HTML("</div>"),
-                        ),
-                        AccordionGroup('Identifiers (required)',
-                            HTML("<div class='form-group' id='identifier'>"),
-                            HTML("{{ identifier_formset.management_form }}"),
-                            identifier_layout,
-                            HTML("</div>"),
-                        ),
-                        AccordionGroup('Rights (required)',
-                            HTML('<div class="form-group" id="source"> '
-                                    '{% load crispy_forms_tags %} '
-                                    '{% crispy rights_form %} '
-                                 '</div>'),
-                        ),
-                        AccordionGroup('Language (optional)',
-                            HTML('<div class="form-group" id="language"> '
-                                    '{% load crispy_forms_tags %} '
-                                    '{% crispy language_form %} '
-                                 '</div>'),
-                        ),
-                        AccordionGroup('Formats/MIME Types (optional)',
-                            HTML("<div class='form-group' id='format'>"),
-                            HTML("{{ format_formset.management_form }}"),
-                            format_layout,
-                            HTML("</div>"),
+                        HTML('<div class="form-group">'
+                             '<label for="" control-label">Abstract</label>'
+                             '<textarea class="mceEditor charfield" cols="40" id="" name="abstract" rows="10" placeholder="Abstract">{{ abstract }}</textarea>'
+                             '</div>'),
+
+                        HTML('<div class="form-group">'
+                             '<label for="" control-label">Keywords</label>'
+                             '<input type="text" class="form-control" id="" name="keywords" placeholder="Keywords">'
+                             '</div>'),
+                        Accordion(
+                            AccordionGroup('Creators (required)',
+                                HTML("<div class='form-group' id='creator'>"),
+                                HTML("{{ creator_formset.management_form }}"),
+                                creator_layout,
+                                HTML("</div>"),
+                            ),
+                            AccordionGroup('Contributors (optional)',
+                                HTML("<div class='form-group' id='contributor'>"),
+                                HTML("{{ contributor_formset.management_form }}"),
+                                contributor_layout,
+                                HTML("</div>"),
+                            ),
+                            AccordionGroup('Relations (optional)',
+                                HTML("<div class='form-group' id='relation'>"),
+                                HTML("{{ relation_formset.management_form }}"),
+                                relation_layout,
+                                HTML("</div>"),
+                            ),
+                            AccordionGroup('Sources (optional)',
+                                HTML("<div class='form-group' id='source'>"),
+                                HTML("{{ source_formset.management_form }}"),
+                                source_layout,
+                                HTML("</div>"),
+                            ),
+                            # AccordionGroup('Identifiers (required)',
+                            #     HTML("<div class='form-group' id='identifier'>"),
+                            #     HTML("{{ identifier_formset.management_form }}"),
+                            #     identifier_layout,
+                            #     HTML("</div>"),
+                            # ),
+                            AccordionGroup('Rights (required)',
+                                HTML('<div class="form-group" id="source"> '
+                                        '{% load crispy_forms_tags %} '
+                                        '{% crispy rights_form %} '
+                                     '</div>'),
+                            ),
+                            AccordionGroup('Language (optional)',
+                                HTML('<div class="form-group" id="language"> '
+                                        '{% load crispy_forms_tags %} '
+                                        '{% crispy language_form %} '
+                                     '</div>'),
+                            ),
+                            # AccordionGroup('Formats/MIME Types (optional)',
+                            #     HTML("<div class='form-group' id='format'>"),
+                            #     HTML("{{ format_formset.management_form }}"),
+                            #     format_layout,
+                            #     HTML("</div>"),
+                            # ),
                         ),
                     ),
-                ),
 
-                # Specific resource type app needs to provide the crispy form Layout object: extended_metadata_layout
-                Tab("Extended Metadata",
-                    extended_metadata_layout,
+                    # Specific resource type app needs to provide the crispy form Layout object: extended_metadata_layout
+                    Tab("Extended Metadata",
+                        extended_metadata_layout,
+                    ),
                 ),
-            ),
-            modal_dialog_add_creator,
-            modal_dialog_add_contributor,
-            modal_dialog_add_relation,
-            modal_dialog_add_source,
-        )
+                modal_dialog_add_creator,
+                modal_dialog_add_contributor,
+                modal_dialog_add_relation,
+                modal_dialog_add_source,
+            )
+        else:
+            layout = Layout(
+                TabHolder(
+                    Tab("Core Metadata",
+                        HTML('<div class="form-group">'
+                             '<label for="" control-label">Title</label>'
+                             '<input type="text" class="form-control input-sm" name="title" id="" placeholder="Title" value="{{ title }}">'
+                             '</div>'),
+
+                        HTML('<div class="form-group">'
+                             '<label for="" control-label">Abstract</label>'
+                             '<textarea class="mceEditor charfield" cols="40" id="" name="abstract" rows="10" placeholder="Abstract">{{ abstract }}</textarea>'
+                             '</div>'),
+
+                        HTML('<div class="form-group">'
+                             '<label for="" control-label">Keywords</label>'
+                             '<input type="text" class="form-control" id="" name="keywords" placeholder="Keywords">'
+                             '</div>'),
+                        Accordion(
+                            AccordionGroup('Creators (required)',
+                                HTML("<div class='form-group' id='creator'>"),
+                                HTML("{{ creator_formset.management_form }}"),
+                                creator_layout,
+                                HTML("</div>"),
+                            ),
+                            AccordionGroup('Contributors (optional)',
+                                HTML("<div class='form-group' id='contributor'>"),
+                                HTML("{{ contributor_formset.management_form }}"),
+                                contributor_layout,
+                                HTML("</div>"),
+                            ),
+                            AccordionGroup('Relations (optional)',
+                                HTML("<div class='form-group' id='relation'>"),
+                                HTML("{{ relation_formset.management_form }}"),
+                                relation_layout,
+                                HTML("</div>"),
+                            ),
+                            AccordionGroup('Sources (optional)',
+                                HTML("<div class='form-group' id='source'>"),
+                                HTML("{{ source_formset.management_form }}"),
+                                source_layout,
+                                HTML("</div>"),
+                            ),
+                            AccordionGroup('Identifiers (required)',
+                                HTML("<div class='form-group' id='identifier'>"),
+                                HTML("{{ identifier_formset.management_form }}"),
+                                identifier_layout,
+                                HTML("</div>"),
+                            ),
+                            AccordionGroup('Rights (required)',
+                                HTML('<div class="form-group" id="source"> '
+                                        '{% load crispy_forms_tags %} '
+                                        '{% crispy rights_form %} '
+                                     '</div>'),
+                            ),
+                            AccordionGroup('Language (optional)',
+                                HTML('<div class="form-group" id="language"> '
+                                        '{% load crispy_forms_tags %} '
+                                        '{% crispy language_form %} '
+                                     '</div>'),
+                            ),
+                            AccordionGroup('Formats/MIME Types (optional)',
+                                HTML("<div class='form-group' id='format'>"),
+                                HTML("{{ format_formset.management_form }}"),
+                                format_layout,
+                                HTML("</div>"),
+                            ),
+                        ),
+                    ),
+
+                    # Specific resource type app needs to provide the crispy form Layout object: extended_metadata_layout
+                    Tab("Extended Metadata",
+                        extended_metadata_layout,
+                    ),
+                ),
+                modal_dialog_add_creator,
+                modal_dialog_add_contributor,
+                modal_dialog_add_relation,
+                modal_dialog_add_source,
+            )
+
+        self.helper.layout = layout
 
 
 class ProfileLinksFormSetHelper(FormHelper):
