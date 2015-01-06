@@ -93,6 +93,7 @@
         });
         $(document).ready(function () {
         // Code adapted from http://djangosnippets.org/snippets/1389/
+
         function updateElementIndex(el, prefix, ndx) {
             var id_regex = new RegExp('(' + prefix + '-\\d+-)');
             var replacement = prefix + '-' + ndx + '-';
@@ -312,6 +313,8 @@
             }
             return false;
         }
+
+        //$("#id_start_date").datepicker();
 
         // Register the click event handlers
         $("#addCreator").click(function () {

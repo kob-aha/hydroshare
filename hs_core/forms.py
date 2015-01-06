@@ -2,11 +2,12 @@ __author__ = 'pabitra'
 
 
 from models import *
-from django.forms import ModelForm, BaseFormSet
+from django.forms import ModelForm, BaseFormSet, DateInput
 from django.forms.models import inlineformset_factory, modelformset_factory, formset_factory
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Fieldset, ButtonHolder, Submit, HTML
 from crispy_forms.bootstrap import *
+from django.forms.extras.widgets import SelectDateWidget
 
 ModalDialogLayoutAddCreator = Layout(
                             HTML('<div class="modal fade" id="add-creator-dialog" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">'
@@ -324,6 +325,7 @@ FormatLayoutEdit = Layout(
                             ),
                     )
 
+
 # the 1st and the 3rd HTML layout objects get replaced in MetaDataElementDeleteForm class
 def _get_modal_confirm_delete_matadata_element():
     layout = Layout(
@@ -457,6 +459,12 @@ class MetaDataForm(forms.Form):
                                         '{% crispy language_form %} '
                                      '</div>'),
                             ),
+                            AccordionGroup('Valid date (optional)',
+                                HTML('<div class="form-group" id="validdate"> '
+                                        '{% load crispy_forms_tags %} '
+                                        '{% crispy valid_date_form %} '
+                                     '</div>'),
+                            ),
                             # AccordionGroup('Formats/MIME Types (optional)',
                             #     HTML("<div class='form-group' id='format'>"),
                             #     HTML("{{ format_formset.management_form }}"),
@@ -535,6 +543,12 @@ class MetaDataForm(forms.Form):
                                 HTML('<div class="form-group" id="language"> '
                                         '{% load crispy_forms_tags %} '
                                         '{% crispy language_form %} '
+                                     '</div>'),
+                            ),
+                            AccordionGroup('Valid date (optional)',
+                                HTML('<div class="form-group" id="validdate"> '
+                                        '{% load crispy_forms_tags %} '
+                                        '{% crispy valid_date_form %} '
                                      '</div>'),
                             ),
                             AccordionGroup('Formats/MIME Types (optional)',
@@ -1068,3 +1082,39 @@ class LanguageValidationForm(forms.Form):
 
     def get_metadata(self):
         return {'language': self.cleaned_data}
+
+
+class ValidDateFormHelper(BaseFormHelper):
+    def __init__(self, res_short_id=None, element_id=None, element_name=None,  *args, **kwargs):
+
+        # the order in which the model fields are listed for the FieldSet is the order these fields will be displayed
+        field_width = 'form-control input-sm'
+        layout = Layout(
+                        Field('start_date', css_class=field_width),
+                        Field('end_date', css_class=field_width),
+                 )
+
+        super(ValidDateFormHelper, self).__init__(res_short_id, element_id, element_name, layout,  *args, **kwargs)
+
+
+class ValidDateForm(ModelForm):
+    def __init__(self, res_short_id=None, element_id=None, *args, **kwargs):
+        super(ValidDateForm, self).__init__(*args, **kwargs)
+        self.helper = ValidDateFormHelper(res_short_id, element_id, element_name='date')
+        self.initial['code'] = 'eng'
+
+    class Meta:
+        model = Date
+        fields = ['start_date', 'end_date']
+        exclude = ['content_object']
+        labels = {'start_date': 'Start date', 'end_date': 'End date'}
+        widgets = {'start_date': DateInput(), 'end_date': DateInput()}
+
+
+class ValidDateValidationForm(forms.Form):
+    start_date = forms.DateField()
+    end_date = forms.DateField()
+
+    def get_metadata(self):
+        self.cleaned_data['type'] = 'valid'
+        return {'date': self.cleaned_data}

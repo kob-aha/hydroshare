@@ -80,6 +80,15 @@ def get_page_context(page, extended_metadata_layout=None):
     language_form = LanguageForm(instance=content_model.metadata.language, res_short_id=content_model.short_id,
                              element_id=content_model.metadata.language.id if content_model.metadata.language else None)
 
+    valid_dates = content_model.metadata.dates.all().filter(type='valid')
+    if len(valid_dates) > 0:
+        valid_date = valid_dates[0]
+    else:
+        valid_date = None
+
+    valid_date_form = ValidDateForm(instance=valid_date, res_short_id=content_model.short_id,
+                             element_id=valid_date.id if valid_date else None)
+
     metadata_form = MetaDataForm(resource_mode='edit', extended_metadata_layout=extended_metadata_layout)
 
     context = {'metadata_form': metadata_form,
@@ -97,6 +106,7 @@ def get_page_context(page, extended_metadata_layout=None):
                'rights_form': rights_form,
                'identifier_formset': identifier_formset,
                'language_form': language_form,
+               'valid_date_form': valid_date_form,
                'format_formset': format_formset,
                'extended_metadata_layout': extended_metadata_layout}
 

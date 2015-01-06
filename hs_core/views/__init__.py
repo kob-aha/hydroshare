@@ -418,6 +418,7 @@ def create_resource(request, *args, **kwargs):
     source_formset = SourceFormSet(request.POST or None, prefix='source')
     rights_form = RightsForm(request.POST or None)
     language_form = LanguageForm(request.POST or None)
+    valid_date_form = ValidDateForm(request.POST or None)
 
     if request.method == "GET":
         #ext_md_layout = Layout(HTML('<h3>Testing extended metadata layout</h3>'))
@@ -441,6 +442,7 @@ def create_resource(request, *args, **kwargs):
                    'source_formset': source_formset,
                    'rights_form': rights_form,
                    'language_form': language_form,
+                   'valid_date_form': valid_date_form,
                    'extended_metadata_layout': ext_md_layout}
 
         return render(request, 'pages/create-resource.html', context)
@@ -458,12 +460,14 @@ def create_resource(request, *args, **kwargs):
         index += 1
 
     rights_form = RightsValidationForm(request.POST)
+    valid_date_form = ValidDateValidationForm(request.POST)
 
     if frm.is_valid() and creator_formset.is_valid() and \
             contributor_formset.is_valid() and \
             relation_formset.is_valid() and \
             source_formset.is_valid() and \
-            rights_form.is_valid():
+            rights_form.is_valid() and \
+            valid_date_form.is_valid():
 
         core_metadata = []
 
@@ -486,6 +490,7 @@ def create_resource(request, *args, **kwargs):
             core_metadata.append(metadata_dict)
 
         core_metadata.append(rights_form.get_metadata())
+        core_metadata.append(valid_date_form.get_metadata())
 
         subjects = [k.strip() for k in frm.cleaned_data['keywords'].split(',')] if frm.cleaned_data['keywords'] else None
         for subject_value in subjects:
