@@ -431,7 +431,7 @@ def create_resource(request, *args, **kwargs):
             first_creator_name = user.username
         first_creator_email = user.email
 
-        creator_formset = CreatorFormSet(initial=[{'name': first_creator_name, 'email': first_creator_email}], prefix='creator')
+        creator_formset = CreatorFormSet(initial=[{'name': first_creator_name, 'email': first_creator_email, 'order': 1}], prefix='creator')
         contributor_formset = ContributorFormSet(prefix='contributor')
         relation_formset = RelationFormSet(prefix='relation')
 
@@ -490,7 +490,11 @@ def create_resource(request, *args, **kwargs):
             core_metadata.append(metadata_dict)
 
         core_metadata.append(rights_form.get_metadata())
-        core_metadata.append(valid_date_form.get_metadata())
+
+        # valid date is optional
+        valid_date_metadata = valid_date_form.get_metadata()
+        if len(valid_date_metadata) > 0:
+            core_metadata.append(valid_date_metadata)
 
         subjects = [k.strip() for k in frm.cleaned_data['keywords'].split(',')] if frm.cleaned_data['keywords'] else None
         for subject_value in subjects:
