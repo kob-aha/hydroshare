@@ -417,6 +417,12 @@ class MetaDataForm(forms.Form):
                              '<input type="text" class="form-control" id="" name="keywords" placeholder="Keywords">'
                              '</div>'),
                         Accordion(
+                            AccordionGroup('Rights (required)',
+                                HTML('<div class="form-group" id="source"> '
+                                        '{% load crispy_forms_tags %} '
+                                        '{% crispy rights_form %} '
+                                     '</div>'),
+                            ),
                             AccordionGroup('Creators (required)',
                                 HTML("<div class='form-group' id='creator'>"),
                                 HTML("{{ creator_formset.management_form }}"),
@@ -441,18 +447,7 @@ class MetaDataForm(forms.Form):
                                 source_layout,
                                 HTML("</div>"),
                             ),
-                            # AccordionGroup('Identifiers (required)',
-                            #     HTML("<div class='form-group' id='identifier'>"),
-                            #     HTML("{{ identifier_formset.management_form }}"),
-                            #     identifier_layout,
-                            #     HTML("</div>"),
-                            # ),
-                            AccordionGroup('Rights (required)',
-                                HTML('<div class="form-group" id="source"> '
-                                        '{% load crispy_forms_tags %} '
-                                        '{% crispy rights_form %} '
-                                     '</div>'),
-                            ),
+
                             AccordionGroup('Language (optional)',
                                 HTML('<div class="form-group" id="language"> '
                                         '{% load crispy_forms_tags %} '
@@ -465,12 +460,6 @@ class MetaDataForm(forms.Form):
                                         '{% crispy valid_date_form %} '
                                      '</div>'),
                             ),
-                            # AccordionGroup('Formats/MIME Types (optional)',
-                            #     HTML("<div class='form-group' id='format'>"),
-                            #     HTML("{{ format_formset.management_form }}"),
-                            #     format_layout,
-                            #     HTML("</div>"),
-                            # ),
                         ),
                     ),
 
@@ -503,6 +492,12 @@ class MetaDataForm(forms.Form):
                              '<input type="text" class="form-control" id="" name="keywords" placeholder="Keywords">'
                              '</div>'),
                         Accordion(
+                            AccordionGroup('Rights (required)',
+                                HTML('<div class="form-group" id="source"> '
+                                        '{% load crispy_forms_tags %} '
+                                        '{% crispy rights_form %} '
+                                     '</div>'),
+                            ),
                             AccordionGroup('Creators (required)',
                                 HTML("<div class='form-group' id='creator'>"),
                                 HTML("{{ creator_formset.management_form }}"),
@@ -533,12 +528,7 @@ class MetaDataForm(forms.Form):
                                 identifier_layout,
                                 HTML("</div>"),
                             ),
-                            AccordionGroup('Rights (required)',
-                                HTML('<div class="form-group" id="source"> '
-                                        '{% load crispy_forms_tags %} '
-                                        '{% crispy rights_form %} '
-                                     '</div>'),
-                            ),
+
                             AccordionGroup('Language (optional)',
                                 HTML('<div class="form-group" id="language"> '
                                         '{% load crispy_forms_tags %} '
@@ -615,9 +605,11 @@ class BaseProfileLinkFormSet(BaseFormSet):
         links_data = []
         for form in self.forms:
             link_data = {k: v for k, v in form.cleaned_data.iteritems()}
-            links_data.append(link_data)
+            if len(link_data) > 0:
+                links_data.append(link_data)
 
         return {'profile_links': links_data}
+
 
 ProfileLinksFormset = formset_factory(ProfileLinksForm, formset=BaseProfileLinkFormSet)
 
@@ -756,6 +748,15 @@ class ContributorForm(PartyForm):
 
 
 class BaseContributorFormSet(BaseFormSet):
+
+    # def clean(self):
+    #     super(BaseContributorFormSet, self).clean()
+    #     form_counter = 0
+    #     for form in self.forms:
+    #         if not form.is_valid() and len(form.cleaned_data) == 0:
+    #             del self.errors[form_counter]
+    #         form_counter +=1
+
     def add_fields(self, form, index):
         super(BaseContributorFormSet, self).add_fields(form, index)
 
@@ -766,12 +767,13 @@ class BaseContributorFormSet(BaseFormSet):
         contributors_data = []
         for form in self.forms:
             contributor_data = {k: v for k, v in form.cleaned_data.iteritems()}
-            if form.profile_link_formset.is_valid():
-                profile_link_dict = form.profile_link_formset.get_metadata()
-                if len(profile_link_dict['profile_links']) > 0:
-                    contributor_data['profile_links'] = profile_link_dict['profile_links']
+            if len(contributor_data) > 0:
+                if form.profile_link_formset.is_valid():
+                    profile_link_dict = form.profile_link_formset.get_metadata()
+                    if len(profile_link_dict['profile_links']) > 0:
+                        contributor_data['profile_links'] = profile_link_dict['profile_links']
 
-            contributors_data.append({'contributor': contributor_data})
+                contributors_data.append({'contributor': contributor_data})
 
         return contributors_data
 
@@ -787,7 +789,7 @@ class RelationFormSetHelper(FormHelper):
         self.form_tag = False
         self.form_show_errors = True
         self.error_text_inline = True
-        self.html5_required = True
+        self.html5_required = False
         self.layout = Layout(
             Fieldset('Relation',
                      Field('type', css_class=field_width),
@@ -801,7 +803,8 @@ class BaseRelationFormSet(BaseFormSet):
         relations_data = []
         for form in self.forms:
             relation_data = {k: v for k, v in form.cleaned_data.iteritems()}
-            relations_data.append({'relation': relation_data})
+            if len(relation_data) > 0:
+                relations_data.append({'relation': relation_data})
 
         return relations_data
 
@@ -841,7 +844,7 @@ class SourceFormSetHelper(FormHelper):
         self.form_tag = False
         self.form_show_errors = True
         self.error_text_inline = True
-        self.html5_required = True
+        self.html5_required = False
         self.layout = Layout(
             Fieldset('Source',
                      Field('derived_from', css_class=field_width),
@@ -854,7 +857,8 @@ class BaseSourceFormSet(BaseFormSet):
         sources_data = []
         for form in self.forms:
             source_data = {k: v for k, v in form.cleaned_data.iteritems()}
-            sources_data.append({'source': source_data})
+            if len(source_data) > 0:
+                sources_data.append({'source': source_data})
 
         return sources_data
 
@@ -1101,7 +1105,6 @@ class ValidDateForm(ModelForm):
     def __init__(self, res_short_id=None, element_id=None, *args, **kwargs):
         super(ValidDateForm, self).__init__(*args, **kwargs)
         self.helper = ValidDateFormHelper(res_short_id, element_id, element_name='date')
-        self.initial['code'] = 'eng'
 
     class Meta:
         model = Date
@@ -1115,6 +1118,28 @@ class ValidDateValidationForm(forms.Form):
     start_date = forms.DateField()
     end_date = forms.DateField()
 
+    def clean(self):
+        cleaned_data = super(ValidDateValidationForm, self).clean()
+        start_date = cleaned_data.get('start_date', None)
+        end_date = cleaned_data.get('end_date', None)
+        if start_date and not end_date:
+            self._errors['end_date'] = ["End date is missing"]
+
+        if end_date and not start_date:
+            self._errors['start_date'] = ["Start date is missing"]
+
+        if not start_date and not end_date:
+            del self._errors['start_date']
+            del self._errors['end_date']
+
+        if start_date and end_date:
+            self.cleaned_data['type'] = 'valid'
+
+        return self.cleaned_data
+
     def get_metadata(self):
-        self.cleaned_data['type'] = 'valid'
-        return {'date': self.cleaned_data}
+        if len(self.cleaned_data) > 0:
+            self.cleaned_data['type'] = 'valid'
+            return {'date': self.cleaned_data}
+        else:
+            return []
