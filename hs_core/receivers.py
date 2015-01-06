@@ -26,6 +26,7 @@ def metadata_element_pre_create_handler(sender, **kwargs):
     elif element_name == 'language':
         element_form = LanguageValidationForm(request.POST)
 
+
     if element_form.is_valid():
         return {'is_valid': True, 'element_data_dict': element_form.cleaned_data}
     else:
@@ -82,6 +83,8 @@ def metadata_element_pre_update_handler(sender, **kwargs):
         element_form = RightsValidationForm(request.POST)
     elif element_name == 'language':
         element_form = LanguageValidationForm(request.POST)
+    elif element_name == 'date':
+        element_form = ValidDateValidationForm(request.POST)
 
     if element_form.is_valid():
         return {'is_valid': True, 'element_data_dict': element_form.cleaned_data}
