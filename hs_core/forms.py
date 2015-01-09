@@ -2,7 +2,7 @@ __author__ = 'pabitra'
 
 
 from models import *
-from django.forms import ModelForm, BaseFormSet, DateInput
+from django.forms import ModelForm, BaseFormSet, DateInput, Select
 from django.forms.models import inlineformset_factory, modelformset_factory, formset_factory
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Fieldset, ButtonHolder, Submit, HTML
@@ -597,7 +597,14 @@ class ProfileLinksForm(ModelForm):
 
     class Meta:
         model = ExternalProfileLink
+        #type = forms.ModelChoiceField(queryset=["ResearchID", "ResearchGateID"])
         fields = ['type', 'url']
+        TYPE_CHOICES = (
+            ('', '___________'),
+            ('ResearchID', 'Research ID'),
+            ('ResearchGateID', 'Research Gate ID')
+        )
+        widgets = {'type': Select(choices=TYPE_CHOICES, attrs={'class': 'select'}),}
 
 
 class BaseProfileLinkFormSet(BaseFormSet):
