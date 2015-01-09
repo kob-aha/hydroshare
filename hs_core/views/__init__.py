@@ -23,7 +23,6 @@ from django.core import exceptions as ex
 from mezzanine.pages.page_processors import processor_for
 from django.template import RequestContext
 from django.core import signing
-
 from ..forms import *
 from . import users_api
 from . import discovery_api
