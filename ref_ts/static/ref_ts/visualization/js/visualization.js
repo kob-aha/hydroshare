@@ -41,9 +41,31 @@ function graphVals(graph_data, units, varName) {
 
             $("#graph-container").html("");
 
+            $("#graph-area").append(
+                '<div id="panel-right"><div id="plot-options"><table class="table">' +
+                    '<div id="dateIntervals" class="btn-group">' +
+                    '<button id="btnAll" type="button" class="btn btn-default">All</button><button id="btnLastMonth" type="button" class="btn btn-default">Last Month</button>' +
+                    '<button id="btnLastWeek" type="button" class="btn btn-default">Last Week</button></div>' +
+                    '<tbody><tr><td>Begin Date</td><td><input id="dpd1" type="text" class="datepicker" data-date-format="m/dd/yyyy"></td></tr>' +
+                    '<tr><td>End Date</td><td><input id="dpd2" type="text" class="datepicker" data-date-format="m/dd/yyyy"></td></tr>' +
+                    '<tr><td>Visualization</td><td></button><ul class="dropdown-menu"><li><a href="#" id="btnTimeSeries">Time Series</a></li><li><a href="#" id="btnHistogram">Histogram</a></li><li><a href="#" id="btnBoxAndWhisker">Box and Whisker</a></li></ul></div></td></tr>' +
+                    '<tr><td></td><td><button id ="btnSetPlotOptions" type="button" class="btn btn-primary"> Plot</button></td></tr></tbody></table></div>' +
+                    '<div id="summaryContainer" class="panel panel-default"><div class="panel-heading  glyphicon glyphicon-list-alt"><span class="container-title"> Summary Statistics</span></div><table class="table" id="statisticsTable"><tbody></tbody></table></div></div>');
+
             var svg = d3.select("#graph-container").append("svg")
                 .attr("width", 833)
                 .attr("height", 500);
+
+    var over = svg.append("g")
+                .attr("class", "over")
+                .style("display", "none");
+
+            over.append("circle")
+                .attr("r", 4.5);
+
+            over.append("text")
+                .attr("x", 9)
+                .attr("dy", ".35em");
 
             svg.append("clipPath")
                 .attr("id", "clip")
@@ -52,6 +74,16 @@ function graphVals(graph_data, units, varName) {
                 .attr("x",MARGINS.left)
                 .attr("height", HEIGHT);
 
+
+            svg.append("rect")
+                .attr("class", "overlay")
+                .attr("width",  WIDTH-MARGINS.right-40)
+                .attr("x",MARGINS.left)
+                .attr("height", HEIGHT)
+                .on("mouseover", function() { over.style("display", null); })
+                .on("mouseout", function() { over.style("display", "none"); })
+                .on("mousemove", mousemove);
+
             var brush = d3.svg.brush()
                 .x(xRange2)
                 .on("brush", brushed);
@@ -59,16 +91,14 @@ function graphVals(graph_data, units, varName) {
             var focus = svg.append("g")
                 .attr("class", "focus")
                 .attr("width", 762)
-                .attr("height", 300)
-                .style("display", "none");
-
+                .attr("height", 300);
 
             focus.append('g')  // Add the x axis
                 .attr('class', 'x axis')
                 .attr('transform', 'translate(0,' + (HEIGHT - MARGINS.bottom) + ')')
                 .call(xAxis);
 
-            svg.append('g')  // Add the y axis
+            focus.append('g')  // Add the y axis
                 .attr('class', 'y axis')
                 .attr('transform', 'translate(' + (MARGINS.left) + ',0)') // not totally sure this is necessary
                 .call(yAxis);
@@ -108,31 +138,18 @@ function graphVals(graph_data, units, varName) {
                 .attr("clip-path", "url(#clip)")
                 .attr('fill', 'none');
 
-            /*focus.append("circle")
-                .attr("r", 4.5);
+            var bisectDate = d3.bisector(function(d) { return d.x; }).left;
 
-            focus.append("text")
-                .attr("x", 9)
-                .attr("dy", ".35em");
-
-            svg.append("rect")
-                .attr("class", "overlay")
-                .attr("width", 762)
-                .attr("height", 300)
-                .on("mouseover", function() { focus.style("display", null); })
-                .on("mouseout", function() { focus.style("display", "none"); })
-                .on("mousemove", mousemove);
-
-              function mousemove() {
-                  console.log(d3.mouse(this)[0]);
-//                var x0 = x.invert(d3.mouse(this)[0]),
-//                    i = bisectDate(data, x0, 1),
-//                    d0 = data[i - 1],
-//                    d1 = data[i],
-//                    d = x0 - d0.date > d1.date - x0 ? d1 : d0;
-//                focus.attr("transform", "translate(" + x(d.date) + "," + y(d.close) + ")");
-//                focus.select("text").text(formatCurrency(d.close));
-              }*/
+             function mousemove() {
+                 var x0 = xRange.invert(d3.mouse(this)[0]),
+                 i = bisectDate(graph_data, x0, 1),
+                 d0 = graph_data[i - 1],
+                 d1 = graph_data[i],
+                 d = x0 - d0.x > d1.x - x0 ? d1 : d0;
+            over.attr("transform", "translate(" + xRange(d.x) + "," + yRange(d.y) + ")");
+            over.select("text").text(d.y);
+            over.select("text").attr("transform","translate(0,8)");
+             }
 
 
             var context = svg.append("g")
@@ -162,8 +179,24 @@ function graphVals(graph_data, units, varName) {
               .attr("height", 35);
         function brushed() {
           xRange.domain(brush.empty() ? xRange2.domain() : brush.extent());
+          var x0 = brush.extent()[0],
+              x1 = brush.extent()[1],
+              xpos0 = bisectDate(graph_data,x0,1),
+              xpos1 = bisectDate(graph_data,x1,1),
+              subData = graph_data.slice(xpos0,xpos1),
+              subMin = d3.min(subData, function(d) {
+                  return d.y;
+                }),
+              subMax = d3.max(subData, function(d) {
+                  return d.y;
+                });
+          yRange.domain(brush.empty() ? yRange2.domain() : [subMin,subMax]);
           focus.select(".line").attr("d", lineFunc(graph_data));
           focus.select(".x.axis").call(xAxis);
+          focus.select(".y.axis").call(yAxis);
+          var summary = calcSummaryStats(subData);
+          if (brush.empty()){summary = calcSummaryStats(graph_data)}
+          setSummaryStatistics(summary);
             }
         var summary = calcSummaryStats(graph_data);
         setSummaryStatistics(summary);
@@ -358,6 +391,30 @@ function getDatasetsAfterFilters(dataset){
                 dateLast.setValue(maxDate);
             });
 
-
+            //f();
             return dataset;
         }
+//
+//$(function() {
+//    $("#btnSetPlotOptions").click(function () {
+//        console.log('test');
+//        var dateFirst = new Date($('#dpd1').val());
+//        var dateLast = new Date($('#dpd2').val());
+//        var dataset = glob_graph_data.filter(function (d) {
+//            return (d.x >= dateFirst.getTime() && d.x <= dateLast.getTime());
+//        });
+//        var a = dateFirst.getTime();
+//        var b = dateLast.getTime();
+//        if (a <= b) {
+//            graphVals(dataset);  // Dates do not overlap, proceed
+//        }
+//        else {
+//            $("#graph-area").prepend(
+//                '<div class="alert alert-danger alert-dismissable">\
+//                  <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>\
+//                  <strong></strong> Dates cannot overlap. \
+//                </div>'
+//            );
+//        }
+//    });
+//});

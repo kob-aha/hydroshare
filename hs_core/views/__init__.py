@@ -6,8 +6,7 @@ from django.contrib.auth.models import Group, User
 from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
 from django.http import HttpResponseRedirect, HttpResponse
-from django.shortcuts import get_object_or_404, render_to_response, render
-import django.dispatch
+from django.shortcuts import get_object_or_404, render_to_response
 from django.template import RequestContext
 from django.utils.timezone import now
 from mezzanine.conf import settings
@@ -22,6 +21,8 @@ import requests
 from django.core import exceptions as ex
 from mezzanine.pages.page_processors import processor_for
 from django.template import RequestContext
+from django.core import signing
+
 from ..forms import *
 from . import users_api
 from . import discovery_api
@@ -33,6 +34,7 @@ from crispy_forms.layout import *
 
 import autocomplete_light
 
+
 def short_url(request, *args, **kwargs):
     try:
         shortkey = kwargs['shortkey']
@@ -43,13 +45,22 @@ def short_url(request, *args, **kwargs):
     return HttpResponseRedirect(m.get_absolute_url())
 
 def verify(request, *args, **kwargs):
-    uid = int(kwargs['pk'])
-    u = User.objects.get(pk=uid)
-    if not u.is_active:
-        u.is_active=True
-        u.save()
-        u.groups.add(Group.objects.get(name="Hydroshare Author"))
+    _, pk, email = signing.loads(kwargs['token']).split(':')
+    u = User.objects.get(pk=pk)
+    if u.email == email:
+        if not u.is_active:
+            u.is_active=True
+            u.save()
+            u.groups.add(Group.objects.get(name="Hydroshare Author"))
+        from django.contrib.auth import login
+        u.backend = settings.AUTHENTICATION_BACKENDS[0]
+        login(request, u)
         return HttpResponseRedirect('/account/update/')
+    else:
+        from django.contrib import messages
+        messages.error(request, "Your verification token was invalid.")
+
+    return HttpResponseRedirect('/')
 
 
 def add_file_to_resource(request, *args, **kwargs):
@@ -71,52 +82,6 @@ def add_citation(request, shortkey, *args, **kwargs):
     resource_modified(res, request.user)
     return HttpResponseRedirect(request.META['HTTP_REFERER'])
 
-def _get_resource_sender(element_name, resource):
-    core_metadata_element_names = [el_name.lower() for el_name in CoreMetaData.get_supported_element_names()]
-
-    if element_name in core_metadata_element_names:
-        sender_resource = GenericResource().__class__
-    else:
-        sender_resource = resource.__class__
-
-    return sender_resource
-
-
-def add_metadata_element(request, shortkey, element_name, *args, **kwargs):
-    res, _, _ = authorize(request, shortkey, edit=True, full=True, superuser=True)
-
-    sender_resource = _get_resource_sender(element_name, res)
-    handler_response = pre_metadata_element_create.send(sender=sender_resource, element_name=element_name,
-                                                        request=request)
-    for receiver, response in handler_response:
-        if 'is_valid' in response:
-            if response['is_valid']:
-                element_data_dict = response['element_data_dict']
-                res.metadata.create_element(element_name, **element_data_dict)
-                resource_modified(res, request.user)
-
-    return HttpResponseRedirect(request.META['HTTP_REFERER'])
-
-
-def update_metadata_element(request, shortkey, element_name, element_id, *args, **kwargs):
-    res, _, _ = authorize(request, shortkey, edit=True, full=True, superuser=True)
-    sender_resource = _get_resource_sender(element_name, res)
-    handler_response = pre_metadata_element_update.send(sender=sender_resource, element_name=element_name,
-                                                        element_id=element_id, request=request)
-    for receiver, response in handler_response:
-        if 'is_valid' in response:
-            if response['is_valid']:
-                element_data_dict = response['element_data_dict']
-                res.metadata.update_element(element_name, element_id, **element_data_dict)
-                resource_modified(res, request.user)
-
-    return HttpResponseRedirect(request.META['HTTP_REFERER'])
-
-
-def delete_metadata_element(request, shortkey, element_name, element_id, *args, **kwargs):
-    res, _, _ = authorize(request, shortkey, edit=True, full=True, superuser=True)
-    res.metadata.delete_element(element_name, element_id)
-    return HttpResponseRedirect(request.META['HTTP_REFERER'])
 
 def add_metadata_term(request, shortkey, *args, **kwargs):
     res, _, _ = authorize(request, shortkey, edit=True, full=True, superuser=True)
@@ -260,13 +225,6 @@ class FilterForm(forms.Form):
 def my_resources(request, page):
 #    if not request.user.is_authenticated():
 #        return HttpResponseRedirect('/accounts/login/')
-    # TODO: Pycharm remote debug code
-    import sys
-    sys.path.append("/home/docker/pycharm-debug")
-    import pydevd
-    pydevd.settrace('172.17.42.1', port=21000, suspend=False)
-    # End of Pycharm remote debug code
-
     frm = FilterForm(data=request.REQUEST)
     if frm.is_valid():
         res_cnt = 20 # 20 is hardcoded for the number of resources to show on one page, which is also hardcoded in my-resources.html
@@ -401,97 +359,8 @@ class CreateResourceForm(forms.Form):
 
 @login_required
 def create_resource(request, *args, **kwargs):
-    creator_formset = CreatorFormSet(request.POST or None, prefix='creator')
-    contributor_formset = ContributorFormSet(request.POST or None, prefix='contributor')
-    relation_formset = RelationFormSet(request.POST or None, prefix='relation')
-    source_formset = SourceFormSet(request.POST or None, prefix='source')
-    rights_form = RightsForm(request.POST or None)
-    language_form = LanguageForm(request.POST or None)
-    valid_date_form = ValidDateForm(request.POST or None)
-
-    if request.method == "GET":
-        #ext_md_layout = Layout(HTML('<h3>Testing extended metadata layout</h3>'))
-        ext_md_layout = None
-        metadata_form = MetaDataForm(extended_metadata_layout=ext_md_layout)
-        user = hydroshare.user_from_id(request.user)
-        if user.first_name:
-            first_creator_name = "{first_name} {last_name}".format(first_name=user.first_name, last_name=user.last_name)
-        else:
-            first_creator_name = user.username
-        first_creator_email = user.email
-
-        creator_formset = CreatorFormSet(initial=[{'name': first_creator_name, 'email': first_creator_email, 'order': 1}], prefix='creator')
-        contributor_formset = ContributorFormSet(prefix='contributor')
-        relation_formset = RelationFormSet(prefix='relation')
-
-        context = {'metadata_form': metadata_form, 'creator_formset': creator_formset,
-                   'creator_profilelink_formset': None,
-                   'contributor_formset': contributor_formset,
-                   'relation_formset': relation_formset,
-                   'source_formset': source_formset,
-                   'rights_form': rights_form,
-                   'language_form': language_form,
-                   'valid_date_form': valid_date_form,
-                   'extended_metadata_layout': ext_md_layout}
-
-        return render(request, 'pages/create-resource.html', context)
-
     frm = CreateResourceForm(request.POST)
-    # core metadata element formsets
-    index = 0
-    for form in creator_formset.forms:
-        form.profile_link_formset = ProfileLinksFormset(request.POST, prefix='creator_links-%s' % index)
-        index += 1
-
-    index = 0
-    for form in contributor_formset.forms:
-        form.profile_link_formset = ProfileLinksFormset(request.POST, prefix='contributor_links-%s' % index)
-        index += 1
-
-    rights_form = RightsValidationForm(request.POST)
-    valid_date_form = ValidDateValidationForm(request.POST)
-
-    if frm.is_valid() and creator_formset.is_valid() and \
-            contributor_formset.is_valid() and \
-            relation_formset.is_valid() and \
-            source_formset.is_valid() and \
-            rights_form.is_valid() and \
-            valid_date_form.is_valid():
-
-        core_metadata = []
-
-        # TODO: implement get_metadata() method in each metadata element form/formset
-        creator_metadata_dict_list = creator_formset.get_metadata()
-
-        for metadata_dict in creator_metadata_dict_list:
-            core_metadata.append(metadata_dict)
-
-        contributor_metadata_dict_list = contributor_formset.get_metadata()
-        for metadata_dict in contributor_metadata_dict_list:
-            core_metadata.append(metadata_dict)
-
-        relation_metadata_dict_list = relation_formset.get_metadata()
-        for metadata_dict in relation_metadata_dict_list:
-            core_metadata.append(metadata_dict)
-
-        source_metadata_dict_list = source_formset.get_metadata()
-        for metadata_dict in source_metadata_dict_list:
-            core_metadata.append(metadata_dict)
-
-        core_metadata.append(rights_form.get_metadata())
-
-        # valid date is optional
-        valid_date_metadata = valid_date_form.get_metadata()
-        if len(valid_date_metadata) > 0:
-            core_metadata.append(valid_date_metadata)
-
-        subjects = [k.strip() for k in frm.cleaned_data['keywords'].split(',')] if frm.cleaned_data['keywords'] else None
-        for subject_value in subjects:
-            core_metadata.append({'subject': {'value': subject_value}})
-
-        core_metadata.append({'title': {'value': frm.cleaned_data['title']}})
-        core_metadata.append({'description': {'abstract': frm.cleaned_data['abstract'] or frm.cleaned_data['title']}})
-
+    if frm.is_valid():
         dcterms = [
             { 'term': 'T', 'content': frm.cleaned_data['title'] },
             { 'term': 'AB',  'content': frm.cleaned_data['abstract'] or frm.cleaned_data['title']},
@@ -513,7 +382,6 @@ def create_resource(request, *args, **kwargs):
             title=frm.cleaned_data['title'],
             keywords=[k.strip() for k in frm.cleaned_data['keywords'].split(',')] if frm.cleaned_data['keywords'] else None, 
             dublin_metadata=dcterms,
-            metadata=core_metadata,
             files=request.FILES.getlist('files'),
             content=frm.cleaned_data['abstract'] or frm.cleaned_data['title']
         )
@@ -525,13 +393,7 @@ def create_resource(request, *args, **kwargs):
             }
             return render_to_response('pages/create-resource.html', context, context_instance=RequestContext(request))
     else:
-        ext_md_layout = None
-        metadata_form = MetaDataForm(extended_metadata_layout=ext_md_layout)
-        context = {'metadata_form': metadata_form, 'creator_formset': creator_formset,
-                   'creator_profilelink_formset': None,
-                   'contributor_formset': contributor_formset, 'extended_metadata_layout': ext_md_layout}
-        return render_to_response('pages/create-resource.html', context, context_instance=RequestContext(request))
-        #raise ValidationError(frm.errors)
+        raise ValidationError(frm.errors)
 
 @login_required
 def get_file(request, *args, **kwargs):
