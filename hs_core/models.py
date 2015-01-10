@@ -254,8 +254,7 @@ class Party(AbstractMetaDataElement):
                     cls._create_profile_link(party, link)
 
             for key, value in kwargs.iteritems():
-                if key in ('description', 'organization', 'email', 'address', 'phone', 'homepage', 'researcherID',
-                           'researchGateID'):
+                if key in ('description', 'organization', 'email', 'address', 'phone', 'homepage'):
                     setattr(party, key, value)
 
             party.save()
@@ -1325,7 +1324,7 @@ class AbstractResource(ResourcePermissionsMixin):
     )
     files = generic.GenericRelation('hs_core.ResourceFile', help_text='The files associated with this resource')
     bags = generic.GenericRelation('hs_core.Bags', help_text='The bagits created from versions of this resource')
-    short_id = models.CharField(max_length=32, default=short_id(), db_index=True)
+    short_id = models.CharField(max_length=32, default=short_id, db_index=True)
     doi = models.CharField(max_length=1024, blank=True, null=True, db_index=True,
                            help_text='Permanent identifier. Never changes once it\'s been set.')
     comments = CommentsField()
@@ -1822,6 +1821,6 @@ def user_creation_signal_handler(sender, instance, created, **kwargs):
             instance.save()
             instance.groups.add(Group.objects.get(name='Hydroshare Author'))
 
-
+import receivers
 
 

@@ -1080,7 +1080,8 @@ class LanguageForm(ModelForm):
     def __init__(self, res_short_id=None, element_id=None, *args, **kwargs):
         super(LanguageForm, self).__init__(*args, **kwargs)
         self.helper = LanguageFormHelper(res_short_id, element_id, element_name='language')
-        self.initial['code'] = 'eng'
+        if len(self.initial) == 0:
+            self.initial['code'] = 'eng'
 
     class Meta:
         model = Language
