@@ -11,6 +11,7 @@ from django.core.exceptions import ObjectDoesNotExist, ValidationError
 
 
 class GeogFeature(Page, AbstractResource):
+
     class Meta:
                 verbose_name = "Geographic Feature Resource"
 
@@ -128,3 +129,4 @@ class GeogFeatureMetaData(CoreMetaData):
             hsterms_value.text = positional_accuracy.value
 
         return etree.tostring(RDF_ROOT, pretty_print=True)
+
