@@ -276,7 +276,8 @@ INSTALLED_APPS = (
     "django_docker_processes",
     "hs_geo_raster_resource",
     "djcelery",
-    "ref_ts"
+    "ref_ts",
+    "geog_feature"
 )
 
 # List of processors used by RequestContext to populate the context.

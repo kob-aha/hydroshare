@@ -1,3 +1,5 @@
+from mezzanine.pages.admin import PageAdmin
 from django.contrib import admin
+from .models import GeogFeature
 
-# Register your models here.
+admin.register(GeogFeature, PageAdmin)
