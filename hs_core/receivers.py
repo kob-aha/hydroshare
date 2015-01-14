@@ -27,6 +27,11 @@ def metadata_element_pre_create_handler(sender, **kwargs):
         element_form = LanguageValidationForm(request.POST)
     elif element_name == 'date':
         element_form = ValidDateValidationForm(request.POST)
+    elif element_name == 'coverage':
+        if 'type' in request.POST:
+            element_form = CoverageSpatialForm(data=request.POST)
+        else:
+            element_form = CoverageTemporalForm(data=request.POST)
 
     if element_form.is_valid():
         return {'is_valid': True, 'element_data_dict': element_form.cleaned_data}
@@ -39,7 +44,9 @@ def metadata_element_pre_update_handler(sender, **kwargs):
     element_name = kwargs['element_name'].lower()
     element_id = kwargs['element_id']
     request = kwargs['request']
-    if element_name == "creator":
+    if element_name == 'title':
+        element_form = TitleValidationForm(request.POST)
+    elif element_name == "creator":
         # since creator is a repeatable element and creator data is displayed on the landing page
         # using formset, the data coming from a single creator form in the request for update
         # needs to be parsed to match with creator field names
@@ -86,6 +93,11 @@ def metadata_element_pre_update_handler(sender, **kwargs):
         element_form = LanguageValidationForm(request.POST)
     elif element_name == 'date':
         element_form = ValidDateValidationForm(request.POST)
+    elif element_name == 'coverage':
+        if 'type' in request.POST:
+            element_form = CoverageSpatialForm(data=request.POST)
+        else:
+            element_form = CoverageTemporalForm(data=request.POST)
 
     if element_form.is_valid():
         return {'is_valid': True, 'element_data_dict': element_form.cleaned_data}

@@ -489,6 +489,9 @@ class Title(AbstractMetaDataElement):
             if 'value' in kwargs:
                 title.value = kwargs['value']
                 title.save()
+                res = title.content_object.resource
+                res.title = title.value
+                res.save()
             else:
                 raise ValidationError('Value for title is missing.')
         else:
@@ -1040,37 +1043,55 @@ class Coverage(AbstractMetaDataElement):
                             raise ValidationError('Coverage value is missing.')
 
                         changing_coverage_type = True
+            else:
+                raise ValidationError("Type of coverage element is missing.")
 
             if 'value' in kwargs:
                 if not isinstance(kwargs['value'], dict):
                     raise ValidationError('Invalid coverage value format.')
 
                 if changing_coverage_type:
-                    value_dict = {}
+                    #value_dict = {}
                     cov.type = kwargs['type']
-                else:
-                    value_dict = cov.value
+                # else:
+                #     value_dict = cov.value
 
-                if 'name' in kwargs['value']:
-                    value_dict['name'] = kwargs['value']['name']
+                cls._validate_coverage_type_value_attributes(kwargs['type'], kwargs['value'])
 
-                if cov.type == 'period':
-                    for item_name in ('start', 'end'):
-                        if item_name in kwargs['value']:
-                            value_dict[item_name] = kwargs['value'][item_name]
-                elif cov.type == 'point':
-                    for item_name in ('east', 'north', 'units', 'elevation', 'zunits', 'projection'):
-                        if item_name in kwargs['value']:
-                            value_dict[item_name] = kwargs['value'][item_name]
-                elif cov.type == 'box':
-                    for item_name in ('units', 'northlimit', 'eastlimit', 'southlimit', 'westlimit', 'uplimit',
-                                      'downlimit', 'zunits', 'projection'):
-                        if item_name in kwargs['value']:
-                            value_dict[item_name] = kwargs['value'][item_name]
+                if kwargs['type'] == 'period':
+                    value_dict = {k: v for k, v in kwargs['value'].iteritems() if k in ('name', 'start', 'end')}
+                elif kwargs['type'] == 'point':
+                    value_dict = {k: v for k, v in kwargs['value'].iteritems()
+                                  if k in ('name', 'east', 'north', 'units', 'elevation', 'zunits', 'projection')}
+                elif kwargs['type'] == 'box':
+                    value_dict = {k: v for k, v in kwargs['value'].iteritems()
+                                  if k in ('units', 'northlimit', 'eastlimit', 'southlimit', 'westlimit', 'name',
+                                           'uplimit', 'downlimit', 'zunits', 'projection')}
+
+                # TODO: remove these commented code
+                # if 'name' in kwargs['value']:
+                #     value_dict['name'] = kwargs['value']['name']
+                #
+                # if cov.type == 'period':
+                #     for item_name in ('start', 'end'):
+                #         if item_name in kwargs['value']:
+                #             value_dict[item_name] = kwargs['value'][item_name]
+                # elif cov.type == 'point':
+                #     for item_name in ('east', 'north', 'units', 'elevation', 'zunits', 'projection'):
+                #         if item_name in kwargs['value']:
+                #             value_dict[item_name] = kwargs['value'][item_name]
+                # elif cov.type == 'box':
+                #     for item_name in ('units', 'northlimit', 'eastlimit', 'southlimit', 'westlimit', 'uplimit',
+                #                       'downlimit', 'zunits', 'projection'):
+                #         if item_name in kwargs['value']:
+                #             value_dict[item_name] = kwargs['value'][item_name]
 
                 value_json = json.dumps(value_dict)
                 cov._value = value_json
-            cov.save()
+                cov.save()
+            else:
+                raise ValidationError('Coverage value is missing.')
+
         else:
             raise ObjectDoesNotExist("No coverage element was found for the provided id:%s" % element_id)
 
@@ -1516,6 +1537,7 @@ class CoreMetaData(models.Model):
         rdf_Description = etree.SubElement(RDF_ROOT, '{%s}Description' % self.NAMESPACES['rdf'])
 
         resource_uri = self.HYDROSHARE_URL + '/resource/' + self.resource.short_id
+        resource_uri = self.identifiers.all().filter(name='hydroShareIdentifier')[0].url
         rdf_Description.set('{%s}about' % self.NAMESPACES['rdf'], resource_uri)
 
         # create the title element
@@ -1792,7 +1814,7 @@ def resource_creation_signal_handler(sender, instance, created, **kwargs):
 
             # res_json = utils.serialize_science_metadata(instance)
             # res_dict = json.loads(res_json)
-            instance.metadata.create_element('identifier', name='hydroShareIdentifier', url='http://hydroshare.org/resource{0}{1}'.format('/', instance.short_id))
+            #instance.metadata.create_element('identifier', name='hydroShareIdentifier', url='http://hydroshare.org/resource{0}{1}'.format('/', instance.short_id))
 
         else:
             resource_update_signal_handler(sender, instance, created, **kwargs)
@@ -1821,6 +1843,6 @@ def user_creation_signal_handler(sender, instance, created, **kwargs):
             instance.save()
             instance.groups.add(Group.objects.get(name='Hydroshare Author'))
 
-import receivers
+
 
 import receivers

@@ -1,13 +1,22 @@
+import copy
+
 __author__ = 'pabitra'
 
 
 from models import *
-from django.forms import ModelForm, BaseFormSet, DateInput, Select
+from django.forms import ModelForm, BaseFormSet, DateInput, Select, TextInput
 from django.forms.models import inlineformset_factory, modelformset_factory, formset_factory
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Fieldset, ButtonHolder, Submit, HTML
 from crispy_forms.bootstrap import *
+import arrow
 from django.forms.extras.widgets import SelectDateWidget
+from django.utils.safestring import mark_safe
+
+
+class HorizontalRadioRenderer(forms.RadioSelect.renderer):
+    def render(self):
+        return mark_safe(u'\n'.join([u'%s\n' % w for w in self]))
 
 ModalDialogLayoutAddCreator = Layout(
                             HTML('<div class="modal fade" id="add-creator-dialog" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">'
@@ -402,9 +411,14 @@ class MetaDataForm(forms.Form):
             layout = Layout(
                 TabHolder(
                     Tab("Core Metadata",
-                        HTML('<div class="form-group">'
-                             '<label for="" control-label">Title</label>'
-                             '<input type="text" class="form-control input-sm" name="title" id="" placeholder="Title" value="{{ title }}">'
+                        # HTML('<div class="form-group">'
+                        #      '<label for="" control-label">Title</label>'
+                        #      '<input type="text" class="form-control input-sm" name="title" id="" placeholder="Title" value="{{ title }}">'
+                        #      '</div>'),
+
+                        HTML('<div class="form-group" id="title"> '
+                                '{% load crispy_forms_tags %} '
+                                '{% crispy title_form %} '
                              '</div>'),
 
                         HTML('<div class="form-group">'
@@ -414,7 +428,7 @@ class MetaDataForm(forms.Form):
 
                         HTML('<div class="form-group">'
                              '<label for="" control-label">Keywords</label>'
-                             '<input type="text" class="form-control" id="" name="keywords" placeholder="Keywords">'
+                             '<input type="text" class="form-control" id="" name="keywords" placeholder="Keywords" >'
                              '</div>'),
                         Accordion(
                             AccordionGroup('Rights (required)',
@@ -460,6 +474,18 @@ class MetaDataForm(forms.Form):
                                         '{% crispy valid_date_form %} '
                                      '</div>'),
                             ),
+                            AccordionGroup('Temporal Coverage (required)',
+                                HTML('<div class="form-group" id="coverage-temporal"> '
+                                        '{% load crispy_forms_tags %} '
+                                        '{% crispy coverage_temporal_form %} '
+                                     '</div>'),
+                            ),
+                            AccordionGroup('Spatial Coverage (required)',
+                                HTML('<div class="form-group" id="coverage-spatial"> '
+                                        '{% load crispy_forms_tags %} '
+                                        '{% crispy coverage_spatial_form %} '
+                                     '</div>'),
+                            ),
                         ),
                     ),
 
@@ -477,9 +503,14 @@ class MetaDataForm(forms.Form):
             layout = Layout(
                 TabHolder(
                     Tab("Core Metadata",
-                        HTML('<div class="form-group">'
-                             '<label for="" control-label">Title</label>'
-                             '<input type="text" class="form-control input-sm" name="title" id="" placeholder="Title" value="{{ title }}">'
+                        # HTML('<div class="form-group">'
+                        #      '<label for="" control-label">Title</label>'
+                        #      '<input type="text" class="form-control input-sm" name="title" id="" placeholder="Title" value="{{ title }}">'
+                        #      '</div>'),
+
+                        HTML('<div class="form-group" id="title"> '
+                                '{% load crispy_forms_tags %} '
+                                '{% crispy title_form %} '
                              '</div>'),
 
                         HTML('<div class="form-group">'
@@ -489,7 +520,7 @@ class MetaDataForm(forms.Form):
 
                         HTML('<div class="form-group">'
                              '<label for="" control-label">Keywords</label>'
-                             '<input type="text" class="form-control" id="" name="keywords" placeholder="Keywords">'
+                             '<input type="text" class="form-control" id="" name="keywords" placeholder="Keywords" value="{{ keywords }}">'
                              '</div>'),
                         Accordion(
                             AccordionGroup('Rights (required)',
@@ -546,6 +577,18 @@ class MetaDataForm(forms.Form):
                                 HTML("{{ format_formset.management_form }}"),
                                 format_layout,
                                 HTML("</div>"),
+                            ),
+                            AccordionGroup('Temporal Coverage (required)',
+                                HTML('<div class="form-group" id="coverage-temporal"> '
+                                        '{% load crispy_forms_tags %} '
+                                        '{% crispy coverage_temporal_form %} '
+                                     '</div>'),
+                            ),
+                            AccordionGroup('Spatial Coverage (required)',
+                                HTML('<div class="form-group" id="coverage-spatial"> '
+                                        '{% load crispy_forms_tags %} '
+                                        '{% crispy coverage_spatial_form %} '
+                                     '</div>'),
                             ),
                         ),
                     ),
@@ -755,15 +798,6 @@ class ContributorForm(PartyForm):
 
 
 class BaseContributorFormSet(BaseFormSet):
-
-    # def clean(self):
-    #     super(BaseContributorFormSet, self).clean()
-    #     form_counter = 0
-    #     for form in self.forms:
-    #         if not form.is_valid() and len(form.cleaned_data) == 0:
-    #             del self.errors[form_counter]
-    #         form_counter +=1
-
     def add_fields(self, form, index):
         super(BaseContributorFormSet, self).add_fields(form, index)
 
@@ -841,7 +875,6 @@ class RelationValidationForm(forms.Form):
     value = forms.CharField(max_length=500)
 
 RelationFormSet = formset_factory(RelationForm, formset=BaseRelationFormSet)
-
 
 class SourceFormSetHelper(FormHelper):
     def __init__(self, *args, **kwargs):
@@ -1031,6 +1064,34 @@ class BaseFormHelper(FormHelper):
                             ),
                           )
 
+class TitleFormHelper(BaseFormHelper):
+    def __init__(self, res_short_id=None, element_id=None, element_name=None,  *args, **kwargs):
+
+        # the order in which the model fields are listed for the FieldSet is the order these fields will be displayed
+        field_width = 'form-control input-sm'
+        layout = Layout(
+                        Field('value', css_class=field_width),
+                 )
+
+        super(TitleFormHelper, self).__init__(res_short_id, element_id, element_name, layout,  *args, **kwargs)
+
+
+class TitleForm(ModelForm):
+    def __init__(self, res_short_id=None, element_id=None, *args, **kwargs):
+        super(TitleForm, self).__init__(*args, **kwargs)
+        self.helper = TitleFormHelper(res_short_id, element_id, element_name='title')
+
+    class Meta:
+        model = Title
+        fields = ['value']
+        exclude = ['content_object']
+        labels = {'value': ''}
+
+class TitleValidationForm(forms.Form):
+    value = forms.CharField(max_length=300)
+
+    def get_metadata(self):
+        return {'title': self.cleaned_data}
 
 class RightsFormHelper(BaseFormHelper):
     def __init__(self, res_short_id=None, element_id=None, element_name=None,  *args, **kwargs):
@@ -1062,6 +1123,270 @@ class RightsValidationForm(forms.Form):
 
     def get_metadata(self):
         return {'rights': self.cleaned_data}
+
+
+class CoverageTemporalFormHelper(BaseFormHelper):
+    def __init__(self, res_short_id=None, element_id=None, element_name=None,  *args, **kwargs):
+
+        # the order in which the model fields are listed for the FieldSet is the order these fields will be displayed
+        field_width = 'form-control input-sm'
+        layout = Layout(
+                        Field('type', css_class=field_width),
+                        Field('name', css_class=field_width),
+                        Field('start', css_class=field_width),
+                        Field('end', css_class=field_width),
+                 )
+
+        super(CoverageTemporalFormHelper, self).__init__(res_short_id, element_id, element_name, layout,  *args, **kwargs)
+
+class CoverageTemporalForm(forms.Form):
+    name = forms.CharField(max_length=200, required=False, label='Place/Area Name')
+    start = forms.DateField()
+    end = forms.DateField()
+
+    def __init__(self, res_short_id=None, element_id=None, *args, **kwargs):
+        # self.name = kwargs.pop('name', None)
+        # self.start = kwargs.pop('start', None)
+        # self.end = kwargs.pop('end', None)
+
+        super(CoverageTemporalForm, self).__init__(*args, **kwargs)
+        self.helper = CoverageTemporalFormHelper(res_short_id, element_id, element_name='coverage')
+        self.number = 0
+        self.delete_modal_form = None
+        if res_short_id:
+            self.action = "/hsapi/_internal/%s/coverage/add-metadata/" % res_short_id
+        else:
+            self.action = ""
+
+    #type = forms.CharField(max_length=20)
+    def clean(self):
+        # modify the form's cleaned_data dictionary
+        is_form_errors = False
+        super(CoverageTemporalForm, self).clean()
+        start_data = self.cleaned_data.get('start', None)
+        end_data = self.cleaned_data.get('end', None)
+        if not start_data:
+            self._errors['start'] = ["Data for start date is missing"]
+            is_form_errors = True
+
+        if not end_data:
+            self._errors['end'] = ["Data for end date is missing"]
+            is_form_errors = True
+
+        if is_form_errors:
+            return self.cleaned_data
+
+        if 'name' in self.cleaned_data:
+            if len(self.cleaned_data['name']) == 0:
+                del self.cleaned_data['name']
+
+        self.cleaned_data['start'] = self.cleaned_data['start'].strftime('%m/%d/%Y')
+        self.cleaned_data['end'] = self.cleaned_data['end'].strftime('%m/%d/%Y')
+        self.cleaned_data['value'] = copy.deepcopy(self.cleaned_data)
+        self.cleaned_data['type'] = 'period'
+        if 'name' in self.cleaned_data:
+            del self.cleaned_data['name']
+        del self.cleaned_data['start']
+        del self.cleaned_data['end']
+
+        return self.cleaned_data
+
+    def get_metadata(self):
+        return {'coverage': self.cleaned_data}
+
+
+class CoverageSpatialFormHelper(BaseFormHelper):
+    def __init__(self, res_short_id=None, element_id=None, element_name=None,  *args, **kwargs):
+
+        # the order in which the model fields are listed for the FieldSet is the order these fields will be displayed
+        field_width = 'form-control input-sm'
+        layout = Layout(
+                        Field('type'),
+                        Field('name', css_class=field_width),
+                        Field('east', css_class=field_width),
+                        Field('north', css_class=field_width),
+                        Field('northlimit', css_class=field_width),
+                        Field('eastlimit', css_class=field_width),
+                        Field('southlimit', css_class=field_width),
+                        Field('westlimit', css_class=field_width),
+                        Field('units', css_class=field_width),
+                        Field('uplimit', css_class=field_width),
+                        Field('downlimit', css_class=field_width),
+                        Field('elevation', css_class=field_width),
+                        Field('zunits', css_class=field_width),
+                        Field('projection', css_class=field_width),
+                 )
+
+        super(CoverageSpatialFormHelper, self).__init__(res_short_id, element_id, element_name, layout,  *args, **kwargs)
+
+class CoverageSpatialForm(forms.Form):
+    TYPE_CHOICES = (
+        ('box', 'Box'),
+        ('point', 'Point')
+    )
+    #type = forms.CharField(max_length=20, widget=Select(choices=TYPE_CHOICES, attrs={'class': 'select'}))
+    type = forms.ChoiceField(choices=TYPE_CHOICES, widget=forms.RadioSelect(renderer=HorizontalRadioRenderer))
+    name = forms.CharField(max_length=200, required=False, label='Place/Area Name')
+    east = forms.DecimalField()
+    north = forms.DecimalField()
+    units = forms.CharField(max_length=50)
+    elevation = forms.DecimalField(required=False)
+    zunits = forms.CharField(max_length=50, required=False)
+    projection = forms.CharField(max_length=100, required=False)
+    northlimit = forms.DecimalField()
+    eastlimit = forms.DecimalField()
+    southlimit = forms.DecimalField()
+    westlimit = forms.DecimalField()
+    uplimit = forms.DecimalField(required=False)
+    downlimit = forms.DecimalField(required=False)
+
+    def __init__(self, res_short_id=None, element_id=None, *args, **kwargs):
+        # self.name = kwargs.pop('name', None)
+        # self.start = kwargs.pop('start', None)
+        # self.end = kwargs.pop('end', None)
+
+        super(CoverageSpatialForm, self).__init__(*args, **kwargs)
+        self.helper = CoverageSpatialFormHelper(res_short_id, element_id, element_name='coverage')
+        self.number = 0
+        self.delete_modal_form = None
+        self.errors.clear()
+        if res_short_id:
+            self.action = "/hsapi/_internal/%s/coverage/add-metadata/" % res_short_id
+        else:
+            self.action = ""
+
+    #type = forms.CharField(max_length=20)
+    def clean(self):
+        # modify the form's cleaned_data dictionary
+        super(CoverageSpatialForm, self).clean()
+        temp_cleaned_data = copy.deepcopy(self.cleaned_data)
+        spatial_coverage_type = temp_cleaned_data['type']
+        is_form_errors = False
+        if spatial_coverage_type == 'point':
+            north = temp_cleaned_data.get('north', None)
+            east = temp_cleaned_data.get('east', None)
+            if not north:
+                self._errors['north'] = ["Data for north is missing"]
+                is_form_errors = True
+
+            if not east:
+                self._errors['east'] = ["Data for east is missing"]
+                is_form_errors = True
+
+            if is_form_errors:
+                return self.cleaned_data
+
+            if 'northlimit' in temp_cleaned_data:
+                del temp_cleaned_data['northlimit']
+            if 'eastlimit' in self.cleaned_data:
+                del temp_cleaned_data['eastlimit']
+            if 'southlimit' in temp_cleaned_data:
+                del temp_cleaned_data['southlimit']
+            if 'westlimit' in temp_cleaned_data:
+                del temp_cleaned_data['westlimit']
+            if 'uplimit' in temp_cleaned_data:
+                del temp_cleaned_data['uplimit']
+            if 'downlimit' in temp_cleaned_data:
+                del temp_cleaned_data['downlimit']
+
+            temp_cleaned_data['north'] = str(temp_cleaned_data['north'])
+            temp_cleaned_data['east'] = str(temp_cleaned_data['east'])
+            if temp_cleaned_data['elevation'] is not None:
+                temp_cleaned_data['elevation'] = str(temp_cleaned_data['elevation'])
+            else:
+                del temp_cleaned_data['zunits']
+                del temp_cleaned_data['elevation']
+        else:   # box type coverage
+            if 'north' in temp_cleaned_data:
+                del temp_cleaned_data['north']
+            if 'east' in temp_cleaned_data:
+                del temp_cleaned_data['east']
+            if 'elevation' in temp_cleaned_data:
+                del temp_cleaned_data['elevation']
+
+            for limit in ('northlimit', 'eastlimit', 'southlimit', 'westlimit'):
+                limit_data = temp_cleaned_data.get(limit, None)
+                if not limit_data:
+                    self._errors[limit] = ["Data for %s is missing" % limit]
+                    is_form_errors = True
+
+            uplimit = temp_cleaned_data.get('uplimit', None)
+            downlimit = temp_cleaned_data.get('downlimit', None)
+
+            if uplimit and not downlimit:
+                self._errors['downlimit'] = ["Data for downlimit is missing"]
+                is_form_errors = True
+
+            if downlimit and not uplimit:
+                self._errors['uplimit'] = ["Data for uplimit is missing"]
+                is_form_errors = True
+
+            if is_form_errors:
+                return self.cleaned_data
+
+            temp_cleaned_data['northlimit'] = str(temp_cleaned_data['northlimit'])
+            temp_cleaned_data['eastlimit'] = str(temp_cleaned_data['eastlimit'])
+            temp_cleaned_data['southlimit'] = str(temp_cleaned_data['southlimit'])
+            temp_cleaned_data['westlimit'] = str(temp_cleaned_data['westlimit'])
+            if temp_cleaned_data['uplimit'] is not None:
+                temp_cleaned_data['uplimit'] = str(temp_cleaned_data['uplimit'])
+            else:
+                del temp_cleaned_data['uplimit']
+
+            if temp_cleaned_data['downlimit'] is not None:
+                temp_cleaned_data['downlimit'] = str(temp_cleaned_data['downlimit'])
+            else:
+                del temp_cleaned_data['downlimit']
+
+            if 'uplimit' not in temp_cleaned_data and 'downlimit' not in temp_cleaned_data:
+                del temp_cleaned_data['zunits']
+
+        del temp_cleaned_data['type']
+        if 'projection' in temp_cleaned_data:
+            if len(temp_cleaned_data['projection']) == 0:
+                del temp_cleaned_data['projection']
+
+        if 'name' in temp_cleaned_data:
+            if len(temp_cleaned_data['name']) == 0:
+                del temp_cleaned_data['name']
+
+        self.cleaned_data['value'] = copy.deepcopy(temp_cleaned_data)
+
+        if 'northlimit' in self.cleaned_data:
+                del self.cleaned_data['northlimit']
+        if 'eastlimit' in self.cleaned_data:
+                del self.cleaned_data['eastlimit']
+        if 'southlimit' in self.cleaned_data:
+            del self.cleaned_data['southlimit']
+        if 'westlimit' in self.cleaned_data:
+            del self.cleaned_data['westlimit']
+        if 'uplimit' in self.cleaned_data:
+            del self.cleaned_data['uplimit']
+        if 'downlimit' in self.cleaned_data:
+            del self.cleaned_data['downlimit']
+        if 'north' in self.cleaned_data:
+             del self.cleaned_data['north']
+        if 'east' in self.cleaned_data:
+            del self.cleaned_data['east']
+        if 'elevation' in self.cleaned_data:
+            del self.cleaned_data['elevation']
+
+        if 'name' in self.cleaned_data:
+            del self.cleaned_data['name']
+
+        if 'units' in self.cleaned_data:
+            del self.cleaned_data['units']
+
+        if 'zunits' in self.cleaned_data:
+            del self.cleaned_data['zunits']
+
+        if 'projection' in self.cleaned_data:
+            del self.cleaned_data['projection']
+
+        return self.cleaned_data
+
+    def get_metadata(self):
+        return {'coverage': self.cleaned_data}
 
 
 class LanguageFormHelper(BaseFormHelper):

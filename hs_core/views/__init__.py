@@ -270,7 +270,7 @@ class FilterForm(forms.Form):
 def my_resources(request, page):
 #    if not request.user.is_authenticated():
 #        return HttpResponseRedirect('/accounts/login/')
-    # TODO: Pycharm remote debug code
+    # TODO: Pycharm remote debug code needs to be removed before making a pull request
     import sys
     sys.path.append("/home/docker/pycharm-debug")
     import pydevd
@@ -403,7 +403,7 @@ def add_dublin_core(request, page):
     }
 
 class CreateResourceForm(forms.Form):
-    title = forms.CharField(required=True)
+    #title = forms.CharField(required=True)
     creators = forms.CharField(required=False, min_length=0)
     contributors = forms.CharField(required=False, min_length=0)
     abstract = forms.CharField(required=False, min_length=0)
@@ -415,9 +415,12 @@ def create_resource(request, *args, **kwargs):
     contributor_formset = ContributorFormSet(request.POST or None, prefix='contributor')
     relation_formset = RelationFormSet(request.POST or None, prefix='relation')
     source_formset = SourceFormSet(request.POST or None, prefix='source')
+    title_form = TitleForm(request.POST or None)
     rights_form = RightsForm(request.POST or None)
     language_form = LanguageForm(request.POST or None)
     valid_date_form = ValidDateForm(request.POST or None)
+    coverage_temporal_form = CoverageTemporalForm(data=request.POST or None)
+    coverage_spatial_form = CoverageSpatialForm(data=request.POST or {'type': 'point'}) # {'type': 'point'}
 
     if request.method == "GET":
         #ext_md_layout = Layout(HTML('<h3>Testing extended metadata layout</h3>'))
@@ -434,7 +437,9 @@ def create_resource(request, *args, **kwargs):
         contributor_formset = ContributorFormSet(prefix='contributor')
         relation_formset = RelationFormSet(prefix='relation')
 
-        context = {'metadata_form': metadata_form, 'creator_formset': creator_formset,
+        context = {'metadata_form': metadata_form,
+                   'title_form': title_form,
+                   'creator_formset': creator_formset,
                    'creator_profilelink_formset': None,
                    'contributor_formset': contributor_formset,
                    'relation_formset': relation_formset,
@@ -442,6 +447,8 @@ def create_resource(request, *args, **kwargs):
                    'rights_form': rights_form,
                    'language_form': language_form,
                    'valid_date_form': valid_date_form,
+                   'coverage_temporal_form': coverage_temporal_form,
+                   'coverage_spatial_form': coverage_spatial_form,
                    'extended_metadata_layout': ext_md_layout}
 
         return render(request, 'pages/create-resource.html', context)
@@ -458,15 +465,20 @@ def create_resource(request, *args, **kwargs):
         form.profile_link_formset = ProfileLinksFormset(request.POST, prefix='contributor_links-%s' % index)
         index += 1
 
+    title_form = TitleValidationForm(request.POST)
     rights_form = RightsValidationForm(request.POST)
     valid_date_form = ValidDateValidationForm(request.POST)
 
-    if frm.is_valid() and creator_formset.is_valid() and \
+    if frm.is_valid() and \
+            title_form.is_valid() and \
+            creator_formset.is_valid() and \
             contributor_formset.is_valid() and \
             relation_formset.is_valid() and \
             source_formset.is_valid() and \
             rights_form.is_valid() and \
-            valid_date_form.is_valid():
+            valid_date_form.is_valid() and \
+            coverage_temporal_form.is_valid() and \
+            coverage_spatial_form.is_valid():
 
         core_metadata = []
 
@@ -495,15 +507,24 @@ def create_resource(request, *args, **kwargs):
         if len(valid_date_metadata) > 0:
             core_metadata.append(valid_date_metadata)
 
+        coverage_temporal_metadata = coverage_temporal_form.get_metadata()
+        if len(coverage_temporal_metadata) > 0:
+            core_metadata.append(coverage_temporal_metadata)
+
+        coverage_spatial_metadata = coverage_spatial_form.get_metadata()
+        if len(coverage_spatial_metadata) > 0:
+            core_metadata.append(coverage_spatial_metadata)
+
         subjects = [k.strip() for k in frm.cleaned_data['keywords'].split(',')] if frm.cleaned_data['keywords'] else None
         for subject_value in subjects:
             core_metadata.append({'subject': {'value': subject_value}})
 
-        core_metadata.append({'title': {'value': frm.cleaned_data['title']}})
+        #core_metadata.append({'title': {'value': frm.cleaned_data['title']}})
+        core_metadata.append({'title': {'value': title_form.cleaned_data['value']}})
         core_metadata.append({'description': {'abstract': frm.cleaned_data['abstract'] or frm.cleaned_data['title']}})
 
         dcterms = [
-            { 'term': 'T', 'content': frm.cleaned_data['title'] },
+            { 'term': 'T', 'content': title_form.cleaned_data['value'] },
             { 'term': 'AB',  'content': frm.cleaned_data['abstract'] or frm.cleaned_data['title']},
             { 'term': 'DT', 'content': now().isoformat()},
             { 'term': 'DC', 'content': now().isoformat()}
@@ -520,7 +541,7 @@ def create_resource(request, *args, **kwargs):
         res = hydroshare.create_resource(
             resource_type=request.POST['resource-type'],
             owner=request.user,
-            title=frm.cleaned_data['title'],
+            title=title_form.cleaned_data['value'],  #frm.cleaned_data['title'],
             keywords=[k.strip() for k in frm.cleaned_data['keywords'].split(',')] if frm.cleaned_data['keywords'] else None, 
             dublin_metadata=dcterms,
             metadata=core_metadata,
@@ -528,6 +549,8 @@ def create_resource(request, *args, **kwargs):
             content=frm.cleaned_data['abstract'] or frm.cleaned_data['title']
         )
         if res is not None:
+            #res.metadata.create_element('identifier', name='hydroShareIdentifier', url=request.build_absolute_uri())
+            res.metadata.create_element('identifier', name='hydroShareIdentifier', url='{0}/resource{1}{2}'.format(current_site_url(), '/', res.short_id))
             return HttpResponseRedirect(res.get_absolute_url())
         else:
             context = {
@@ -537,11 +560,32 @@ def create_resource(request, *args, **kwargs):
     else:
         ext_md_layout = None
         metadata_form = MetaDataForm(extended_metadata_layout=ext_md_layout)
-        context = {'metadata_form': metadata_form, 'creator_formset': creator_formset,
+        context = {'metadata_form': metadata_form,
+                   'title_form': title_form,
+                   'creator_formset': creator_formset,
                    'creator_profilelink_formset': None,
-                   'contributor_formset': contributor_formset, 'extended_metadata_layout': ext_md_layout}
+                   'contributor_formset': contributor_formset,
+                   'relation_formset': relation_formset,
+                   'source_formset': source_formset,
+                   'rights_form': rights_form,
+                   'language_form': language_form,
+                   'valid_date_form': valid_date_form,
+                   'coverage_temporal_form': coverage_temporal_form,
+                   'coverage_spatial_form': coverage_spatial_form,
+                   'extended_metadata_layout': ext_md_layout}
         return render_to_response('pages/create-resource.html', context, context_instance=RequestContext(request))
         #raise ValidationError(frm.errors)
+
+def current_site_url():
+    """Returns fully qualified URL (no trailing slash) for the current site."""
+    from django.contrib.sites.models import Site
+    current_site = Site.objects.get_current()
+    protocol = getattr(settings, 'MY_SITE_PROTOCOL', 'http')
+    port     = getattr(settings, 'MY_SITE_PORT', '')
+    url = '%s://%s' % (protocol, current_site.domain)
+    if port:
+        url += ':%s' % port
+    return url
 
 @login_required
 def get_file(request, *args, **kwargs):

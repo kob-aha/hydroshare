@@ -17,6 +17,10 @@ def get_page_context(page, extended_metadata_layout=None):
     add_relation_modal_form = RelationForm(res_short_id=content_model.short_id)
     add_source_modal_form = SourceForm(res_short_id=content_model.short_id)
 
+    title_form = TitleForm(instance=content_model.metadata.title, res_short_id=content_model.short_id,
+                             element_id=content_model.metadata.title.id if content_model.metadata.title else None)
+
+    subjects = ",".join([sub.value for sub in content_model.metadata.subjects.all()])
     CreatorFormSetEdit = formset_factory(CreatorForm, formset=BaseCreatorFormSet, extra=0)
     creator_formset = CreatorFormSetEdit(initial=content_model.metadata.creators.all().values(), prefix='creator')
     index = 0
@@ -89,9 +93,52 @@ def get_page_context(page, extended_metadata_layout=None):
     valid_date_form = ValidDateForm(instance=valid_date, res_short_id=content_model.short_id,
                              element_id=valid_date.id if valid_date else None)
 
+    temporal_coverages = content_model.metadata.coverages.all().filter(type='period')
+    temporal_coverage_data_dict = {}
+    if len(temporal_coverages) > 0:
+        temporal_coverage = temporal_coverages[0]
+        temporal_coverage_data_dict['start'] = temporal_coverage.value['start']
+        temporal_coverage_data_dict['end'] = temporal_coverage.value['end']
+        temporal_coverage_data_dict['name'] = temporal_coverage.value['name']
+    else:
+        temporal_coverage = None
+
+    coverage_temporal_form = CoverageTemporalForm(initial= temporal_coverage_data_dict,
+                                                  res_short_id=content_model.short_id,
+                                                  element_id=temporal_coverage.id if temporal_coverage else None)
+
+
+    spatial_coverages = content_model.metadata.coverages.all().exclude(type='period')
+    spatial_coverage_data_dict = {}
+    if len(spatial_coverages) > 0:
+        spatial_coverage = spatial_coverages[0]
+        spatial_coverage_data_dict['name'] = spatial_coverage.value.get('name', None)
+        spatial_coverage_data_dict['units'] = spatial_coverage.value['units']
+        spatial_coverage_data_dict['zunits'] = spatial_coverage.value.get('zunits', None)
+        spatial_coverage_data_dict['projection'] = spatial_coverage.value.get('projection', None)
+        spatial_coverage_data_dict['type'] = spatial_coverage.type
+        if spatial_coverage.type == 'point':
+            spatial_coverage_data_dict['east'] = spatial_coverage.value['east']
+            spatial_coverage_data_dict['north'] = spatial_coverage.value['north']
+            spatial_coverage_data_dict['elevation'] = spatial_coverage.value.get('elevation', None)
+        else:
+            spatial_coverage_data_dict['northlimit'] = spatial_coverage.value['northlimit']
+            spatial_coverage_data_dict['eastlimit'] = spatial_coverage.value['eastlimit']
+            spatial_coverage_data_dict['southlimit'] = spatial_coverage.value['southlimit']
+            spatial_coverage_data_dict['westlimit'] = spatial_coverage.value['westlimit']
+            spatial_coverage_data_dict['uplimit'] = spatial_coverage.value.get('uplimit', None)
+            spatial_coverage_data_dict['downlimit'] = spatial_coverage.value.get('downlimit', None)
+    else:
+        spatial_coverage = None
+
+    coverage_spatial_form = CoverageSpatialForm(initial= spatial_coverage_data_dict,
+                                                  res_short_id=content_model.short_id,
+                                                  element_id=spatial_coverage.id if spatial_coverage else None)
+
     metadata_form = MetaDataForm(resource_mode='edit', extended_metadata_layout=extended_metadata_layout)
 
     context = {'metadata_form': metadata_form,
+               'title_form': title_form,
                'creator_formset': creator_formset,
                'add_creator_modal_form': add_creator_modal_form,
                'creator_profilelink_formset': None,
@@ -107,7 +154,10 @@ def get_page_context(page, extended_metadata_layout=None):
                'identifier_formset': identifier_formset,
                'language_form': language_form,
                'valid_date_form': valid_date_form,
+               'coverage_temporal_form': coverage_temporal_form,
+               'coverage_spatial_form': coverage_spatial_form,
                'format_formset': format_formset,
+               'keywords': subjects,
                'extended_metadata_layout': extended_metadata_layout}
 
     return context
