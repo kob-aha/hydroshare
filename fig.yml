@@ -41,7 +41,9 @@ defaultworker:
   volumes_from:
     - hydroshare
   volumes:
-    - "/var/run/docker.sock:/docker.sock"
+    # Specific to hydrobuild user on xxx.hydroshare.org
+    - "/home/hydro/hydroshare:/home/docker/hydroshare"
+    - "/home/hydro/pycharm-debug:/home/docker/pycharm-debug"
   links:
     - postgis:postgis
     - redis:redis
