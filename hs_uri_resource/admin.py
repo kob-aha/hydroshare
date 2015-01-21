@@ -1,3 +1,8 @@
-from django.contrib import admin
+from mezzanine.pages.admin import PageAdmin
+from django.contrib.gis import admin
+from .models import *
 
-# Register your models here.
+# admin.site.register(MyResource, PageAdmin)
+
+
+admin.site.register(RasterResource, PageAdmin)
