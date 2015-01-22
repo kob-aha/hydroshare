@@ -1,5 +1,9 @@
 from django.db import models
+from django.contrib.contenttypes import generic
 from hs_core.models import AbstractResource, resource_processor, CoreMetaData
+from hs_core.models import AbstractMetaDataElement
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.contrib.contenttypes.models import ContentType
 from mezzanine.pages.models import Page
 from mezzanine.pages.page_processors import processor_for
 #
@@ -51,13 +55,59 @@ def main_page(request, page):
               'dcterm_frm' : DCTerm()
             }
 
+class ReferenceUri(AbstractMetaDataElement):
+    term = 'Reference URI'
+    value = models.URLField(null=True)
+
+    @classmethod
+    def create(cls, **kwargs):
+        if 'value' in kwargs:
+            if 'content_object' in kwargs:
+                content_object = kwargs['content_object']
+                metadata_type = ContentType.objects.get_for_model(content_object)
+                uri_ref = ReferenceUri.objects.filter(value__iexact=kwargs['value'], object_id=content_object.id, content_type=metadata_type).first()
+                if uri_ref:
+                    raise ValidationError('Reference URI %s already exists' % kwargs['value'])
+                uri_ref = ReferenceUri.objects.create(value=kwargs['value'], content_object=content_object)
+                return uri_ref
+            else:
+                raise ValidationError('Metadata instance for which uri_ref element to be created is missing.')
+        else:
+            raise ValidationError("Value of uri_ref is missing.")
+
+
+    @classmethod
+    def update(cls, element_id, **kwargs):
+        uri_ref = ReferenceUri.objects.get(id=element_id)
+        if uri_ref:
+            if 'value' in kwargs:
+                uri_ref.value = kwargs['value']
+                uri_ref.save()
+            else:
+                raise ValidationError('Value of uri_ref is missing')
+        else:
+            raise ObjectDoesNotExist("No uri_ref element was found for the provided id:%s" % kwargs['id'])
+
+    @classmethod
+    def remove(cls, element_id):
+        uri_ref = ReferenceUri.objects.get(id=element_id)
+        if uri_ref:
+            uri_ref.delete()
+        else:
+            raise ObjectDoesNotExist("No uri_ref element was found for id:%d." % element_id)
+
+
 class UriMetaData(CoreMetaData):
+    # should be only one reference uri
+    reference_uris = generic.GenericRelation(ReferenceUri)
+    _uri_resource = generic.GenericRelation(UriResource)
+
     @classmethod
     def get_supported_element_names(cls):
         # get the names of all core metadata elements
         elements = super(UriMetaData, cls).get_supported_element_names()
         # add the name of any additional element to the list
-        #none
+        elements.append('ReferenceUri') # needs to match the classname
         return elements
 
     @property
@@ -84,10 +134,18 @@ class UriMetaData(CoreMetaData):
         # <hsterms:type>float</hsterms:type>
         # <hsterms:shape>y,x,time</hsterms:shape>
         # <hsterms:descriptiveName>snow water equivalent</hsterms:descriptiveName>
-        # <hsterms:method>UEB model simulation for TWDEF site</hsterms:method>
+        # <hsterms:uri_ref>UEB model simulation for TWDEF site</hsterms:uri_ref>
         # <hsterms:missingValue>-9999</hsterms:missingValue>
         # </rdf:Description>
         # </hsterms:netcdfVariable>
+
+        #inject Uri resource specific metadata element "reference uri" into container element
+        for ref in self.reference_uris.all():
+            hsterms_method = etree.SubElement(container, '{%s}Reference URI' % self.NAMESPACES['hsterms'])
+            hsterms_method_rdf_Description = etree.SubElement(hsterms_method, '{%s}Description' % self.NAMESPACES['rdf'])
+
+            hsterms_name = etree.SubElement(hsterms_method_rdf_Description, '{%s}value' % self.NAMESPACES['hsterms'])
+            hsterms_name.text = ref.value
 
         return etree.tostring(RDF_ROOT, pretty_print=True)
 
