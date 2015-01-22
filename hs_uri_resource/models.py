@@ -1,11 +1,12 @@
 from django.db import models
 from hs_core.models import AbstractResource, resource_processor, CoreMetaData
+from mezzanine.pages.models import Page
 from mezzanine.pages.page_processors import processor_for
 #
 # To create a new resource, use these two super-classes.
 #
 class UriResource(Page, AbstractResource):
-    link = models.URLField()
+    url_res_link = models.URLField(null=True)  # resolved into the 'relation' metadata element
     class Meta:
         verbose_name = 'URI Link Resource'
 

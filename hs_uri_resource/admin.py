@@ -5,4 +5,4 @@ from .models import *
 # admin.site.register(MyResource, PageAdmin)
 
 
-admin.site.register(RasterResource, PageAdmin)
+admin.site.register(UriResource, PageAdmin)
