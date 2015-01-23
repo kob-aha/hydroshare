@@ -10,7 +10,6 @@ from mezzanine.pages.page_processors import processor_for
 # To create a new resource, use these two super-classes.
 #
 class UriResource(Page, AbstractResource):
-    url_res_link = models.URLField(null=True)  # resolved into the 'relation' metadata element
     class Meta:
         verbose_name = 'URI Link Resource'
 
@@ -50,7 +49,7 @@ def main_page(request, page):
     content_model = page.get_content_model()
 
     return  { 'resource_type' : content_model._meta.verbose_name,
-              'link' : content_model.link,
+              'link' : content_model.metadata.reference_uris.first().value or None,
               'dublin_core' : [t for t in content_model.dublin_metadata.all().exclude(term='AB')],
               'dcterm_frm' : DCTerm()
             }

@@ -24,9 +24,9 @@ def raster_pre_call_resource_trigger(sender, **kwargs):
     if(sender is UriResource):
         pass
 
-# signal handler to
+# signal handler to save metadata after resource is created
 @receiver(post_create_resource, sender=UriResource)
 def raster_post_trigger(sender, **kwargs):
     if sender is UriResource:
-        pass
-
+        resource = kwargs['resource']
+        resource.metadata.create_element('ReferenceUri', value="http://www.example.com")

@@ -2,5 +2,14 @@
 {% load geoanalytics_tags pages_tags mezzanine_tags crispy_forms_tags %}
 
 {% block extra_content %}
-    <h4><a href ={{ link }} >Follow Link</a></h4>
+    <h4>Reference URI: {{ link }}</h4>
+    <button class="btn btn-block" href = {{ link }}>Follow Link</button>
+
+{#    <table>#}
+{#        <tr>#}
+{#            <td><h4>Reference URI: {{ link }}</h4></td>#}
+{#            <td><button class="btn btn-block" href = {{ link }}>Follow Link</button></td>#}
+{#        </tr>#}
+{#    </table>#}
+
 {% endblock %}

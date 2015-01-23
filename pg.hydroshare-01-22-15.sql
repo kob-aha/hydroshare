@@ -4165,9 +4165,9 @@ ALTER SEQUENCE hs_core_type_id_seq OWNED BY hs_core_type.id;
 CREATE TABLE hs_geo_raster_resource_rasterband (
     id integer NOT NULL,
     "bandName" character varying(50),
-    "variableName" character varying(50),
+    "variableName" text,
     "variableUnit" character varying(50),
-    method character varying(100),
+    method text,
     comment text
 );
 
@@ -4707,7 +4707,6 @@ CREATE TABLE hs_uri_resource_uriresource (
     creator_id integer NOT NULL,
     last_changed_by_id integer,
     user_id integer NOT NULL,
-    url_res_link character varying(200),
     CONSTRAINT hs_uri_resource_uriresource_object_id_check CHECK ((object_id >= 0))
 );
 
@@ -7087,12 +7086,12 @@ COPY auth_permission (id, name, content_type_id, codename) FROM stdin;
 437	Can add URI Link Resource	146	add_uriresource
 438	Can change URI Link Resource	146	change_uriresource
 439	Can delete URI Link Resource	146	delete_uriresource
-440	Can add uri meta data	147	add_urimetadata
-441	Can change uri meta data	147	change_urimetadata
-442	Can delete uri meta data	147	delete_urimetadata
-443	Can add reference uri	148	add_referenceuri
-444	Can change reference uri	148	change_referenceuri
-445	Can delete reference uri	148	delete_referenceuri
+440	Can add reference uri	147	add_referenceuri
+441	Can change reference uri	147	change_referenceuri
+442	Can delete reference uri	147	delete_referenceuri
+443	Can add uri meta data	148	add_urimetadata
+444	Can change uri meta data	148	change_urimetadata
+445	Can delete uri meta data	148	delete_urimetadata
 \.
 
 
@@ -7108,7 +7107,7 @@ SELECT pg_catalog.setval('auth_permission_id_seq', 445, true);
 --
 
 COPY auth_user (id, password, last_login, is_superuser, username, first_name, last_name, email, is_staff, is_active, date_joined) FROM stdin;
-1	pbkdf2_sha256$12000$yo6wShVYEQIT$Et3iysrxfBjq2yfo/ubiuiklUfYglZ1vuDNfPjiR8Fw=	2015-01-21 01:21:26.885428+00	t	admin			example@example.com	t	t	2014-02-04 14:51:59.864755+00
+1	pbkdf2_sha256$12000$yo6wShVYEQIT$Et3iysrxfBjq2yfo/ubiuiklUfYglZ1vuDNfPjiR8Fw=	2015-01-23 00:25:34.20976+00	t	admin			example@example.com	t	t	2014-02-04 14:51:59.864755+00
 \.
 
 
@@ -7948,7 +7947,8 @@ COPY django_admin_log (id, action_time, user_id, content_type_id, object_id, obj
 860	2014-11-20 15:09:26.513308+00	1	3	113	wyaniero	3	
 861	2014-11-20 15:09:26.515615+00	1	3	52	yirugi	3	
 862	2014-11-20 15:09:26.517441+00	1	3	123	zsdlightning	3	
-864	2015-01-21 01:22:14.971925+00	1	18	196	resource-selection	1	
+864	2015-01-23 00:25:58.265537+00	1	51	6	Home	2	Changed header_background, header_image, content, in_menus and keywords.
+865	2015-01-23 00:26:11.377082+00	1	18	196	resource-selection	1	
 \.
 
 
@@ -7956,7 +7956,7 @@ COPY django_admin_log (id, action_time, user_id, content_type_id, object_id, obj
 -- Name: django_admin_log_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('django_admin_log_id_seq', 864, true);
+SELECT pg_catalog.setval('django_admin_log_id_seq', 865, true);
 
 
 --
@@ -8140,8 +8140,8 @@ COPY django_content_type (id, name, app_label, model) FROM stdin;
 144	site	ref_ts	site
 145	ref ts metadata	ref_ts	reftsmetadata
 146	URI Link Resource	hs_uri_resource	uriresource
-147	uri meta data	hs_uri_resource	urimetadata
-148	reference uri	hs_uri_resource	referenceuri
+147	reference uri	hs_uri_resource	referenceuri
+148	uri meta data	hs_uri_resource	urimetadata
 \.
 
 
@@ -8344,16 +8344,17 @@ COPY django_migrations (id, app, name, applied) FROM stdin;
 5	redirects	0001_initial	2014-11-19 18:55:35.532924+00
 6	sessions	0001_initial	2014-11-19 18:55:35.664696+00
 7	tastypie	0001_initial	2014-11-19 18:55:35.810073+00
-8	hs_geo_raster_resource	0001_initial	2015-01-21 01:19:33.952969+00
-9	hs_core	0001_initial	2015-01-21 01:20:05.012494+00
-10	ref_ts	0001_initial	2015-01-21 01:20:07.346068+00
-11	ref_ts	0002_auto_20150121_0119	2015-01-21 01:20:08.749801+00
-12	hs_core	0002_auto_20150121_0344	2015-01-21 03:44:42.047541+00
-13	hs_uri_resource	0001_initial	2015-01-21 03:44:42.655267+00
-14	hs_uri_resource	0002_auto_20150121_2134	2015-01-21 21:34:35.690752+00
-15	hs_uri_resource	0003_auto_20150121_2136	2015-01-21 21:36:55.84342+00
-16	hs_uri_resource	0004_auto_20150121_2140	2015-01-21 21:40:53.686023+00
-17	hs_uri_resource	0005_referenceuri	2015-01-22 18:57:42.550507+00
+8	hs_geo_raster_resource	0001_initial	2015-01-23 00:23:31.740287+00
+9	hs_core	0001_initial	2015-01-23 00:24:20.753511+00
+10	ref_ts	0001_initial	2015-01-23 00:24:23.013853+00
+11	ref_ts	0002_auto_20150121_0119	2015-01-23 00:24:24.47184+00
+12	hs_core	0002_auto_20150121_0344	2015-01-23 00:25:08.134674+00
+13	hs_uri_resource	0001_initial	2015-01-23 00:25:08.817124+00
+14	hs_uri_resource	0002_auto_20150121_2134	2015-01-23 00:25:09.504079+00
+15	hs_uri_resource	0003_auto_20150121_2136	2015-01-23 00:25:09.994234+00
+16	hs_uri_resource	0004_auto_20150121_2140	2015-01-23 00:25:10.710436+00
+17	hs_uri_resource	0005_referenceuri	2015-01-23 00:25:11.279218+00
+18	hs_uri_resource	0006_remove_uriresource_url_res_link	2015-01-23 00:25:11.821802+00
 \.
 
 
@@ -8361,7 +8362,7 @@ COPY django_migrations (id, app, name, applied) FROM stdin;
 -- Name: django_migrations_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('django_migrations_id_seq', 17, true);
+SELECT pg_catalog.setval('django_migrations_id_seq', 18, true);
 
 
 --
@@ -8932,7 +8933,10 @@ p987vbjgmzzsctaufrpi95xr3amwavzh	N2RiMzRiMzg3MzNlOGYwOTdiZmNhODliZmZhOTYxMTEzNTZ
 9xo048t38rga74f33bntpyz0wviw5u57	MTAzMDg1YWVmZDQwMzVjYmRiYzA3ZjRmNzU2MDk3Nzc2MGRlNGQwMjp7Il9hdXRoX3VzZXJfYmFja2VuZCI6Im1lenphbmluZS5jb3JlLmF1dGhfYmFja2VuZHMuTWV6emFuaW5lQmFja2VuZCIsIl9hdXRoX3VzZXJfaWQiOjE1Nn0=	2014-12-01 06:21:44.824553+00
 6cbmo1md0czw67lhlpnphz03xo3095h2	NTdmZDBlYmZjZGI4ZTdiZWMwODU0ZThlODE5YmYxNjIwYTM2MjNhMTp7Il9hdXRoX3VzZXJfYmFja2VuZCI6Im1lenphbmluZS5jb3JlLmF1dGhfYmFja2VuZHMuTWV6emFuaW5lQmFja2VuZCIsIl9hdXRoX3VzZXJfaWQiOjE1N30=	2014-12-02 12:43:09.443406+00
 y9hnmida0rpefpzzjnkogyloq6wn2jak	NmM0MTZkOGYzNTBkNDEwMTBiZTc3NTFmODg5ZDU4N2VkNmVkZDJlZTp7fQ==	2014-12-04 15:50:48.766134+00
-gschi5pl8i9nzz89e85tyl4l18qiotp2	NGU4MDExYzBiNTE4MGEwMzM3ZWY2ZjZhNmYzNjYzMTJhZGM5OGI2OTp7Il9hdXRoX3VzZXJfaGFzaCI6ImEyZmYzNzQ2YzJhMTU0OWZkZTJhMTliOGI2NjY1OTE2Mjk0ZTAwN2UiLCJfYXV0aF91c2VyX2JhY2tlbmQiOiJtZXp6YW5pbmUuY29yZS5hdXRoX2JhY2tlbmRzLk1lenphbmluZUJhY2tlbmQiLCJfYXV0aF91c2VyX2lkIjoxfQ==	2015-02-04 01:21:26.968106+00
+o85jvwnojy2hu59o7xo40i6v1et79fnt	NmM0MTZkOGYzNTBkNDEwMTBiZTc3NTFmODg5ZDU4N2VkNmVkZDJlZTp7fQ==	2015-02-06 00:22:25.440312+00
+s6wuq35a7jefd7y2eaypazivhn218006	NmM0MTZkOGYzNTBkNDEwMTBiZTc3NTFmODg5ZDU4N2VkNmVkZDJlZTp7fQ==	2015-02-06 00:23:42.861325+00
+5tfsucsvydw5bchueo0fpkq1dgcoj7kz	NmM0MTZkOGYzNTBkNDEwMTBiZTc3NTFmODg5ZDU4N2VkNmVkZDJlZTp7fQ==	2015-02-06 00:24:29.523585+00
+j5sql3qkghurmzrfkc7sersnr8c7tkhq	NGU4MDExYzBiNTE4MGEwMzM3ZWY2ZjZhNmYzNjYzMTJhZGM5OGI2OTp7Il9hdXRoX3VzZXJfaGFzaCI6ImEyZmYzNzQ2YzJhMTU0OWZkZTJhMTliOGI2NjY1OTE2Mjk0ZTAwN2UiLCJfYXV0aF91c2VyX2JhY2tlbmQiOiJtZXp6YW5pbmUuY29yZS5hdXRoX2JhY2tlbmRzLk1lenphbmluZUJhY2tlbmQiLCJfYXV0aF91c2VyX2lkIjoxfQ==	2015-02-06 00:25:34.239718+00
 \.
 
 
@@ -9041,6 +9045,12 @@ SELECT pg_catalog.setval('djcelery_workerstate_id_seq', 1, false);
 
 COPY dublincore_qualifieddublincoreelement (id, object_id, content_type_id, term, qualifier, content, updated_at, created_at) FROM stdin;
 4	9	32	AB		This is a simple generic resource that is not entirely public.  DaveT, JeffH, and Jefferson should be able to view it.	2014-03-12 14:16:21.953376+00	2014-03-12 14:16:21.953398+00
+1375	197	146	T	\N	Charlie Forever	2015-01-23 00:26:47.366873+00	2015-01-23 00:26:47.366916+00
+1376	197	146	AB	\N	Charlie Forever	2015-01-23 00:26:47.41212+00	2015-01-23 00:26:47.412155+00
+1377	197	146	DT	\N	2015-01-23T00:26:47.320505+00:00	2015-01-23 00:26:47.419999+00	2015-01-23 00:26:47.420035+00
+1378	197	146	DC	\N	2015-01-23T00:26:47.320545+00:00	2015-01-23 00:26:47.425311+00	2015-01-23 00:26:47.425361+00
+1379	197	146	CN	\N	admin	2015-01-23 00:26:47.428912+00	2015-01-23 00:26:47.428942+00
+1380	197	146	CR	\N	admin	2015-01-23 00:26:47.4329+00	2015-01-23 00:26:47.432942+00
 \.
 
 
@@ -9048,7 +9058,7 @@ COPY dublincore_qualifieddublincoreelement (id, object_id, content_type_id, term
 -- Name: dublincore_qualifieddublincoreelement_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('dublincore_qualifieddublincoreelement_id_seq', 1374, true);
+SELECT pg_catalog.setval('dublincore_qualifieddublincoreelement_id_seq', 1380, true);
 
 
 --
@@ -9418,8 +9428,7 @@ COPY generic_threadedcomment (by_author, comment_ptr_id, replied_to_id, rating_c
 --
 
 COPY hs_core_bags (id, object_id, content_type_id, "timestamp", bag) FROM stdin;
-332	200	146	2015-01-22 19:02:35.200231+00	bags/b7210a34fb04426ea9c9fef1151fa4ee.zip
-333	201	146	2015-01-22 19:03:44.27208+00	bags/5dc6649171344572953035917e69be93.zip
+332	197	146	2015-01-23 00:26:47.322017+00	bags/7f499060d6f845349497f43cbe7efcec.zip
 \.
 
 
@@ -9427,7 +9436,7 @@ COPY hs_core_bags (id, object_id, content_type_id, "timestamp", bag) FROM stdin;
 -- Name: hs_core_bags_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('hs_core_bags_id_seq', 333, true);
+SELECT pg_catalog.setval('hs_core_bags_id_seq', 332, true);
 
 
 --
@@ -9458,10 +9467,6 @@ COPY hs_core_coremetadata (id) FROM stdin;
 6
 7
 8
-9
-10
-11
-12
 \.
 
 
@@ -9469,7 +9474,7 @@ COPY hs_core_coremetadata (id) FROM stdin;
 -- Name: hs_core_coremetadata_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('hs_core_coremetadata_id_seq', 12, true);
+SELECT pg_catalog.setval('hs_core_coremetadata_id_seq', 8, true);
 
 
 --
@@ -9497,11 +9502,7 @@ COPY hs_core_creator (id, object_id, content_type_id, description, name, organiz
 3	5	93	\N	David Tarboton	\N	dtarb@usu.edu	\N	\N	\N	1
 4	6	93	\N	Hong Yi	\N	hongyi@renci.org	\N	\N	\N	1
 5	7	93	\N	David G Tarboton	\N	david.tarboton@gmail.com	\N	\N	\N	1
-6	8	93	\N		\N	example@example.com	\N	\N	\N	1
-7	9	145	\N		\N	example@example.com	\N	\N	\N	1
-8	10	147	\N		\N	example@example.com	\N	\N	\N	1
-9	11	147	\N		\N	example@example.com	\N	\N	\N	1
-10	12	147	\N		\N	example@example.com	\N	\N	\N	1
+6	8	148	\N		\N	example@example.com	\N	\N	\N	1
 \.
 
 
@@ -9509,7 +9510,7 @@ COPY hs_core_creator (id, object_id, content_type_id, description, name, organiz
 -- Name: hs_core_creator_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('hs_core_creator_id_seq', 10, true);
+SELECT pg_catalog.setval('hs_core_creator_id_seq', 6, true);
 
 
 --
@@ -9527,16 +9528,8 @@ COPY hs_core_date (id, object_id, content_type_id, type, start_date, end_date) F
 8	6	93	modified	2014-11-07 19:59:07.172154+00	\N
 9	7	93	created	2014-11-10 12:28:35.107128+00	\N
 10	7	93	modified	2014-11-10 12:28:35.114559+00	\N
-11	8	93	created	2015-01-21 21:11:22.026243+00	\N
-12	8	93	modified	2015-01-21 21:11:22.116069+00	\N
-13	9	145	created	2015-01-21 21:25:59.531327+00	\N
-14	9	145	modified	2015-01-21 21:25:59.553933+00	\N
-15	10	147	created	2015-01-21 21:41:22.260027+00	\N
-16	10	147	modified	2015-01-21 21:41:22.634457+00	\N
-17	11	147	created	2015-01-22 19:02:35.178213+00	\N
-18	11	147	modified	2015-01-22 19:02:35.200231+00	\N
-19	12	147	created	2015-01-22 19:03:44.262454+00	\N
-20	12	147	modified	2015-01-22 19:03:44.27208+00	\N
+11	8	148	created	2015-01-23 00:26:30.052989+00	\N
+12	8	148	modified	2015-01-23 00:26:30.375616+00	\N
 \.
 
 
@@ -9544,7 +9537,7 @@ COPY hs_core_date (id, object_id, content_type_id, type, start_date, end_date) F
 -- Name: hs_core_date_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('hs_core_date_id_seq', 20, true);
+SELECT pg_catalog.setval('hs_core_date_id_seq', 12, true);
 
 
 --
@@ -9557,11 +9550,7 @@ COPY hs_core_description (id, object_id, content_type_id, abstract) FROM stdin;
 3	5	93	HydroShare is an online, collaborative system being developed for open sharing of hydrologic data and models.  This presentation will introduce the HydroShare functionality developed to date and describe ongoing development of functionality to support collaboration and integration of data and models.  
 4	6	93	12345678901234567890\r\n12345678901234567890\r\n12345678901234567890\r\n12345678901234567890\r\n12345678901234567890\r\n12345678901234567890\r\n12345678901234567890\r\n12345678901234567890\r\n12345678901234567890\r\n12345678901234567890\r\n12345678901234567890\r\n12345678901234567890\r\n12345678901234567890\r\n12345678901234567890\r\n12345678901234567890\r\n12345678901234567890\r\n12345678901234567890\r\n12345678901234567890\r\n12345678901234567890\r\n12345678901234567890\r\n12345678901234567890\r\n12345678901234567890\r\n12345678901234567890\r\n12345678901234567890\r\n12345678901234567890\r\n12345678901234567890\r\n12345678901234567890\r\n12345678901234567890\r\n12345678901234567890\r\n12345678901234567890\r\n12345678901234567890\r\n12345678901234567890\r\n12345678901234567890\r\n12345678901234567890\r\n12345678901234567890\r\n
 5	7	93	 HydroShare is an online, collaborative system being developed for open sharing of hydrologic data and models.  The goal of HydroShare is to enable scientists to easily discover and access hydrologic data and models, retrieve them to their desktop or perform analyses in a distributed computing environment that may include grid, cloud or high performance computing model instances as necessary.  Scientists may also publish outcomes (data, results or models) into HydroShare, using the system as a collaboration platform for sharing data, models and analyses.  HydroShare is expanding the data sharing capability of the CUAHSI Hydrologic Information System by broadening the classes of data accommodated to include geospatial data used in hydrology.  HydroShare will also include new capability to share models and model components, and will take advantage of emerging social media functionality to enhance information about and collaboration around hydrologic data and models.  \r\n\r\nThis presentation will introduce the HydroShare functionality developed to date and describe ongoing development of functionality to support collaboration and integration of data and models.  
-6	8	93	Gen 1
-7	9	145	Untitled resource
-8	10	147	Untitled resource
-9	11	147	Jeff is a boss
-10	12	147	Jiri is a boss
+6	8	148	Charlie Forever
 \.
 
 
@@ -9569,7 +9558,7 @@ COPY hs_core_description (id, object_id, content_type_id, abstract) FROM stdin;
 -- Name: hs_core_description_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('hs_core_description_id_seq', 10, true);
+SELECT pg_catalog.setval('hs_core_description_id_seq', 6, true);
 
 
 --
@@ -9607,7 +9596,6 @@ SELECT pg_catalog.setval('hs_core_format_id_seq', 1, false);
 --
 
 COPY hs_core_genericresource (page_ptr_id, content, user_id, creator_id, public, frozen, do_not_distribute, discoverable, published_and_frozen, last_changed_by_id, comments_count, short_id, doi, object_id, content_type_id) FROM stdin;
-197		1	1	t	f	f	t	f	1	0	0320a19286ad47bc9177af89988ab2b8	\N	8	93
 \.
 
 
@@ -9711,11 +9699,7 @@ COPY hs_core_identifier (id, object_id, content_type_id, name, url) FROM stdin;
 3	5	93	hydroShareIdentifier	http://hydroshare.org/resource/ce9c114a36f541c88aecd9c6ff0a06a4
 4	6	93	hydroShareIdentifier	http://hydroshare.org/resource/3a48ef2f22574f209ff9767ae50947f8
 5	7	93	hydroShareIdentifier	http://hydroshare.org/resource/6cc40e13b92843f9b8e963337b43758e
-6	8	93	hydroShareIdentifier	http://hydroshare.org/resource/0320a19286ad47bc9177af89988ab2b8
-7	9	145	hydroShareIdentifier	http://hydroshare.org/resource/2eba5be1e99b43249d84a06fd9201fd5
-8	10	147	hydroShareIdentifier	http://hydroshare.org/resource/8ece9b5554c343af90b1099436447c2b
-9	11	147	hydroShareIdentifier	http://hydroshare.org/resource/b7210a34fb04426ea9c9fef1151fa4ee
-10	12	147	hydroShareIdentifier	http://hydroshare.org/resource/5dc6649171344572953035917e69be93
+6	8	148	hydroShareIdentifier	http://hydroshare.org/resource/7f499060d6f845349497f43cbe7efcec
 \.
 
 
@@ -9723,7 +9707,7 @@ COPY hs_core_identifier (id, object_id, content_type_id, name, url) FROM stdin;
 -- Name: hs_core_identifier_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('hs_core_identifier_id_seq', 10, true);
+SELECT pg_catalog.setval('hs_core_identifier_id_seq', 6, true);
 
 
 --
@@ -9849,11 +9833,7 @@ COPY hs_core_title (id, object_id, content_type_id, value) FROM stdin;
 5	5	93	AWRA conference presentations "HydroShare: Advancing Collaboration through Hydrologic Data and Model Sharing"
 6	6	93	test abstract length
 7	7	93	AWRA Presentation: "HydroShare: Advancing Collaboration through Hydrologic Data and Model Sharing"
-8	8	93	Gen 1
-9	9	145	Untitled resource
-10	10	147	Untitled resource
-11	11	147	Jeff is a boss
-12	12	147	Jiri is a boss
+8	8	148	Charlie Forever
 \.
 
 
@@ -9861,7 +9841,7 @@ COPY hs_core_title (id, object_id, content_type_id, value) FROM stdin;
 -- Name: hs_core_title_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('hs_core_title_id_seq', 12, true);
+SELECT pg_catalog.setval('hs_core_title_id_seq', 8, true);
 
 
 --
@@ -10080,7 +10060,7 @@ SELECT pg_catalog.setval('hs_rhessys_inst_resource_instresource_view_users_id_se
 --
 
 COPY hs_uri_resource_referenceuri (id, object_id, value, content_type_id) FROM stdin;
-1	11	https://www.whateva.com	147
+1	8	http://www.example.com	148
 \.
 
 
@@ -10096,9 +10076,7 @@ SELECT pg_catalog.setval('hs_uri_resource_referenceuri_id_seq', 1, true);
 --
 
 COPY hs_uri_resource_urimetadata (coremetadata_ptr_id) FROM stdin;
-10
-11
-12
+8
 \.
 
 
@@ -10106,10 +10084,8 @@ COPY hs_uri_resource_urimetadata (coremetadata_ptr_id) FROM stdin;
 -- Data for Name: hs_uri_resource_uriresource; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY hs_uri_resource_uriresource (page_ptr_id, comments_count, public, frozen, do_not_distribute, discoverable, published_and_frozen, content, short_id, doi, object_id, content_type_id, creator_id, last_changed_by_id, user_id, url_res_link) FROM stdin;
-199	0	t	f	f	t	f		8ece9b5554c343af90b1099436447c2b	\N	10	147	1	1	1	\N
-200	0	t	f	f	t	f		b7210a34fb04426ea9c9fef1151fa4ee	\N	11	147	1	1	1	\N
-201	0	t	f	f	t	f		5dc6649171344572953035917e69be93	\N	12	147	1	1	1	\N
+COPY hs_uri_resource_uriresource (page_ptr_id, comments_count, public, frozen, do_not_distribute, discoverable, published_and_frozen, content, short_id, doi, object_id, content_type_id, creator_id, last_changed_by_id, user_id) FROM stdin;
+197	0	t	f	f	t	f	Charlie Forever	7f499060d6f845349497f43cbe7efcec	\N	8	148	1	1	1
 \.
 
 
@@ -10133,8 +10109,7 @@ SELECT pg_catalog.setval('hs_uri_resource_uriresource_edit_groups_id_seq', 1, fa
 --
 
 COPY hs_uri_resource_uriresource_edit_users (id, uriresource_id, user_id) FROM stdin;
-1	200	1
-2	201	1
+1	197	1
 \.
 
 
@@ -10142,7 +10117,7 @@ COPY hs_uri_resource_uriresource_edit_users (id, uriresource_id, user_id) FROM s
 -- Name: hs_uri_resource_uriresource_edit_users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('hs_uri_resource_uriresource_edit_users_id_seq', 2, true);
+SELECT pg_catalog.setval('hs_uri_resource_uriresource_edit_users_id_seq', 1, true);
 
 
 --
@@ -10150,8 +10125,7 @@ SELECT pg_catalog.setval('hs_uri_resource_uriresource_edit_users_id_seq', 2, tru
 --
 
 COPY hs_uri_resource_uriresource_owners (id, uriresource_id, user_id) FROM stdin;
-1	200	1
-2	201	1
+1	197	1
 \.
 
 
@@ -10159,7 +10133,7 @@ COPY hs_uri_resource_uriresource_owners (id, uriresource_id, user_id) FROM stdin
 -- Name: hs_uri_resource_uriresource_owners_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('hs_uri_resource_uriresource_owners_id_seq', 2, true);
+SELECT pg_catalog.setval('hs_uri_resource_uriresource_owners_id_seq', 1, true);
 
 
 --
@@ -10182,8 +10156,7 @@ SELECT pg_catalog.setval('hs_uri_resource_uriresource_view_groups_id_seq', 1, fa
 --
 
 COPY hs_uri_resource_uriresource_view_users (id, uriresource_id, user_id) FROM stdin;
-1	200	1
-2	201	1
+1	197	1
 \.
 
 
@@ -10191,7 +10164,7 @@ COPY hs_uri_resource_uriresource_view_users (id, uriresource_id, user_id) FROM s
 -- Name: hs_uri_resource_uriresource_view_users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('hs_uri_resource_uriresource_view_users_id_seq', 2, true);
+SELECT pg_catalog.setval('hs_uri_resource_uriresource_view_users_id_seq', 1, true);
 
 
 --
@@ -10214,17 +10187,13 @@ COPY pages_page (status, _order, parent_id, description, title, short_url, login
 2	11	\N	hjkl	Resource landing	\N	f	28	\N	2014-06-02 18:07:38+00	Resource landing	richtextpage	resourcelanding		1	t			t	2014-06-02 18:07:38.184936+00	2014-06-02 18:09:05.842892+00
 2	3	\N	This page is slated for release 2	Explore	\N	f	20	\N	2014-04-29 19:02:27+00	Explore	richtextpage	explore		1	t			t	2014-04-29 19:02:27.56175+00	2014-06-11 12:34:11.658582+00
 2	4	\N	hjkl	Collaborate	\N	f	21	\N	2014-04-29 19:02:40+00	Collaborate	richtextpage	collaborate		1	t			t	2014-04-29 19:02:40.289254+00	2014-06-11 12:34:19.706092+00
-2	0	\N	Hydroshare is an online collaboration environment for sharing data, models, and code.  Join the community to start sharing.	Home	\N	f	6	\N	2014-03-05 16:16:07+00	Home	homepage	/		1	t			t	2014-03-05 16:16:07.848+00	2014-08-03 20:16:24.927+00
 2	2	\N	hjkl	Resources	\N	f	19	\N	2014-04-29 19:01:32+00	Resources	richtextpage	my-resources		1	t	1,2,3		t	2014-04-29 19:01:32.78+00	2014-07-18 18:04:31.804+00
 2	5	\N	This page is under construction	Support	\N	f	22	\N	2014-04-29 19:02:56+00	Support	richtextpage	help		1	t	1,2,3		t	2014-04-29 19:02:56.717+00	2014-06-02 18:03:55.848+00
 2	6	\N	Thank you for signing up for HydroShare! We have sent you an email from hydroshare.org to verify your account.  Please click on the link within the email and verify your account with us and you can get started sharing data and models with HydroShare.	Verify account	\N	f	23	\N	2014-05-05 19:40:28+00	Verify account	richtextpage	verify-account		1	t			t	2014-05-05 19:40:28.558+00	2014-05-05 19:47:25.082+00
 2	8	\N	jkl;	Create Resource	\N	t	25	\N	2014-05-07 15:16:21.597+00	Create Resource	richtextpage	create-resource		1	t			t	2014-05-07 15:16:21.598+00	2014-05-07 15:16:21.598+00
-2	12	\N	d	resource-selection	\N	f	196	\N	2015-01-21 01:22:14.934701+00	resource-selection	richtextpage	resource-selection		1	t	1,2,3		t	2015-01-21 01:22:14.960726+00	2015-01-21 01:22:14.960726+00
-2	13	\N	Gen 1	Gen 1	\N	f	197	\N	2015-01-21 21:11:22.000272+00	Gen 1	genericresource	gen-1		1	t		\N	t	2015-01-21 21:11:22.026243+00	2015-01-21 21:11:22.116069+00
-2	14	\N	Untitled resource	Untitled resource	\N	f	198	\N	2015-01-21 21:25:59.528146+00	Untitled resource	reftimeseries	untitled-resource		1	t		\N	t	2015-01-21 21:25:59.531327+00	2015-01-21 21:25:59.553933+00
-2	15	\N	Untitled resource	Untitled resource	\N	f	199	\N	2015-01-21 21:41:22.25198+00	Untitled resource	uriresource	untitled-resource-1		1	t		\N	t	2015-01-21 21:41:22.260027+00	2015-01-21 21:41:22.634457+00
-2	16	\N	Jeff is a boss	Jeff is a boss	\N	f	200	\N	2015-01-22 19:02:35.150866+00	Jeff is a boss	uriresource	jeff-is-a-boss		1	t		\N	t	2015-01-22 19:02:35.178213+00	2015-01-22 19:02:35.200231+00
-2	17	\N	Jiri is a boss	Jiri is a boss	\N	f	201	\N	2015-01-22 19:03:44.257344+00	Jiri is a boss	uriresource	jiri-is-a-boss		1	t		\N	t	2015-01-22 19:03:44.262454+00	2015-01-22 19:03:44.27208+00
+2	0	\N	Hydroshare is an online collaboration environment for sharing data, models, and code.  Join the community to start sharing.	Home	\N	f	6	\N	2014-03-05 16:16:07+00	Home	homepage	/		1	t			t	2014-03-05 16:16:07.848+00	2015-01-23 00:25:58.246+00
+2	12	\N	k	resource-selection	\N	f	196	\N	2015-01-23 00:26:11.320428+00	resource-selection	richtextpage	resource-selection		1	t	1,2,3		t	2015-01-23 00:26:11.359999+00	2015-01-23 00:26:11.359999+00
+2	13	\N	Charlie Forever	Charlie Forever	\N	f	197	\N	2015-01-23 00:26:30.036746+00	Charlie Forever	uriresource	charlie-forever		1	t		\N	t	2015-01-23 00:26:30.052989+00	2015-01-23 00:26:47.322017+00
 \.
 
 
@@ -10232,7 +10201,7 @@ COPY pages_page (status, _order, parent_id, description, title, short_url, login
 -- Name: pages_page_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('pages_page_id_seq', 201, true);
+SELECT pg_catalog.setval('pages_page_id_seq', 197, true);
 
 
 --
@@ -10250,7 +10219,7 @@ COPY pages_richtextpage (content, page_ptr_id) FROM stdin;
 <p>hjkl</p>	19
 <p>This page is under construction</p>	22
 <p>Thank you for signing up for HydroShare! We have sent you an email from hydroshare.org to verify your account.  Please click on the link within the email and verify your account with us and you can get started sharing data and models with HydroShare.</p>\n<p><a href="/hsapi/_internal/resend_verification_email/">Please click here if you do not receive a verification email within 1 hour.</a></p>	23
-<p>d</p>	196
+<p>k</p>	196
 \.
 
 
@@ -10289,7 +10258,6 @@ SELECT pg_catalog.setval('ref_ts_qualitycontrollevel_id_seq', 1, false);
 --
 
 COPY ref_ts_reftimeseries (page_ptr_id, comments_count, content, public, frozen, do_not_distribute, discoverable, published_and_frozen, short_id, doi, object_id, reference_type, url, data_site_name, data_site_code, variable_name, variable_code, start_date, end_date, content_type_id, creator_id, last_changed_by_id, user_id) FROM stdin;
-198	0		t	f	f	t	f	2eba5be1e99b43249d84a06fd9201fd5	\N	9							\N	\N	145	1	1	1
 \.
 
 
@@ -10373,7 +10341,6 @@ SELECT pg_catalog.setval('ref_ts_reftimeseries_view_users_id_seq', 1, false);
 --
 
 COPY ref_ts_reftsmetadata (coremetadata_ptr_id) FROM stdin;
-9
 \.
 
 
@@ -14981,172 +14948,4 @@ ALTER TABLE ONLY hs_core_genericresource
 -- Name: owner_id_refs_id_4a4141f5; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY ga_resources_dataresource
-    ADD CONSTRAINT owner_id_refs_id_4a4141f5 FOREIGN KEY (owner_id) REFERENCES auth_user(id) DEFERRABLE INITIALLY DEFERRED;
-
-
---
--- Name: owner_id_refs_id_d528c757; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY ga_resources_catalogpage
-    ADD CONSTRAINT owner_id_refs_id_d528c757 FOREIGN KEY (owner_id) REFERENCES auth_user(id) DEFERRABLE INITIALLY DEFERRED;
-
-
---
--- Name: owner_id_refs_id_e2271514; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY hs_core_groupownership
-    ADD CONSTRAINT owner_id_refs_id_e2271514 FOREIGN KEY (owner_id) REFERENCES auth_user(id) DEFERRABLE INITIALLY DEFERRED;
-
-
---
--- Name: owner_id_refs_id_ee8494bc; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY ga_resources_renderedlayer
-    ADD CONSTRAINT owner_id_refs_id_ee8494bc FOREIGN KEY (owner_id) REFERENCES auth_user(id) DEFERRABLE INITIALLY DEFERRED;
-
-
---
--- Name: owner_id_refs_id_f919891d; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY ga_resources_style
-    ADD CONSTRAINT owner_id_refs_id_f919891d FOREIGN KEY (owner_id) REFERENCES auth_user(id) DEFERRABLE INITIALLY DEFERRED;
-
-
---
--- Name: page_ptr_id_refs_id_1f0514ba; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY ga_resources_relatedresource
-    ADD CONSTRAINT page_ptr_id_refs_id_1f0514ba FOREIGN KEY (page_ptr_id) REFERENCES pages_page(id) DEFERRABLE INITIALLY DEFERRED;
-
-
---
--- Name: page_ptr_id_refs_id_2adddb0b; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY pages_link
-    ADD CONSTRAINT page_ptr_id_refs_id_2adddb0b FOREIGN KEY (page_ptr_id) REFERENCES pages_page(id) DEFERRABLE INITIALLY DEFERRED;
-
-
---
--- Name: page_ptr_id_refs_id_41a57472; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY hs_core_genericresource
-    ADD CONSTRAINT page_ptr_id_refs_id_41a57472 FOREIGN KEY (page_ptr_id) REFERENCES pages_page(id) DEFERRABLE INITIALLY DEFERRED;
-
-
---
--- Name: page_ptr_id_refs_id_558d29bc; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY pages_richtextpage
-    ADD CONSTRAINT page_ptr_id_refs_id_558d29bc FOREIGN KEY (page_ptr_id) REFERENCES pages_page(id) DEFERRABLE INITIALLY DEFERRED;
-
-
---
--- Name: page_ptr_id_refs_id_5ea3a75a; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY ga_resources_dataresource
-    ADD CONSTRAINT page_ptr_id_refs_id_5ea3a75a FOREIGN KEY (page_ptr_id) REFERENCES pages_page(id) DEFERRABLE INITIALLY DEFERRED;
-
-
---
--- Name: page_ptr_id_refs_id_75804475; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY galleries_gallery
-    ADD CONSTRAINT page_ptr_id_refs_id_75804475 FOREIGN KEY (page_ptr_id) REFERENCES pages_page(id) DEFERRABLE INITIALLY DEFERRED;
-
-
---
--- Name: page_ptr_id_refs_id_8aa2112f; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY hs_rhessys_inst_resource_instresource
-    ADD CONSTRAINT page_ptr_id_refs_id_8aa2112f FOREIGN KEY (page_ptr_id) REFERENCES pages_page(id) DEFERRABLE INITIALLY DEFERRED;
-
-
---
--- Name: page_ptr_id_refs_id_93df8296; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY ga_resources_resourcegroup
-    ADD CONSTRAINT page_ptr_id_refs_id_93df8296 FOREIGN KEY (page_ptr_id) REFERENCES pages_page(id) DEFERRABLE INITIALLY DEFERRED;
-
-
---
--- Name: page_ptr_id_refs_id_a8ba09aa; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY ga_resources_catalogpage
-    ADD CONSTRAINT page_ptr_id_refs_id_a8ba09aa FOREIGN KEY (page_ptr_id) REFERENCES pages_page(id) DEFERRABLE INITIALLY DEFERRED;
-
-
---
--- Name: page_ptr_id_refs_id_ae3b1c29; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY ga_resources_style
-    ADD CONSTRAINT page_ptr_id_refs_id_ae3b1c29 FOREIGN KEY (page_ptr_id) REFERENCES pages_page(id) DEFERRABLE INITIALLY DEFERRED;
-
-
---
--- Name: page_ptr_id_refs_id_bf381bd5; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY theme_homepage
-    ADD CONSTRAINT page_ptr_id_refs_id_bf381bd5 FOREIGN KEY (page_ptr_id) REFERENCES pages_page(id) DEFERRABLE INITIALLY DEFERRED;
-
-
---
--- Name: page_ptr_id_refs_id_f73583c5; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY ga_resources_renderedlayer
-    ADD CONSTRAINT page_ptr_id_refs_id_f73583c5 FOREIGN KEY (page_ptr_id) REFERENCES pages_page(id) DEFERRABLE INITIALLY DEFERRED;
-
-
---
--- Name: page_ptr_id_refs_id_fe19b67b; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY forms_form
-    ADD CONSTRAINT page_ptr_id_refs_id_fe19b67b FOREIGN KEY (page_ptr_id) REFERENCES pages_page(id) DEFERRABLE INITIALLY DEFERRED;
-
-
---
--- Name: parent_id_refs_id_68963b8e; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY pages_page
-    ADD CONSTRAINT parent_id_refs_id_68963b8e FOREIGN KEY (parent_id) REFERENCES pages_page(id) DEFERRABLE INITIALLY DEFERRED;
-
-
---
--- Name: profile_id_refs_id_dfb05146; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY django_docker_processes_dockerprocess
-    ADD CONSTRAINT profile_id_refs_id_dfb05146 FOREIGN KEY (profile_id) REFERENCES django_docker_processes_dockerprofile(id) DEFERRABLE INITIALLY DEFERRED;
-
-
---
--- Name: qdce_id_refs_id_7eb27ec4; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY dublincore_qualifieddublincoreelementhistory
-    ADD CONSTRAINT qdce_id_refs_id_7eb27ec4 FOREIGN KEY (qdce_id) REFERENCES dublincore_qualifieddublincoreelement(id) DEFERRABLE INITIALLY DEFERRED;
-
-
---
--- Name: ref__content_type_id_1596bb7967529f8a_fk_django_content_type_id; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY ref_ts_site
+ALTER TABLE ONLY ga
