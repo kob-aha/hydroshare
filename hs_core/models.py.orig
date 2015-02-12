@@ -1412,11 +1412,15 @@ class AbstractResource(ResourcePermissionsMixin):
         CITATION_ERROR = "Failed to generate citation."
 
         first_author = self.metadata.creators.all().filter(order=1)[0]
+<<<<<<< HEAD
         name_parts = first_author.name.split()
         if len(name_parts) == 0:
             citation = CREATOR_NAME_ERROR
-            return citation
-
+=======
+        name_parts = first_author.name.split(" ")
+        if len(name_parts) == 0:
+            citation = "Failed to generate citation - invalid creator name (%s)." % first_author.name
+>>>>>>> [#146] unfinished fix
             return citation
 
         if len(name_parts) > 2:
@@ -1429,10 +1433,15 @@ class AbstractResource(ResourcePermissionsMixin):
 
         other_authors = self.metadata.creators.all().filter(order__gt=1)
         for author in other_authors:
+<<<<<<< HEAD
             name_parts = author.name.split()
             if len(name_parts) == 0:
-            if len(name_parts) == 0:
                 citation = CREATOR_NAME_ERROR
+=======
+            name_parts = author.name.split(" ")
+            if len(name_parts) == 0:
+                citation = "Failed to generate citation - invalid creator name (%s)." % author.name
+>>>>>>> [#146] unfinished fix
                 return citation
 
             if len(name_parts) > 2:
