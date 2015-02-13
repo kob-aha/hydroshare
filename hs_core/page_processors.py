@@ -5,7 +5,6 @@ from hs_core.hydroshare.utils import get_file_mime_type, resource_modified
 from hs_core.models import GenericResource
 from hs_core import languages_iso
 from forms import *
-from hs_tools_resource.models import ToolResourceType
 
 @processor_for(GenericResource)
 def landing_page(request, page):
@@ -91,7 +90,7 @@ def get_page_context(page, user, resource_edit=False, extended_metadata_layout=N
                    'rights': content_model.metadata.rights,
                    'sources': content_model.metadata.sources.all(),
                    'relations': content_model.metadata.relations.all(),
-                   'metadata_status': metadata_status,
+                   'metadata_status': metadata_status
                    'missing_metadata_elements': content_model.metadata.get_required_missing_elements(),
                    'supported_file_types': content_model.get_supported_upload_file_types(),
                    'allow_multiple_file_upload': content_model.can_have_multiple_files()
@@ -269,17 +268,41 @@ def get_page_context(page, user, resource_edit=False, extended_metadata_layout=N
     return context
 
 
-def check_resource_mode(request):
-    if request.method == "GET":
-        resource_mode = request.session.get('resource-mode', None)
-        if resource_mode == 'edit':
-            edit_resource = True
-            del request.session['resource-mode']
-        else:
-            edit_resource = False
+def _get_metadata_status(resource):
+    if resource.metadata.has_all_required_elements():
+        metadata_status = "Sufficient to make public"
     else:
-        edit_resource = True
+        metadata_status = "Insufficient to make public"
 
+    return metadata_status
+
+def _do_metadata_migration(resource, user):
+    # create title element
+    if not resource.metadata.title:
+        resource.metadata.create_element('title', value=resource.title)
+
+    # create abstract element
+    if not resource.metadata.description:
+        abs_elements = QualifiedDublinCoreElement.objects.filter(term='AB', object_id=resource.pk)
+        if len(abs_elements) > 0:
+            abs_element = abs_elements[0]
+            if len(abs_element.content.strip()) > 0:
+                resource.metadata.create_element('description', abstract=abs_element.content)
+
+    # create language element
+    if not resource.metadata.language:
+        language_elements = QualifiedDublinCoreElement.objects.filter(term='LG', object_id=resource.pk)
+        if len(language_elements) > 0:
+            language_element = language_elements[0]
+            code = _get_language_code(language_element.content)
+            if code:
+                resource.metadata.create_element('language', code=code)
+            else:
+                resource.metadata.create_element('language', code='eng')
+        else:
+            resource.metadata.create_element('language', code='eng')
+
+    # create the rights element
     return edit_resource
 
 def _get_metadata_status(resource):
