@@ -15,15 +15,9 @@ def go_for_tools(request, shortkey, user, tooltype, *args, **kwargs):
     if frm.is_valid():
         my_string = frm.cleaned_data.get('my_str')
         url_base = "https://google.com" # TODO change eventually...
-        res = hydroshare.get_resource_by_shortkey(shortkey)
-        if res:
-            if res.files.first():
-                f_url = str(res.files.first().resource_file)
-                f_name = f_url.split("/")[-1]  # choose the last part of the url for the file, which is it's name
-            else:
-                f_name = "none-no-resource-file"
-        else:
-            f_name = "none-no-resource-provided"
+        res = hydroshare.get_resource(shortkey)
+        f_url = str(res.files.first().resource_file)
+        f_name = f_url.split("/")[-1]  # choose the last part of the url for the file, which is it's name
 
         myParameters = { "res_id" : shortkey, "user" : user, "tool_type" : tooltype, "file_name": f_name }
         myURL = "%s?%s" % (url_base, urllib.urlencode(myParameters))

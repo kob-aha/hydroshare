@@ -28,12 +28,13 @@
                 <option value="TimeSeriesResource">Time Series Resource</option>
 {#                <option value="InstResource">RHESSys Instance Resource</option> #}
                 <option value="RefTimeSeries">HIS Referenced Time Series</option>
-                <option value="ModelInstanceResource">Model Instance Resource</option>
 <<<<<<< HEAD
+                <option value="ModelInstanceResource">Model Instance Resource</option>
                 <option value="NetcdfResource">Multidimensional Space and Time Data Resource</option>
                 <option value="ModelProgramResource">Model Program Resource</option>
 =======
->>>>>>> update create-resource.html for Model Instance Resource option
+                <option value="ToolResource">Tool Resource</option>
+>>>>>>> initial commit on new branch
             </select>
         </div>
     </div>
