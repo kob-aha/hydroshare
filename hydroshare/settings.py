@@ -288,6 +288,7 @@ INSTALLED_APPS = (
     "ref_ts",
     "hs_app_timeseries",
     "widget_tweaks",
+    "hs_tools_resource",
 )
 
 # List of processors used by RequestContext to populate the context.
