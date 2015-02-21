@@ -5,6 +5,7 @@ from hs_core.hydroshare.utils import get_file_mime_type, resource_modified
 from hs_core.models import GenericResource
 from hs_core import languages_iso
 from forms import *
+from hs_tools_resource.models import ToolResourceType
 
 @processor_for(GenericResource)
 def landing_page(request, page):
@@ -236,8 +237,15 @@ def get_page_context(page, user, resource_edit=False, extended_metadata_layout=N
 
     metadata_form = MetaDataForm(resource_mode='edit' if edit_mode else 'view',
                                  extended_metadata_layout=extended_metadata_layout)
+    #find out which tools use that type of resource
+    meta_res_types = ToolResourceType.objects.filter(tool_res_type=content_model.content_model)
+    tools = []
+    for typ in meta_res_types:
+        tools.append(typ.metadata.resource.title)
 
-    context = {'metadata_form': metadata_form,
+        context = {
+               'tools': tools,
+               'metadata_form': metadata_form,
                'title_form': title_form,
                'creator_formset': creator_formset,
                'add_creator_modal_form': add_creator_modal_form,
