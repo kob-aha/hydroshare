@@ -5,6 +5,7 @@ from hs_core.hydroshare.utils import get_file_mime_type, resource_modified
 from hs_core.models import GenericResource
 from hs_core import languages_iso
 from forms import *
+from hs_tools_resource.models import ToolResourceType
 
 @processor_for(GenericResource)
 def landing_page(request, page):
