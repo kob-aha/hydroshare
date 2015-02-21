@@ -2,6 +2,7 @@ from mezzanine.pages.page_processors import processor_for
 from hs_core.models import GenericResource
 from hs_core import languages_iso
 from forms import *
+from hs_tools_resource.models import ToolResourceType
 
 @processor_for(GenericResource)
 def landing_page(request, page):
@@ -71,7 +72,15 @@ def get_page_context(page, user, resource_edit=False, extended_metadata_layout=N
         keywords = ",".join([sub.value for sub in content_model.metadata.subjects.all()])
         languages_dict = dict(languages_iso.languages)
 
-        context = {'metadata_form': None,
+    #find out which tools use that type of resource
+    meta_res_types = ToolResourceType.objects.filter(tool_res_type=content_model.content_model)
+    tools = []
+    for typ in meta_res_types:
+        tools.append(typ.metadata.resource.title)
+
+        context = {
+                   'tools': tools,
+                   'metadata_form': None,
                    'citation': content_model.get_citation(),
                    'title': content_model.metadata.title,
                    'abstract': content_model.metadata.description,

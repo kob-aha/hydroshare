@@ -21,7 +21,7 @@
 </div>
 
 <div class="row">
-    <div class="col-md-12">{# <img src="/placeholder.png"></div> #}
+    <div class="col-md-9">{# <img src="/placeholder.png"></div> #}
 
         <table class="table">
             <tr><th>Resource Type</th><td>{{ cm|resource_type }}</td></tr>
@@ -52,6 +52,26 @@
         </table>
 
     </div>
+{% block tools %}
+        <div class="col-md-3">
+        {# how about a dynamic list of resources with urls that include their tooltype? #}
+            <div style="padding-bottom: 0.5em" class="btn-group">
+                <a class="btn btn-primary btn-lg btn-block dropdown-toggle" data-toggle="dropdown" href="#">
+                     Launch Tools . . .
+                    <span class="caret"></span>
+                </a>
+                <ul class="dropdown-menu" role="menu" style="height: auto; max-height: 200px; overflow-x: hidden;">
+                {% if tools != None %}
+                    {% for tool in tools %}
+                        <li><a href="/tools/_internal/{{ cm.short_id }}/{{ cm.user }}/{{ tool|lower|cut:" " }}/go-for-tools/">{{ tool }}</a></li>
+                    {% endfor %}
+                {% else %}
+                    <li>No Tools</li>
+                {% endif %}
+                </ul>
+            </div>
+        </div>
+    {% endblock %}
 </div>
 
     {% block core_metadata %}
