@@ -411,9 +411,6 @@ def my_resources(request, page):
     # import pydevd
     # pydevd.settrace('172.17.42.1', port=21000, suspend=False)
 
-    # from hs_core.hydroshare import users
-    # users.create_account(email="hong.yi.hello@gmail.com", username="test1", first_name="Hong", last_name="Yi", password="test123")
-
     frm = FilterForm(data=request.REQUEST)
     if frm.is_valid():
         res_cnt = 20 # 20 is hardcoded for the number of resources to show on one page, which is also hardcoded in my-resources.html
@@ -664,7 +661,6 @@ def create_resource_new_workflow(request, *args, **kwargs):
             files=request.FILES.getlist('files'),
             content=res_title
     )
-
     # Send post-create resource signal
     post_create_resource.send(sender=res_cls, resource=resource, metadata=metadata, **kwargs)
 
@@ -727,15 +723,6 @@ def create_resource(request, *args, **kwargs):
             return HttpResponseRedirect(res.get_absolute_url())
     else:
         raise ValidationError(frm.errors)
-
-@login_required
-def get_file(request, *args, **kwargs):
-    from django_irods.icommands import RodsSession
-    name = kwargs['name']
-    session = RodsSession("./", "/usr/bin")
-    session.runCmd("iinit");
-    session.runCmd('iget', [ name, 'tempfile.' + name ])
-    return HttpResponse(open(name), content_type='x-binary/octet-stream')
 
 processor_for(GenericResource)(resource_processor)
 
