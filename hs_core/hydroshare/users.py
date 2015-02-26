@@ -7,7 +7,7 @@ from django.core import signing
 
 from hs_core.models import GroupOwnership
 from .utils import get_resource_by_shortkey, user_from_id, group_from_id, get_resource_types, get_profile
-
+from django_irods import account
 
 def set_resource_owner(pk, user):
     """
@@ -166,13 +166,6 @@ def create_account(
     from django.conf import settings
 
     username = username if username else email
-
-    # useirods = getattr(settings,'USE_IRODS', False)
-    # if useirods:
-    #    from django_irods import account
-    #    iaccount = account.IrodsAccount()
-    #    iaccount.create(username)
-    #    iaccount.setPassward(username, password)
 
     groups = groups if groups else []
     groups = Group.objects.in_bulk(*groups) if groups and isinstance(groups[0], int) else groups
