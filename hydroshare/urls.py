@@ -31,6 +31,9 @@ urlpatterns = i18n_patterns("",
     url(r'^user/$', theme.UserProfileView.as_view()),
     url(r'^accounts/login/$', theme.login),
     url(r'^accounts/profile_update/$', theme.profile_update),
+    # the following url mapping is needed for password change populated
+    # from Django to iRODS when initially a user signs up and changes password immediately
+    url(r'^accounts/update/$', theme.profile_update),
     url(r'^user/(?P<user>.*)/', theme.UserProfileView.as_view()),
     url(r'^verify/(?P<token>[0-9a-zA-Z:_\-]*)/', 'hs_core.views.verify'),
     url(r'^django_irods/', include('django_irods.urls')),
