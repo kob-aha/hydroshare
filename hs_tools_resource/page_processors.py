@@ -1,98 +1,108 @@
-# __author__ = 'Shaun'
-# from mezzanine.pages.page_processors import processor_for
-# from models import TimeSeriesResource
-# from crispy_forms.layout import Layout, Fieldset, ButtonHolder, Submit, HTML
-# from forms import *
-# from hs_core import page_processors
-#
-#
-# @processor_for(TimeSeriesResource)
-# def landing_page(request, page):
-#     content_model = page.get_content_model()
-#     edit_resource = page_processors.check_resource_mode(request)
-#
-#     if not edit_resource:
-#         # get the context from hs_core
-#         context = page_processors.get_page_context(page, request.user, resource_edit=edit_resource, extended_metadata_layout=None)
-#         extended_metadata_exists = False
-#         if content_model.metadata.site or \
-#                 content_model.metadata.variable or \
-#                 content_model.metadata.method or \
-#                 content_model.metadata.processing_level or \
-#                 content_model.metadata.time_series_result:
-#             extended_metadata_exists = True
-#
-#         context['extended_metadata_exists'] = extended_metadata_exists
-#         context['site'] = content_model.metadata.site
-#         context['variable'] = content_model.metadata.variable
-#         context['method'] = content_model.metadata.method
-#         context['processing_level'] = content_model.metadata.processing_level
-#         context['timeseries_result'] = content_model.metadata.time_series_result
-#     else:
-#         site_form = SiteForm(instance=content_model.metadata.site, res_short_id=content_model.short_id,
-#                              element_id=content_model.metadata.site.id if content_model.metadata.site else None)
-#
-#         variable_form = VariableForm(instance=content_model.metadata.variable, res_short_id=content_model.short_id,
-#                              element_id=content_model.metadata.variable.id if content_model.metadata.variable else None)
-#
-#         method_form = MethodForm(instance=content_model.metadata.method, res_short_id=content_model.short_id,
-#                                  element_id=content_model.metadata.method.id if content_model.metadata.method else None)
-#
-#         processing_level_form = ProcessingLevelForm(instance=content_model.metadata.processing_level,
-#                                                     res_short_id=content_model.short_id,
-#                                                     element_id=content_model.metadata.processing_level.id
-#                                                     if content_model.metadata.processing_level else None)
-#
-#         timeseries_result_form = TimeSeriesResultForm(instance=content_model.metadata.time_series_result,
-#                                                       res_short_id=content_model.short_id,
-#                                                       element_id=content_model.metadata.time_series_result.id
-#                                                       if content_model.metadata.time_series_result else None)
-#         ext_md_layout = Layout(
-#                                 AccordionGroup('Site (required)',
-#                                     HTML("<div class='form-group' id='site'> "
-#                                         '{% load crispy_forms_tags %} '
-#                                         '{% crispy site_form %} '
-#                                      '</div>'),
-#                                 ),
-#
-#                                 AccordionGroup('Variable (required)',
-#                                      HTML('<div class="form-group" id="variable"> '
-#                                         '{% load crispy_forms_tags %} '
-#                                         '{% crispy variable_form %} '
-#                                      '</div> '),
-#                                 ),
-#
-#                                 AccordionGroup('Method (required)',
-#                                      HTML('<div class="form-group" id="method"> '
-#                                         '{% load crispy_forms_tags %} '
-#                                         '{% crispy method_form %} '
-#                                      '</div> '),
-#                                 ),
-#
-#                                 AccordionGroup('Processing Level (required)',
-#                                      HTML('<div class="form-group" id="processinglevel"> '
-#                                         '{% load crispy_forms_tags %} '
-#                                         '{% crispy processing_level_form %} '
-#                                      '</div> '),
-#                                 ),
-#
-#                                 AccordionGroup('Time Series Result (required)',
-#                                      HTML('<div class="form-group" id="timeseriesresult"> '
-#                                         '{% load crispy_forms_tags %} '
-#                                         '{% crispy timeseries_result_form %} '
-#                                      '</div> '),
-#                                 ),
-#                         )
-#
-#
-#         # get the context from hs_core
-#         context = page_processors.get_page_context(page, request.user, resource_edit=edit_resource, extended_metadata_layout=ext_md_layout)
-#
-#         context['resource_type'] = 'Time Series Resource'
-#         context['site_form'] = site_form
-#         context['variable_form'] = variable_form
-#         context['method_form'] = method_form
-#         context['processing_level_form'] = processing_level_form
-#         context['timeseries_result_form'] = timeseries_result_form
-#
-#     return context
+__author__ = 'Shaun'
+from mezzanine.pages.page_processors import processor_for
+from models import *
+from crispy_forms.layout import Layout, Fieldset, ButtonHolder, Submit, HTML
+from forms import *
+from hs_core import page_processors
+from hs_core.forms import MetaDataElementDeleteForm
+from django.forms.models import formset_factory
+
+
+@processor_for(ToolResource)
+def landing_page(request, page):
+    content_model = page.get_content_model()
+    edit_resource = page_processors.check_resource_mode(request)
+
+    if not edit_resource:
+        # get the context from hs_core
+        context = page_processors.get_page_context(page, request.user, resource_edit=edit_resource, extended_metadata_layout=None)
+        extended_metadata_exists = False
+        if content_model.metadata.url_base.first() or \
+                content_model.metadata.res_types.first():
+            extended_metadata_exists = True
+
+        context['extended_metadata_exists'] = extended_metadata_exists
+        context['url_base'] = content_model.metadata.url_base.first()
+        context['res_types'] = content_model.metadata.res_types.all()
+        context['fees'] = content_model.metadata.fees.all()
+        context['version'] = content_model.metadata.version.first()
+    else:
+        url_base_form = UrlBaseForm(instance=content_model.metadata.url_bases.first(), res_short_id=content_model.short_id,
+                             element_id=content_model.metadata.url_bases.first().id if content_model.metadata.url_bases.first() else None)
+
+        ResTypeFormSetEdit = formset_factory(wraps(ResTypeForm)(partial(ResTypeForm, allow_edit=edit_resource)), formset=BaseResTypeFormSet, extra=0)
+        res_type_formset = ResTypeFormSetEdit(initial=content_model.metadata.res_types.all().values(), prefix='res_type')
+        add_res_type_modal_form = ResTypeForm(allow_edit=edit_resource, res_short_id=content_model.short_id)
+        ext_md_layout = Layout(
+                                ResTypeLayoutEdit,
+                                ModalDialogLayoutAddResType
+                            )
+        for form in res_type_formset.forms:
+            if len(form.initial) > 0:
+                form.delete_modal_form = MetaDataElementDeleteForm(content_model.short_id, 'res_type', form.initial['id'])
+                form.action = "/hsapi/_internal/%s/toolresourcetype/%s/update-metadata/" % (content_model.short_id, form.initial['id'])
+                form.number = form.initial['id']
+            else:
+                form.action = "/hsapi/_internal/%s/toolresourcetype/add-metadata/" % content_model.short_id
+
+        context = page_processors.get_page_context(page, request.user, resource_edit=edit_resource, extended_metadata_layout=ext_md_layout)
+        context['res_type_formset'] = res_type_formset
+        context['add_res_type_modal_form'] = add_res_type_modal_form
+
+        fees_form = FeeForm(instance=content_model.metadata.fees.all(), res_short_id=content_model.short_id,
+                                 element_id=content_model.metadata.fees.first().id if content_model.metadata.fees.first() else None)
+
+        version_form = VersionForm(instance=content_model.metadata.versions.all(),
+                                                    res_short_id=content_model.short_id,
+                                                    element_id=content_model.metadata.versions.first().id
+                                                    if content_model.metadata.versions.first() else None)
+
+        ext_md_layout += Layout(
+                                AccordionGroup('Url Base (required)',
+                                    HTML("<div class='form-group' id='url_bases'> "
+                                        '{% load crispy_forms_tags %} '
+                                        '{% crispy url_base_form %} '
+                                     '</div>'),
+                                ),
+
+                                AccordionGroup('Resource Types (required)',
+                                     HTML('<div class="form-group" id="res_types"> '
+                                        '{% load crispy_forms_tags %} '
+                                        '{% crispy res_types_form %} '
+                                     '</div> '),
+                                ),
+
+                                AccordionGroup('Method (required)',
+                                     HTML('<div class="form-group" id="method"> '
+                                        '{% load crispy_forms_tags %} '
+                                        '{% crispy method_form %} '
+                                     '</div> '),
+                                ),
+
+                                AccordionGroup('Fees (optional)',
+                                     HTML('<div class="form-group" id="fees"> '
+                                        '{% load crispy_forms_tags %} '
+                                        '{% crispy fees_form %} '
+                                     '</div> '),
+                                ),
+
+                                AccordionGroup('Version (optional)',
+                                     HTML('<div class="form-group" id="fees"> '
+                                        '{% load crispy_forms_tags %} '
+                                        '{% crispy version_form %} '
+                                     '</div> '),
+                                ),
+                        )
+
+
+        # get the context from hs_core
+        context = page_processors.get_page_context(page, request.user, resource_edit=edit_resource, extended_metadata_layout=ext_md_layout)
+
+        context['resource_type'] = 'Tool Resource'
+        context['url_base_form'] = url_base_form
+        context['res_types_formset'] = res_type_formset
+        context['add_res_type_modal_form'] = add_res_type_modal_form
+        context['fees_form'] = fees_form
+        context['version_form'] = version_form
+
+    return context

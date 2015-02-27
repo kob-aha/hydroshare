@@ -198,7 +198,6 @@ class ToolVersion(AbstractMetaDataElement):
         else:
             raise ValidationError("Value of Tool Version is missing.")
 
-
     @classmethod
     def update(cls, element_id, **kwargs):
         version = ToolVersion.objects.get(id=element_id)
@@ -222,10 +221,11 @@ class ToolVersion(AbstractMetaDataElement):
 class ToolMetaData(CoreMetaData):
     # tool license is implemented via existing metadata element "rights" with attr. "statement" and "url"
     # should be only one Request Url Base metadata element
-    url_bases = generic.GenericRelation(RequestUrlBase)
+    url_base = generic.GenericRelation(RequestUrlBase)
     res_types = generic.GenericRelation(ToolResourceType)
     fees = generic.GenericRelation(Fee)
-    versions = generic.GenericRelation(ToolVersion)
+    # should be only one Version metadata element
+    version = generic.GenericRelation(ToolVersion)
     _tool_resource = generic.GenericRelation(ToolResource)
 
     @classmethod

@@ -22,7 +22,7 @@ def go_for_tools(request, shortkey, user, tooltype, *args, **kwargs):
                 f_name = f_url.split("/")[-1]  # choose the last part of the url for the file, which is it's name
             else:
                 f_name = "none-no-resource-file"
-            url_base = res.metadata.url_bases.first() or "http://www.example.com" # if there isn't a url_base
+            url_base = res.metadata.url_base.first() or "http://www.example.com" # if there isn't a url_base
         else:
             f_name = "none-no-resource-provided"
 
