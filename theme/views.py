@@ -55,21 +55,22 @@ def profile_update(request, template="accounts/account_profile_update.html"):
         user = form.save()
         # change corresponding iRODS account password accordingly when USE_IRODS is true but IRODS_GLOBAL_SESSION is FALSE and the user is not superuser
         if getattr(settings, 'USE_IRODS', False) and not getattr(settings, 'IRODS_GLOBAL_SESSION', False) and not request.user.is_superuser:
-            # change password for the corresponding iRODS account accordingly upon success
-            from django_irods import account
-            irods_account = account.IrodsAccount()
             newpwd = form.cleaned_data.get("password1")
-            uname = form.cleaned_data.get("username")
-            irods_account.setPassward(uname, newpwd)
-            # also needs to create a user session corresponding to the user just created to get ready for resource creation
-            from hs_core.models import irods_storage
-            if irods_storage.session and irods_storage.environment:
-                try:
-                    irods_storage.session.run('iexit full', None, irods_storage.environment.auth)
-                except:
-                    pass # try to remove session if there is one, pass without error out if the previous session cannot be removed
+            if newpwd:
+                # change password for the corresponding iRODS account accordingly upon success
+                from django_irods import account
+                irods_account = account.IrodsAccount()
+                uname = form.cleaned_data.get("username")
+                irods_account.setPassward(uname, newpwd)
+                # also needs to create a user session corresponding to the user just created to get ready for resource creation
+                from hs_core.models import irods_storage
+                if irods_storage.session and irods_storage.environment:
+                    try:
+                        irods_storage.session.run('iexit full', None, irods_storage.environment.auth)
+                    except:
+                        pass # try to remove session if there is one, pass without error out if the previous session cannot be removed
 
-            irods_storage.set_user_session(username=uname, password=newpwd, userid=request.user.id)
+                irods_storage.set_user_session(username=uname, password=newpwd, userid=request.user.id)
 
         info(request, _("Profile updated"))
         try:
