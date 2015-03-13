@@ -1,25 +1,23 @@
 #!/bin/sh
 
-# initiates a full build of hydroshare inlcuding hs_base if it does not already exist.
+# ensure docker is version 1.3.0 or greater
 
-# set current working directory as CWD
-CWD=$(pwd)
+DOCKER_VERSION=$(docker version | grep "Client version" | tr -s ' ' | cut -d ' ' -f 3)
+if [[ $DOCKER_VERSION < "1.3.0" ]]; then
+    echo "Please install Docker version 1.3.0 or greater to use this script"
+    exit;
+fi
 
 # get submodules
 echo "### get git submodules ###"
 git submodule init && git submodule update
 
 # build hs_base if it does not exist
-IID=$(docker images | grep hs_base | tr -s ' ' | cut -d ' ' -f 3)
-if [ -z $IID ];
+IMAGE_ID=$(docker images | grep hs_base | tr -s ' ' | cut -d ' ' -f 3)
+if [ -z $IMAGE_ID ];
     then
         echo "### pull hs_base image from docker hub ###"
         docker pull mjstealey/hs_base;
-        #echo "### build hs_base ###"
-        #pushd $CWD
-        #cd hs_docker_base
-        #docker build -t hs_base .
-        #popd;
     else
         echo "### hs_base already exists ###";
 fi
@@ -32,12 +30,12 @@ fig up -d
 
 # load pg.development.sql into postgis database
 echo "### load clean pg.development.sql database from the running hydroshare container ###"
-CID=$(docker ps -a | grep hydroshare_hydroshare_1 | cut -d ' ' -f 1)
-docker exec $CID dropdb -U postgres -h postgis postgres
-docker exec $CID createdb -U postgres -h postgis postgres
-docker exec $CID psql -U postgres -h postgis -w -c 'create extension postgis;'
-docker exec $CID psql -U postgres -h postgis -f pg.development.sql
-docker exec $CID python manage.py makemigrations
-docker exec $CID python manage.py migrate
+CONTAINER_ID=$(docker ps -a | grep hydroshare_hydroshare_1 | cut -d ' ' -f 1)
+docker exec $CONTAINER_ID dropdb -U postgres -h postgis postgres
+docker exec $CONTAINER_ID createdb -U postgres -h postgis postgres
+docker exec $CONTAINER_ID psql -U postgres -h postgis -w -c 'create extension postgis;'
+docker exec $CONTAINER_ID psql -U postgres -h postgis -f pg.development.sql
+docker exec $CONTAINER_ID python manage.py makemigrations
+docker exec $CONTAINER_ID python manage.py migrate
 
 echo "### complete ###"
