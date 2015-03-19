@@ -35,6 +35,8 @@ urlpatterns = i18n_patterns("",
     # from Django to iRODS when initially a user signs up and changes password immediately
     url(r'^accounts/update/$', theme.profile_update),
     url(r'^user/(?P<user>.*)/', theme.UserProfileView.as_view()),
+    url(r'^comment/$', theme.comment),
+    url(r'^rating/$', theme.rating),
     url(r'^verify/(?P<token>[0-9a-zA-Z:_\-]*)/', 'hs_core.views.verify'),
     url(r'^django_irods/', include('django_irods.urls')),
     url(r'^django_docker_processes/', include('django_docker_processes.urls')),

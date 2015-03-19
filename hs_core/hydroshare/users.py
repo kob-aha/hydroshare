@@ -186,14 +186,6 @@ def create_account(
             password=password,
         )
 
-    u.is_staff = False
-    if not active:
-        u.is_active=False
-    u.save()
-
-    u.groups = groups
-    ApiKey.objects.get_or_create(user=u)
-
     try:
         token = signing.dumps('verify_user_email:{0}:{1}'.format(u.pk, u.email))
         u.email_user(
@@ -208,7 +200,13 @@ go to http://{domain}/verify/{token}/ and verify your account.
     except:
         pass # FIXME should log this instead of ignoring it.
 
+    u.is_staff = False
+    if not active:
+        u.is_active=False
+    u.save()
+
     u.groups = groups
+    ApiKey.objects.get_or_create(user=u)
 
     # create iRODS account accordingly when USE_IRODS is true but IRODS_GLOBAL_SESSION is FALSE and the user is not superuser
     if getattr(settings,'USE_IRODS', False) and not getattr(settings, 'IRODS_GLOBAL_SESSION', False) and not superuser:
@@ -224,6 +222,7 @@ go to http://{domain}/verify/{token}/ and verify your account.
                 pass # try to remove session if there is one, pass without error out if the previous session cannot be removed
 
         irods_storage.set_user_session(username=username, password=password, userid=u.id)
+    u.groups = groups
 
     return u
 
