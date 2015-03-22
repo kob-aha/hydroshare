@@ -7,6 +7,7 @@ from crispy_forms.bootstrap import *
 from models import *
 from hs_core.forms import BaseFormHelper
 
+#TODO: reference hs_core.forms
 class UrlBaseFormHelper(BaseFormHelper):
     def __init__(self, allow_edit=True, res_short_id=None, element_id=None, element_name=None,  *args, **kwargs):
 
@@ -32,24 +33,25 @@ class UrlBaseForm(ModelForm):
 
 
 class UrlBaseValidationForm(forms.Form):
-    value = forms.CharField(null=True, max_length="500")
+    value = forms.CharField(max_length="500")
 
 
 class ResTypeFormHelper(BaseFormHelper):
-    def __init__(self, res_short_id=None, element_id=None, element_name=None, *args, **kwargs):
+    def __init__(self, allow_edit=True, res_short_id=None, element_id=None, element_name=None, *args, **kwargs):
         field_width = 'form-control input-sm'
         # change the fields name here
         layout = Layout(
                      Field('tool_res_type', css_class=field_width),
                 )
 
-        super(ResTypeFormHelper, self).__init__(res_short_id, element_id, element_name, layout,  *args, **kwargs)
+        super(ResTypeFormHelper, self).__init__(allow_edit, res_short_id, element_id, element_name, layout,  *args, **kwargs)
 
 
 class ResTypeForm(ModelForm):
-    def __init__(self, allow_edit=False, res_short_id=None, element_id=None, *args, **kwargs):
+    def __init__(self, allow_edit=True, res_short_id=None, element_id=None, *args, **kwargs):
         super(ResTypeForm, self).__init__(*args, **kwargs)
-        self.helper = ResTypeFormHelper(res_short_id, element_id, element_name='ToolResourceType')
+        self.helper = ResTypeFormHelper(allow_edit, res_short_id, element_id, element_name='ToolResourceType')
+        #TODO: implement a delete form
         self.delete_modal_form = None
         self.number = 0
         self.allow_edit = allow_edit
@@ -57,10 +59,7 @@ class ResTypeForm(ModelForm):
             self.action = "/hsapi/_internal/%s/toolresourcetype/add-metadata/" % res_short_id
         else:
             self.action = ""
-        if not allow_edit:
-            for field in self.fields.values():
-                field.widget.attrs['readonly'] = True
-                field.widget.attrs['style'] = "background-color:white;"
+
     @property
     def form_id(self):
         form_id = 'id_toolresourcetype_%s' % self.number
@@ -79,24 +78,24 @@ class ResTypeForm(ModelForm):
 
 
 class ResTypeValidationForm(forms.Form):
-    tool_res_type = forms.TextField(null=True)
+    tool_res_type = forms.CharField()
 
 
-class BaseResTypeFormSet(BaseFormSet):
-    def add_fields(self, form, index):
-        super(BaseResTypeFormSet, self).add_fields(form, index)
-
-
-    def get_metadata_dict(self):
-        res_types_data = []
-        for form in self.forms:
-            res_type_data = {k: v for k, v in form.cleaned_data.iteritems()}
-
-            res_types_data.append({'res_type': res_type_data})
-
-        return res_types_data
-
-ResTypeFormSet = formset_factory(ResTypeForm, formset=BaseResTypeFormSet, extra=0)
+# class BaseResTypeFormSet(BaseFormSet):
+#     def add_fields(self, form, index):
+#         super(BaseResTypeFormSet, self).add_fields(form, index)
+#
+#
+#     def get_metadata_dict(self):
+#         res_types_data = []
+#         for form in self.forms:
+#             res_type_data = {k: v for k, v in form.cleaned_data.iteritems()}
+#
+#             res_types_data.append({'ToolResourceType': res_type_data})
+#
+#         return res_types_data
+#
+# ResTypeFormSet = formset_factory(ResTypeForm, formset=BaseResTypeFormSet, extra=0)
 
 
 ModalDialogLayoutAddResType = Layout(
@@ -128,17 +127,6 @@ ModalDialogLayoutAddResType = Layout(
                             )
                         )
 
-# change here for meta extraction frontend
-ResTypeLayoutView = Layout(
-                            HTML('{% load crispy_forms_tags %} '
-                                 '{% for form in res_type_formset.forms %} '
-                                     '<div class="item"> '
-                                     '{% crispy form %} '
-                                     '</div> '
-                                 '{% endfor %}'
-                                ),
-                        )
-
 ResTypeLayoutEdit = Layout(
                             HTML('{% load crispy_forms_tags %} '
                                  '{% for form in res_type_formset.forms %} '
@@ -167,7 +155,7 @@ ResTypeLayoutEdit = Layout(
 
 
 class FeeFormHelper(BaseFormHelper):
-    def __init__(self, res_short_id=None, element_id=None, element_name=None, *args, **kwargs):
+    def __init__(self, allow_edit=True, res_short_id=None, element_id=None, element_name=None, *args, **kwargs):
         field_width = 'form-control input-sm'
         # change the fields name here
         layout = Layout(
@@ -175,13 +163,13 @@ class FeeFormHelper(BaseFormHelper):
                      Field('value', css_class=field_width),
                 )
 
-        super(ResTypeFormHelper, self).__init__(res_short_id, element_id, element_name, layout,  *args, **kwargs)
+        super(FeeFormHelper, self).__init__(allow_edit, res_short_id, element_id, element_name, layout,  *args, **kwargs)
 
 
 class FeeForm(ModelForm):
-    def __init__(self, allow_edit=False, res_short_id=None, element_id=None, *args, **kwargs):
-        super(ResTypeForm, self).__init__(*args, **kwargs)
-        self.helper = ResTypeFormHelper(res_short_id, element_id, element_name='ToolResourceType')
+    def __init__(self, allow_edit=True, res_short_id=None, element_id=None, *args, **kwargs):
+        super(FeeForm, self).__init__(*args, **kwargs)
+        self.helper = FeeFormHelper(allow_edit, res_short_id, element_id, element_name='Fee')
         self.delete_modal_form = None
         self.number = 0
         self.allow_edit = allow_edit
@@ -189,10 +177,7 @@ class FeeForm(ModelForm):
             self.action = "/hsapi/_internal/%s/fee/add-metadata/" % res_short_id
         else:
             self.action = ""
-        if not allow_edit:
-            for field in self.fields.values():
-                field.widget.attrs['readonly'] = True
-                field.widget.attrs['style'] = "background-color:white;"
+
     @property
     def form_id(self):
         form_id = 'id_fee_%s' % self.number
@@ -210,25 +195,25 @@ class FeeForm(ModelForm):
 
 
 class FeeValidationForm(forms.Form):
-    description = forms.TextField()
+    description = forms.CharField(min_length="0")
     value = forms.DecimalField(max_digits=10, decimal_places=2)
 
 
-class BaseFeeFormSet(BaseFormSet):
-    def add_fields(self, form, index):
-        super(BaseFeeFormSet, self).add_fields(form, index)
+# class BaseFeeFormSet(BaseFormSet):
+#     def add_fields(self, form, index):
+#         super(BaseFeeFormSet, self).add_fields(form, index)
 
 
-    def get_metadata_dict(self):
-        fees_data = []
-        for form in self.forms:
-            fee_data = {k: v for k, v in form.cleaned_data.iteritems()}
+    # def get_metadata_dict(self):
+    #     fees_data = []
+    #     for form in self.forms:
+    #         fee_data = {k: v for k, v in form.cleaned_data.iteritems()}
+    #
+    #         fees_data.append({'Fee': fee_data})
+    #
+    #     return fees_data
 
-            fees_data.append({'fee': fee_data})
-
-        return fees_data
-
-FeeFormSet = formset_factory(FeeForm, formset=BaseFeeFormSet, extra=0)
+#FeeFormSet = formset_factory(FeeForm, formset=BaseFeeFormSet, extra=0)
 
 
 ModalDialogLayoutAddFee = Layout(
@@ -258,17 +243,6 @@ ModalDialogLayoutAddFee = Layout(
                                     '</div>'
                                 '</div>'
                             )
-                        )
-
-# change here for meta extraction frontend
-FeeLayoutView = Layout(
-                            HTML('{% load crispy_forms_tags %} '
-                                 '{% for form in fee_formset.forms %} '
-                                     '<div class="item"> '
-                                     '{% crispy form %} '
-                                     '</div> '
-                                 '{% endfor %}'
-                                ),
                         )
 
 FeeLayoutEdit = Layout(
@@ -317,11 +291,10 @@ class VersionForm(ModelForm):
         model = ToolVersion
         fields = ['value']
         exclude = ['content_object']
-        widgets = {'value': forms.TextInput()}
 
 
 class VersionValidationForm(forms.Form):
-    value = forms.CharField(null=True, max_length="500")
+    value = forms.CharField(max_length="500")
 
 
 
