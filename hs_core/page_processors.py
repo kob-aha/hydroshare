@@ -246,32 +246,32 @@ def get_page_context(page, user, resource_edit=False, extended_metadata_layout=N
     for typ in meta_res_types:
         tools.append(typ.metadata.resource.title)
 
-        context = {
-               'tools': tools,
-               'metadata_form': metadata_form,
-               'title_form': title_form,
-               'creator_formset': creator_formset,
-               'add_creator_modal_form': add_creator_modal_form,
-               'creator_profilelink_formset': None,
-               'title': content_model.metadata.title,
-               'abstract_form': abstract_form,
-               'contributor_formset': contributor_formset,
-               'add_contributor_modal_form': add_contributor_modal_form,
-               'relation_formset': relation_formset,
-               'add_relation_modal_form': add_relation_modal_form,
-               'source_formset': source_formset,
-               'add_source_modal_form': add_source_modal_form,
-               'rights_form': rights_form,
-               #'identifier_formset': identifier_formset,
-               'language_form': language_form,
-               #'valid_date_form': valid_date_form,
-               'coverage_temporal_form': coverage_temporal_form,
-               'coverage_spatial_form': coverage_spatial_form,
-               #'format_formset': format_formset,
-               'subjects_form': subjects_form,
-               'metadata_status': metadata_status,
-               'citation': content_model.get_citation(),
-               'extended_metadata_layout': extended_metadata_layout}
+    context = {
+           'tools': tools,
+           'metadata_form': metadata_form,
+           'title_form': title_form,
+           'creator_formset': creator_formset,
+           'add_creator_modal_form': add_creator_modal_form,
+           'creator_profilelink_formset': None,
+           'title': content_model.metadata.title,
+           'abstract_form': abstract_form,
+           'contributor_formset': contributor_formset,
+           'add_contributor_modal_form': add_contributor_modal_form,
+           'relation_formset': relation_formset,
+           'add_relation_modal_form': add_relation_modal_form,
+           'source_formset': source_formset,
+           'add_source_modal_form': add_source_modal_form,
+           'rights_form': rights_form,
+           #'identifier_formset': identifier_formset,
+           'language_form': language_form,
+           #'valid_date_form': valid_date_form,
+           'coverage_temporal_form': coverage_temporal_form,
+           'coverage_spatial_form': coverage_spatial_form,
+           #'format_formset': format_formset,
+           'subjects_form': subjects_form,
+           'metadata_status': metadata_status,
+           'citation': content_model.get_citation(),
+           'extended_metadata_layout': extended_metadata_layout}
 
     return context
 

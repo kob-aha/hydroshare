@@ -221,11 +221,11 @@ class ToolVersion(AbstractMetaDataElement):
 class ToolMetaData(CoreMetaData):
     # tool license is implemented via existing metadata element "rights" with attr. "statement" and "url"
     # should be only one Request Url Base metadata element
-    url_base = generic.GenericRelation(RequestUrlBase)
+    url_bases = generic.GenericRelation(RequestUrlBase)
     res_types = generic.GenericRelation(ToolResourceType)
     fees = generic.GenericRelation(Fee)
     # should be only one Version metadata element
-    version = generic.GenericRelation(ToolVersion)
+    versions = generic.GenericRelation(ToolVersion)
     _tool_resource = generic.GenericRelation(ToolResource)
 
     @classmethod
