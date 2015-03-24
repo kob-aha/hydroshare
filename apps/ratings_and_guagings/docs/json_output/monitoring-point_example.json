@@ -1,0 +1,8 @@
+{"id": "419009", "name": "Peel River At Tamworth", "shape": {
+    "type": "Point",
+    "coordinates": [150.9264, -31.0908]
+}, "cease_to_flow": "-0.25",
+    "control": "Gravel",
+    "verticalDatum": "AHD",
+    "conversiongroup_set": ["http://waterml2.csiro.au/rgs-api/v1/conversion-group/8/"],
+    "rangeGroups": []}

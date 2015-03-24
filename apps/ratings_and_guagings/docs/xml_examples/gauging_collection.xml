@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wmlrgs:Collection xmlns:xlink="http://www.w3.org/1999/xlink" 
+  xmlns:gml="http://www.opengis.net/gml/3.2"
+  xmlns:wmlrgs="http://www.opengis.net/waterml-part2/1.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:wml2="http://www.opengis.net/waterml/2.0"
+  xsi:schemaLocation="http://www.opengis.net/waterml/2.0 collection.xsd" 
+  gml:id="collection-response">
+
+  <wmlrgs:metadata>
+    <wml2:DocumentMetadata gml:id="document-metadata">
+      <gml:description>Service metadata describing the nature of the collection document.</gml:description>
+      <gml:descriptionReference xlink:href="http://waterml2.csiro.au" xlink:title="Base page describing service"/>
+      <wml2:generationDate>2015-01-28T12:05:59.969642-06:00</wml2:generationDate>
+      <wml2:version xlink:href="http://www.opengis.net/waterml-part2/1.0" xlink:title="WaterML2.0 part 2"/>
+      <wml2:generationSystem>Prototype RESTful service for WaterML2.0 part 2</wml2:generationSystem>
+    </wml2:DocumentMetadata>
+  </wmlrgs:metadata>
+
+  
+ 
+  
+
+  
+  <wmlrgs:gaugingMember xlink:href="http://waterml2.csiro.au/rgs-api/v1/gauging/18953/" xlink:title="18953"/>
+  
+  <wmlrgs:gaugingMember xlink:href="http://waterml2.csiro.au/rgs-api/v1/gauging/18868/" xlink:title="18868"/>
+  
+
+</wmlrgs:Collection>
+
