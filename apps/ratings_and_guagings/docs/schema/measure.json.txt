@@ -1,0 +1,19 @@
+{
+	"$schema":"http://json-schema.org/draft-03/schema#",
+	"id":"http://shapechange.net/tmp/ows9/json/measure.json",
+	"title":"measure",
+	"type":"object",
+	"properties":{
+		"value":{
+			"title":"measure value",
+			"type":"number",
+			"required":true
+		},
+		"unit":{
+			"title":"unit of measure",
+			"description":"the value may be a conventional unit of measure symbol or the URI of the definition of a unit of measure"  
+			"type":"string",
+			"required":true
+		}
+	}
+}

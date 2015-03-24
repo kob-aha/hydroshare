@@ -1,0 +1,75 @@
+{"models": {
+    "TablePointSerializer": {
+        "id": "TablePointSerializer",
+        "properties": {
+            "fromValue": {
+                "allowableValues": {
+                    "max": null,
+                    "defaultValue": null,
+                    "readOnly": false,
+                    "valueType": "RANGE",
+                    "min": null
+                },
+                "required": true,
+                "type": "decimal"
+            },
+            "quality": {
+                "allowableValues": {
+                    "max": null,
+                    "defaultValue": null,
+                    "readOnly": false,
+                    "valueType": "RANGE",
+                    "min": null
+                },
+                "required": true,
+                "type": "string"
+            },
+            "toValue": {
+                "allowableValues": {
+                    "max": null,
+                    "defaultValue": null,
+                    "readOnly": false,
+                    "valueType": "RANGE",
+                    "min": null
+                },
+                "required": true,
+                "type": "decimal"
+            }
+        }
+    }
+}, "basePath": "http://waterml2.csiro.au/rgs-api/v1/", "apis": [
+    {
+        "operations": [
+            {
+                "httpMethod": "GET",
+                "notes": "API endpoint that represents a list of all table points",
+                "nickname": "Table_Point_List",
+                "responseClass": "TablePointSerializer",
+                "summary": "API endpoint that represents a list of all table points"
+            }
+        ],
+        "path": "/table-point/",
+        "description": "API endpoint that represents a list of all table points"
+    },
+    {
+        "operations": [
+            {
+                "responseClass": "TablePointSerializer",
+                "parameters": [
+                    {
+                        "dataType": "string",
+                        "paramType": "path",
+                        "required": true,
+                        "name": "pk"
+                    }
+                ],
+                "notes": "API endpoint that represents a single table point",
+                "summary": "API endpoint that represents a single table point",
+                "httpMethod": "GET",
+                "nickname": "Table_Point_Detail"
+            }
+        ],
+        "path": "/table-point/{pk}/",
+        "description": "API endpoint that represents a single table point"
+    }
+]}

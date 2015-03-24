@@ -1,0 +1,27 @@
+{
+	"$schema":"http://json-schema.org/draft-03/schema#",
+	"id":"http://waterml2.csiro.au/part2/json/rgs-ie/Conversion.json",
+	"title":"Conversion",
+	"type":"object",
+	"properties":{
+				"monitoringPoint":{
+					"title":"monitoringPoint",
+					"type":"string",
+					"format":"uri",
+					"required":true
+				},
+				"id":{
+					"title":"id",
+					"type":"string",
+					"required":true
+				},
+				"paramFrom":{
+					"title":"paramFrom",
+					"$ref":"http://waterml2.csiro.au/part2/json/rgs-ie/Parameter.json"
+				},
+				"paramTo":{
+					"title":"paramTo",
+					"$ref":"http://waterml2.csiro.au/part2/json/rgs-ie/Parameter.json"
+				}
+	}
+}

@@ -282,15 +282,14 @@ INSTALLED_APPS = (
     "hs_core",
     "hs_metrics",
     #"hs_rhessys_inst_resource",
-    #"django_docker_processes",
     "hs_geo_raster_resource",
     "djcelery",
     "ref_ts",
     "hs_modelinstance",
     "hs_app_timeseries",
     "widget_tweaks",
-    "hs_app_netCDF",
-    "hs_model_program",
+    "rest_framework",
+    "ratings_and_guagings",
 )
 
 # List of processors used by RequestContext to populate the context.

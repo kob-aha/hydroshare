@@ -1,0 +1,240 @@
+{"id": "419009-100.00-141-100",
+    "paramFrom": {
+        "id": "100.00",
+        "description": "",
+        "external_definition": "http://neiivocab.bom.gov.au/std/water/xml/wio0.2/property/wdtf-parameters/WaterCourseLevel_m"
+    },
+    "paramTo": {
+        "id": "141",
+        "description": "",
+        "external_definition": "http://neiivocab.bom.gov.au/std/water/xml/wio0.2/property/wdtf-parameters/WaterCourseDischarge_m3s"
+    }
+    , "conversionperiod_set": ["http://waterml2.csiro.au/rgs-api/v1/conversion-period/371/"]
+    ,"monitoringPoint": "http://waterml2.csiro.au/rgs-api/v1/monitoring-point/419009/"
+    ,"points": [
+    {
+        "fromValue": "-1.00000",
+        "toValue": "0.00000",
+        "quality": "http://www.kisters.com.au/hydstra/quality-codes/140"
+    },
+    {
+        "fromValue": "-0.57000",
+        "toValue": "0.00000",
+        "quality": "http://www.kisters.com.au/hydstra/quality-codes/140"
+    },
+    {
+        "fromValue": "-0.56000",
+        "toValue": "0.40000",
+        "quality": "http://www.kisters.com.au/hydstra/quality-codes/140"
+    },
+    {
+        "fromValue": "-0.54000",
+        "toValue": "0.80000",
+        "quality": "http://www.kisters.com.au/hydstra/quality-codes/140"
+    },
+    {
+        "fromValue": "-0.52000",
+        "toValue": "2.00000",
+        "quality": "http://www.kisters.com.au/hydstra/quality-codes/140"
+    },
+    {
+        "fromValue": "-0.50000",
+        "toValue": "3.40000",
+        "quality": "http://www.kisters.com.au/hydstra/quality-codes/140"
+    },
+    {
+        "fromValue": "-0.48000",
+        "toValue": "5.00000",
+        "quality": "http://www.kisters.com.au/hydstra/quality-codes/140"
+    },
+    {
+        "fromValue": "-0.46000",
+        "toValue": "6.80000",
+        "quality": "http://www.kisters.com.au/hydstra/quality-codes/140"
+    },
+    {
+        "fromValue": "-0.44000",
+        "toValue": "9.10000",
+        "quality": "http://www.kisters.com.au/hydstra/quality-codes/140"
+    },
+    {
+        "fromValue": "-0.42000",
+        "toValue": "12.00000",
+        "quality": "http://www.kisters.com.au/hydstra/quality-codes/140"
+    },
+    {
+        "fromValue": "-0.40000",
+        "toValue": "15.50000",
+        "quality": "http://www.kisters.com.au/hydstra/quality-codes/140"
+    },
+    {
+        "fromValue": "-0.36000",
+        "toValue": "25.00000",
+        "quality": "http://www.kisters.com.au/hydstra/quality-codes/140"
+    },
+    {
+        "fromValue": "-0.32000",
+        "toValue": "39.50000",
+        "quality": "http://www.kisters.com.au/hydstra/quality-codes/140"
+    },
+    {
+        "fromValue": "-0.25000",
+        "toValue": "79.50000",
+        "quality": "http://www.kisters.com.au/hydstra/quality-codes/140"
+    },
+    {
+        "fromValue": "-0.20000",
+        "toValue": "123.00000",
+        "quality": "http://www.kisters.com.au/hydstra/quality-codes/140"
+    },
+    {
+        "fromValue": "-0.15000",
+        "toValue": "186.00000",
+        "quality": "http://www.kisters.com.au/hydstra/quality-codes/140"
+    },
+    {
+        "fromValue": "-0.10000",
+        "toValue": "268.00000",
+        "quality": "http://www.kisters.com.au/hydstra/quality-codes/140"
+    },
+    {
+        "fromValue": "-0.05000",
+        "toValue": "362.00000",
+        "quality": "http://www.kisters.com.au/hydstra/quality-codes/140"
+    },
+    {
+        "fromValue": "0.00000",
+        "toValue": "455.00000",
+        "quality": "http://www.kisters.com.au/hydstra/quality-codes/140"
+    },
+    {
+        "fromValue": "0.05000",
+        "toValue": "550.00000",
+        "quality": "http://www.kisters.com.au/hydstra/quality-codes/140"
+    },
+    {
+        "fromValue": "0.10000",
+        "toValue": "650.00000",
+        "quality": "http://www.kisters.com.au/hydstra/quality-codes/140"
+    },
+    {
+        "fromValue": "0.15000",
+        "toValue": "750.00000",
+        "quality": "http://www.kisters.com.au/hydstra/quality-codes/140"
+    },
+    {
+        "fromValue": "0.20000",
+        "toValue": "855.00000",
+        "quality": "http://www.kisters.com.au/hydstra/quality-codes/140"
+    },
+    {
+        "fromValue": "0.25000",
+        "toValue": "960.00000",
+        "quality": "http://www.kisters.com.au/hydstra/quality-codes/140"
+    },
+    {
+        "fromValue": "0.30000",
+        "toValue": "1080.00000",
+        "quality": "http://www.kisters.com.au/hydstra/quality-codes/140"
+    },
+    {
+        "fromValue": "0.40000",
+        "toValue": "1330.00000",
+        "quality": "http://www.kisters.com.au/hydstra/quality-codes/140"
+    },
+    {
+        "fromValue": "0.50000",
+        "toValue": "1610.00000",
+        "quality": "http://www.kisters.com.au/hydstra/quality-codes/140"
+    },
+    {
+        "fromValue": "0.60000",
+        "toValue": "1930.00000",
+        "quality": "http://www.kisters.com.au/hydstra/quality-codes/140"
+    },
+    {
+        "fromValue": "0.70000",
+        "toValue": "2280.00000",
+        "quality": "http://www.kisters.com.au/hydstra/quality-codes/140"
+    },
+    {
+        "fromValue": "0.90000",
+        "toValue": "3050.00000",
+        "quality": "http://www.kisters.com.au/hydstra/quality-codes/140"
+    },
+    {
+        "fromValue": "1.10000",
+        "toValue": "3900.00000",
+        "quality": "http://www.kisters.com.au/hydstra/quality-codes/140"
+    },
+    {
+        "fromValue": "1.30000",
+        "toValue": "4800.00000",
+        "quality": "http://www.kisters.com.au/hydstra/quality-codes/140"
+    },
+    {
+        "fromValue": "1.50000",
+        "toValue": "5800.00000",
+        "quality": "http://www.kisters.com.au/hydstra/quality-codes/140"
+    },
+    {
+        "fromValue": "1.70000",
+        "toValue": "6800.00000",
+        "quality": "http://www.kisters.com.au/hydstra/quality-codes/140"
+    },
+    {
+        "fromValue": "2.10000",
+        "toValue": "9100.00000",
+        "quality": "http://www.kisters.com.au/hydstra/quality-codes/140"
+    },
+    {
+        "fromValue": "2.50000",
+        "toValue": "11100.00000",
+        "quality": "http://www.kisters.com.au/hydstra/quality-codes/140"
+    },
+    {
+        "fromValue": "2.90000",
+        "toValue": "14400.00000",
+        "quality": "http://www.kisters.com.au/hydstra/quality-codes/140"
+    },
+    {
+        "fromValue": "3.30000",
+        "toValue": "18000.00000",
+        "quality": "http://www.kisters.com.au/hydstra/quality-codes/140"
+    },
+    {
+        "fromValue": "3.70000",
+        "toValue": "22000.00000",
+        "quality": "http://www.kisters.com.au/hydstra/quality-codes/140"
+    },
+    {
+        "fromValue": "4.10000",
+        "toValue": "28500.00000",
+        "quality": "http://www.kisters.com.au/hydstra/quality-codes/140"
+    },
+    {
+        "fromValue": "4.50000",
+        "toValue": "39000.00000",
+        "quality": "http://www.kisters.com.au/hydstra/quality-codes/140"
+    },
+    {
+        "fromValue": "5.20000",
+        "toValue": "65000.00000",
+        "quality": "http://www.kisters.com.au/hydstra/quality-codes/140"
+    },
+    {
+        "fromValue": "5.70000",
+        "toValue": "90000.00000",
+        "quality": "http://www.kisters.com.au/hydstra/quality-codes/140"
+    },
+    {
+        "fromValue": "6.20000",
+        "toValue": "121000.00000",
+        "quality": "http://www.kisters.com.au/hydstra/quality-codes/140"
+    },
+    {
+        "fromValue": "6.70000",
+        "toValue": "160000.00000",
+        "quality": "http://www.kisters.com.au/hydstra/quality-codes/140"
+    }
+]}

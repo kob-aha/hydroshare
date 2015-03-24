@@ -1,0 +1,23 @@
+{
+	"$schema":"http://json-schema.org/draft-03/schema#",
+	"id":"http://waterml2.csiro.au/part2/json/rgs-ie/Parameter.json",
+	"title":"Parameter",
+	"type":"object",
+	"properties":{
+				"id":{
+					"title":"id",
+					"type":"string",
+					"required":true
+				},
+				"description":{
+					"title":"description",
+					"type":"string",
+					"required":true
+				},
+				"external_definition":{
+					"title":"external_definition",
+					"type":"string",
+					"required":true
+				}
+	}
+}

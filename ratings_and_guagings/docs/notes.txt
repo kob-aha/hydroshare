@@ -1,0 +1,25 @@
+swagger:
+http://waterml2.csiro.au/rgs-api/v1/docs/
+
+Rest Services UI endpoint:
+http://waterml2.csiro.au/rgs-api/v1/
+http://waterml2.csiro.au/rgs-api/v1/monitoring-point/
+http://waterml2.csiro.au/rgs-api/v1/conversion/?changesSince=2
+
+
+
+UML Model:
+http://waterml2.csiro.au/part2/doco/
+
+Json enpoint:
+http://waterml2.csiro.au/rgs-api/v1/
+http://waterml2.csiro.au/rgs-api/v1/monitoring-point/
+http://waterml2.csiro.au/rgs-api/v1/conversion/?changesSince=2
+
+
+XML service outputs: I’ve updated the XML encodings in the REST API to give up to date XML according to the current schema. Some of the examples are based from these. Example links:
+
+    Conversion group: http://waterml2.csiro.au/rgs-api/v1/conversion-group/8?format=xml
+    Single conversion table: http://waterml2.csiro.au/rgs-api/v1/conversion/419009-100.00-141-100?format=xml
+    Gauging collection: http://waterml2.csiro.au/rgs-api/v1/gauging?monitoring-point=419009&format=xml&start-date=2011-01-27T19:10:32
+    Single gauging: http://waterml2.csiro.au/rgs-api/v1/gauging/18953?format=xml

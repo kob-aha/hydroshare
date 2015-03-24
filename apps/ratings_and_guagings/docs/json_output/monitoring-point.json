@@ -1,0 +1,130 @@
+{"models": {
+    "MPSerializer": {
+        "id": "MPSerializer",
+        "properties": {
+            "control": {
+                "allowableValues": {
+                    "max": 200,
+                    "defaultValue": null,
+                    "readOnly": false,
+                    "valueType": "RANGE",
+                    "min": null
+                },
+                "required": false,
+                "type": "string"
+            },
+            "rangeGroups": {
+                "allowableValues": {
+                    "max": null,
+                    "defaultValue": null,
+                    "readOnly": false,
+                    "valueType": "RANGE",
+                    "min": null
+                },
+                "required": true,
+                "type": "field"
+            },
+            "name": {
+                "allowableValues": {
+                    "max": 200,
+                    "defaultValue": null,
+                    "readOnly": false,
+                    "valueType": "RANGE",
+                    "min": null
+                },
+                "required": true,
+                "type": "string"
+            },
+            "conversiongroup_set": {
+                "allowableValues": {
+                    "max": null,
+                    "defaultValue": null,
+                    "readOnly": false,
+                    "valueType": "RANGE",
+                    "min": null
+                },
+                "required": true,
+                "type": "field"
+            },
+            "shape": {
+                "allowableValues": {
+                    "max": null,
+                    "defaultValue": null,
+                    "readOnly": false,
+                    "valueType": "RANGE",
+                    "min": null
+                },
+                "required": true,
+                "type": "field"
+            },
+            "cease_to_flow": {
+                "allowableValues": {
+                    "max": null,
+                    "defaultValue": null,
+                    "readOnly": false,
+                    "valueType": "RANGE",
+                    "min": null
+                },
+                "required": false,
+                "type": "decimal"
+            },
+            "id": {
+                "allowableValues": {
+                    "max": 200,
+                    "defaultValue": null,
+                    "readOnly": false,
+                    "valueType": "RANGE",
+                    "min": null
+                },
+                "required": true,
+                "type": "string"
+            },
+            "verticalDatum": {
+                "allowableValues": {
+                    "max": null,
+                    "defaultValue": null,
+                    "readOnly": false,
+                    "valueType": "RANGE",
+                    "min": null
+                },
+                "required": true,
+                "type": "string"
+            }
+        }
+    }
+}, "basePath": "http://waterml2.csiro.au/rgs-api/v1/", "apis": [
+    {
+        "operations": [
+            {
+                "httpMethod": "GET",
+                "notes": "API endpoint that represents a list of monitoring points. <br/><br/>monitoring-point = query by a comma separated list of MP IDs<br/>name - search for monitoring point by name",
+                "nickname": "Monitoring_Point_List",
+                "responseClass": "MPSerializer",
+                "summary": "API endpoint that represents a list of monitoring points"
+            }
+        ],
+        "path": "/monitoring-point/",
+        "description": "API endpoint that represents a list of monitoring points"
+    },
+    {
+        "operations": [
+            {
+                "responseClass": "MPSerializer",
+                "parameters": [
+                    {
+                        "dataType": "string",
+                        "paramType": "path",
+                        "required": true,
+                        "name": "pk"
+                    }
+                ],
+                "notes": "API endpoint that describes a monitoring point based on its ID.",
+                "summary": "API endpoint that describes a monitoring point based on its ID",
+                "httpMethod": "GET",
+                "nickname": "Monitoring_Point_Detail"
+            }
+        ],
+        "path": "/monitoring-point/{pk}/",
+        "description": "API endpoint that describes a monitoring point based on its ID"
+    }
+]}
