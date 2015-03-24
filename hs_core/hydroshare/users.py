@@ -209,7 +209,11 @@ go to http://{domain}/verify/{token}/ and verify your account.
     ApiKey.objects.get_or_create(user=u)
 
     # create iRODS account accordingly when USE_IRODS is true but IRODS_GLOBAL_SESSION is FALSE and the user is not superuser
+    # this should actually be done when the user has clicked the link to verify the account, however, the password has to
+    # be encoded in the token so that verify() view can retrieve it to create an iRODS account at that time. Since we
+    # have HSAccess database to control access,creating an inactive iRODS account here will not pose any harm
     if getattr(settings,'USE_IRODS', False) and not getattr(settings, 'IRODS_GLOBAL_SESSION', False) and not superuser:
+        # create iRODS account
         irods_account = account.IrodsAccount()
         irods_account.create(username)
         irods_account.setPassward(username, password)
@@ -222,6 +226,7 @@ go to http://{domain}/verify/{token}/ and verify your account.
                 pass # try to remove session if there is one, pass without error out if the previous session cannot be removed
 
         irods_storage.set_user_session(username=username, password=password, userid=u.id)
+
     u.groups = groups
 
     return u

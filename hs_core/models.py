@@ -23,6 +23,8 @@ from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from languages_iso import languages as iso_languages
 from dateutil import parser
 import json
+from hs_core import HSAlib
+from django.db import DatabaseError
 
 irods_storage = IrodsStorage()
 
@@ -107,58 +109,56 @@ class ResourcePermissionsMixin(Ownable):
     def permissions_store(self):
         return s.PERMISSIONS_DB
 
-    def can_add(self, request):
-        return self.can_change(request)
-
-    def can_delete(self, request):
-        return self.can_change(request)
-
-    def can_change(self, request):
-        user = get_user(request)
-
-        if user.is_authenticated():
-            if user.is_superuser:
-                ret = True
-            elif self.creator and user.pk == self.creator.pk:
-                ret = True
-            elif user.pk in { o.pk for o in self.owners.all() }:
-                ret = True
-            elif self.edit_users.filter(pk=user.pk).exists():
-                ret = True
-            elif self.edit_groups.filter(pk__in=set(g.pk for g in user.groups.all())):
-                ret = True
-            else:
-                ret = False
-        else:
-            ret = False
-
-        return ret
-
-
-    def can_view(self, request):
-        user = get_user(request)
-
-        if self.public:
-            return True
-        if user.is_authenticated():
-            if user.is_superuser:
-                ret = True
-            elif self.creator and user.pk == self.creator.pk:
-                ret = True
-            elif user.pk in { o.pk for o in self.owners.all() }:
-                ret = True
-            elif self.view_users.filter(pk=user.pk).exists():
-                ret = True
-            elif self.view_groups.filter(pk__in=set(g.pk for g in user.groups.all())):
-                ret = True
-            else:
-                ret = False
-        else:
-            ret = False
-
-        return ret
-
-
+    # def can_add(self, request):
+    #     return self.can_change(request)
+    #
+    # def can_delete(self, request):
+    #     return self.can_change(request)
+    #
+    # def can_change(self, request):
+    #     user = get_user(request)
+    #
+    #     if user.is_authenticated():
+    #         if user.is_superuser:
+    #             ret = True
+    #         elif self.creator and user.pk == self.creator.pk:
+    #             ret = True
+    #         elif user.pk in { o.pk for o in self.owners.all() }:
+    #             ret = True
+    #         elif self.edit_users.filter(pk=user.pk).exists():
+    #             ret = True
+    #         elif self.edit_groups.filter(pk__in=set(g.pk for g in user.groups.all())):
+    #             ret = True
+    #         else:
+    #             ret = False
+    #     else:
+    #         ret = False
+    #
+    #     return ret
+    #
+    #
+    # def can_view(self, request):
+    #     user = get_user(request)
+    #
+    #     if self.public:
+    #         return True
+    #     if user.is_authenticated():
+    #         if user.is_superuser:
+    #             ret = True
+    #         elif self.creator and user.pk == self.creator.pk:
+    #             ret = True
+    #         elif user.pk in { o.pk for o in self.owners.all() }:
+    #             ret = True
+    #         elif self.view_users.filter(pk=user.pk).exists():
+    #             ret = True
+    #         elif self.view_groups.filter(pk__in=set(g.pk for g in user.groups.all())):
+    #             ret = True
+    #         else:
+    #             ret = False
+    #     else:
+    #         ret = False
+    #
+    #     return ret
 
 
 # this should be used as the page processor for anything with pagepermissionsmixin
@@ -1356,6 +1356,73 @@ class AbstractResource(ResourcePermissionsMixin):
         class MyResourceContentType(pages.Page, hs_core.AbstractResource):
             ...
     """
+    ha_obj = None
+    def __init__(self, *args, **kwargs):
+        super(AbstractResource, self).__init__(*args, **kwargs)
+        try:
+            self.ha_obj = HSAlib.HSAccess('admin', 'unused', settings.HS_ACCESS_DB, settings.HS_ACCESS_USERNAME, settings.HS_ACCESS_PASSWORD, settings.HS_ACCESS_HOST, settings.HS_ACCESS_PORT)
+        except:
+            # unable to connect to the database
+            raise DatabaseError("unable to connect to the database HSAccess.")
+
+    def can_add(self, request):
+        return self.can_change(request)
+
+    def can_delete(self, request):
+        user = get_user(request)
+        if user.is_authenticated():
+            if user.is_superuser:
+                ret = True
+            elif self.creator and user.pk == self.creator.pk:
+                ret = True
+            elif not self.ha_obj is None:
+                user_uuid = self.ha_obj._get_user_uuid_from_login(user.username)
+                ret = self.ha_obj.resource_is_owned(self.short_id, user_uuid)
+            else:
+                ret = False
+        else:
+            ret = False
+        return ret
+
+    def can_change(self, request):
+        user = get_user(request)
+
+        if user.is_authenticated():
+            if user.is_superuser:
+                ret = True
+            elif self.creator and user.pk == self.creator.pk:
+                ret = True
+            elif not self.ha_obj is None:
+                user_uuid = self.ha_obj._get_user_uuid_from_login(user.username)
+                ret = self.ha_obj.resource_is_readwrite(self.short_id, user_uuid)
+            else:
+                ret = False
+        else:
+            ret = False
+
+        return ret
+
+
+    def can_view(self, request):
+        user = get_user(request)
+
+        if self.public:
+            return True
+        if user.is_authenticated():
+            if user.is_superuser:
+                ret = True
+            elif self.creator and user.pk == self.creator.pk:
+                ret = True
+            elif not self.ha_obj is None:
+                user_uuid = self.ha_obj._get_user_uuid_from_login(user.username)
+                ret = self.ha_obj.resource_is_readable(self.short_id, user_uuid)
+            else:
+                ret = False
+        else:
+            ret = False
+
+        return ret
+
     content = models.TextField() # the field added for use by Django inplace editing
     last_changed_by = models.ForeignKey(User,
                                         help_text='The person who last changed the resource',
