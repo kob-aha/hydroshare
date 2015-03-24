@@ -34,6 +34,12 @@ def get_page_context(page, user, resource_edit=False, extended_metadata_layout=N
 
     metadata_status = _get_metadata_status(content_model)
 
+    #find out which tools use that type of resource
+    meta_res_types = ToolResourceType.objects.filter(tool_res_type=content_model.content_model)
+    tools = []
+    for typ in meta_res_types:
+        tools.append(typ.metadata.resource.title)
+
     if not resource_edit:
         if not content_model.metadata.language:
             _do_metadata_migration(content_model, user)
@@ -91,10 +97,11 @@ def get_page_context(page, user, resource_edit=False, extended_metadata_layout=N
                    'rights': content_model.metadata.rights,
                    'sources': content_model.metadata.sources.all(),
                    'relations': content_model.metadata.relations.all(),
-                   'metadata_status': metadata_status
+                   'metadata_status': metadata_status,
                    'missing_metadata_elements': content_model.metadata.get_required_missing_elements(),
                    'supported_file_types': content_model.get_supported_upload_file_types(),
-                   'allow_multiple_file_upload': content_model.can_have_multiple_files()
+                   'allow_multiple_file_upload': content_model.can_have_multiple_files(),
+                   'tools': tools
 
         }
         return context
@@ -240,77 +247,47 @@ def get_page_context(page, user, resource_edit=False, extended_metadata_layout=N
 
     metadata_form = MetaDataForm(resource_mode='edit' if edit_mode else 'view',
                                  extended_metadata_layout=extended_metadata_layout)
-    #find out which tools use that type of resource
-    meta_res_types = ToolResourceType.objects.filter(tool_res_type=content_model.content_model)
-    tools = []
-    for typ in meta_res_types:
-        tools.append(typ.metadata.resource.title)
 
-    context = {
-           'tools': tools,
-           'metadata_form': metadata_form,
-           'title_form': title_form,
-           'creator_formset': creator_formset,
-           'add_creator_modal_form': add_creator_modal_form,
-           'creator_profilelink_formset': None,
-           'title': content_model.metadata.title,
-           'abstract_form': abstract_form,
-           'contributor_formset': contributor_formset,
-           'add_contributor_modal_form': add_contributor_modal_form,
-           'relation_formset': relation_formset,
-           'add_relation_modal_form': add_relation_modal_form,
-           'source_formset': source_formset,
-           'add_source_modal_form': add_source_modal_form,
-           'rights_form': rights_form,
-           #'identifier_formset': identifier_formset,
-           'language_form': language_form,
-           #'valid_date_form': valid_date_form,
-           'coverage_temporal_form': coverage_temporal_form,
-           'coverage_spatial_form': coverage_spatial_form,
-           #'format_formset': format_formset,
-           'subjects_form': subjects_form,
-           'metadata_status': metadata_status,
-           'citation': content_model.get_citation(),
-           'extended_metadata_layout': extended_metadata_layout}
+    context = {'metadata_form': metadata_form,
+               'title_form': title_form,
+               'creator_formset': creator_formset,
+               'add_creator_modal_form': add_creator_modal_form,
+               'creator_profilelink_formset': None,
+               'title': content_model.metadata.title,
+               'abstract_form': abstract_form,
+               'contributor_formset': contributor_formset,
+               'add_contributor_modal_form': add_contributor_modal_form,
+               'relation_formset': relation_formset,
+               'add_relation_modal_form': add_relation_modal_form,
+               'source_formset': source_formset,
+               'add_source_modal_form': add_source_modal_form,
+               'rights_form': rights_form,
+               #'identifier_formset': identifier_formset,
+               'language_form': language_form,
+               #'valid_date_form': valid_date_form,
+               'coverage_temporal_form': coverage_temporal_form,
+               'coverage_spatial_form': coverage_spatial_form,
+               #'format_formset': format_formset,
+               'subjects_form': subjects_form,
+               'metadata_status': metadata_status,
+               'citation': content_model.get_citation(),
+               'extended_metadata_layout': extended_metadata_layout,
+               'tools': tools}
 
     return context
 
 
-def _get_metadata_status(resource):
-    if resource.metadata.has_all_required_elements():
-        metadata_status = "Sufficient to make public"
-    else:
-        metadata_status = "Insufficient to make public"
-
-    return metadata_status
-
-def _do_metadata_migration(resource, user):
-    # create title element
-    if not resource.metadata.title:
-        resource.metadata.create_element('title', value=resource.title)
-
-    # create abstract element
-    if not resource.metadata.description:
-        abs_elements = QualifiedDublinCoreElement.objects.filter(term='AB', object_id=resource.pk)
-        if len(abs_elements) > 0:
-            abs_element = abs_elements[0]
-            if len(abs_element.content.strip()) > 0:
-                resource.metadata.create_element('description', abstract=abs_element.content)
-
-    # create language element
-    if not resource.metadata.language:
-        language_elements = QualifiedDublinCoreElement.objects.filter(term='LG', object_id=resource.pk)
-        if len(language_elements) > 0:
-            language_element = language_elements[0]
-            code = _get_language_code(language_element.content)
-            if code:
-                resource.metadata.create_element('language', code=code)
-            else:
-                resource.metadata.create_element('language', code='eng')
+def check_resource_mode(request):
+    if request.method == "GET":
+        resource_mode = request.session.get('resource-mode', None)
+        if resource_mode == 'edit':
+            edit_resource = True
+            del request.session['resource-mode']
         else:
-            resource.metadata.create_element('language', code='eng')
+            edit_resource = False
+    else:
+        edit_resource = True
 
-    # create the rights element
     return edit_resource
 
 def _get_metadata_status(resource):
@@ -466,3 +443,4 @@ def _get_language_code(language):
         code = None
 
     return code
+

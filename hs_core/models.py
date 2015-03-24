@@ -31,7 +31,6 @@ class GroupOwnership(models.Model):
 
 def get_user(request):
     """authorize user based on API key if it was passed, otherwise just use the request's user.
-
     :param request:
     :return: django.contrib.auth.User
     """
@@ -969,10 +968,8 @@ class Coverage(AbstractMetaDataElement):
     """
     _value field stores a json string. The content of the json
      string depends on the type of coverage as shown below. All keys shown in json string are required.
-
      For coverage type: period
          _value = "{'name':coverage name value here (optional), 'start':start date value, 'end':end date value, 'scheme':'W3C-DTF}"
-
      For coverage type: point
          _value = "{'east':east coordinate value,
                     'north':north coordinate value,
@@ -982,7 +979,6 @@ class Coverage(AbstractMetaDataElement):
                     'zunits': units for elevation (optional),
                     'projection': name of the projection (optional),
                     }"
-
      For coverage type: box
          _value = "{'northlimit':northenmost coordinate value,
                     'eastlimit':easternmost coordinate value,
@@ -1347,10 +1343,8 @@ class AbstractResource(ResourcePermissionsMixin):
     be present to be considered a hydroshare resource.  Additionally, all
     hydroshare resources should inherit from Page.  This gives them what they
     need to be represented in the Mezzanine CMS.
-
     In some cases, it is possible that the order of inheritence matters.  Best
     practice dictates that you list pages.Page first and then other classes:
-
         class MyResourceContentType(pages.Page, hs_core.AbstractResource):
             ...
     """
@@ -1417,8 +1411,6 @@ class AbstractResource(ResourcePermissionsMixin):
             citation = CREATOR_NAME_ERROR
             return citation
 
-            return citation
-
         if len(name_parts) > 2:
             citation = "{last_name}, {first_initial}.{middle_initial}.".format(last_name=name_parts[-1],
                                                                               first_initial=name_parts[0][0],
@@ -1430,7 +1422,6 @@ class AbstractResource(ResourcePermissionsMixin):
         other_authors = self.metadata.creators.all().filter(order__gt=1)
         for author in other_authors:
             name_parts = author.name.split()
-            if len(name_parts) == 0:
             if len(name_parts) == 0:
                 citation = CREATOR_NAME_ERROR
                 return citation

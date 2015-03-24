@@ -19,49 +19,73 @@
             {%  endif %}
         {% endblock %}
         {% if not metadata_form %}
-            {% if not keywords or not abstract %}
-                <div class="alert alert-danger alert-dismissible" role="alert">
-                  <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                  <strong>Data for the following required elements are missing:</strong>
-                    <ul>
-                    {% for element in missing_metadata_elements %}
-                        <li>{{ element }}</li>
-                    {% endfor %}
-                    {% if title|stringformat:"s" == "Untitled resource" %}
-                       <li>Title: needs to be changed</li>
+            <div class ="row">
+                <div class="col-md-9">
+                    {% if not keywords or not abstract %}
+                        <div class="alert alert-danger alert-dismissible" role="alert">
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            <strong>Data for the following required elements are missing:</strong>
+                            <ul>
+                                {% for element in missing_metadata_elements %}
+                                    <li>{{ element }}</li>
+                                {% endfor %}
+                                {% if title|stringformat:"s" == "Untitled resource" %}
+                                    <li>Title: needs to be changed</li>
+                                {% endif %}
+                            </ul>
+                        </div>
                     {% endif %}
-                </ul>
-             </div>
-            {% endif %}
-            {% if page.perms.change %}
-                <div class="custom-btn-toolbar">
-                    <form class="inline" action="{{ cm.get_absolute_url }}" method="post">
-                        {% csrf_token %}
-                        <a id="delete" data-toggle="modal" data-target="#delete-resource-dialog">
+                    {% if page.perms.change %}
+                        <div class="custom-btn-toolbar">
+                            <form class="inline" action="{{ cm.get_absolute_url }}" method="post">
+                                {% csrf_token %}
+                                <a id="delete" data-toggle="modal" data-target="#delete-resource-dialog">
                         <span data-toggle="tooltip" data-placement="auto" title="Delete"
                               class="glyphicon glyphicon-trash icon-button btn-remove"></span>
-                        </a>
-                        <input name="resource-mode" type="hidden" value="edit"/>
-                        <button id="edit-metadata" type="submit" data-toggle="tooltip" data-placement="auto"
-                                title="Edit" class="glyphicon glyphicon-pencil icon-button btn-edit"></button>
-                    </form>
-                </div>
-            {% endif %}
+                                </a>
+                                <input name="resource-mode" type="hidden" value="edit"/>
+                                <button id="edit-metadata" type="submit" data-toggle="tooltip" data-placement="auto"
+                                        title="Edit" class="glyphicon glyphicon-pencil icon-button btn-edit"></button>
+                            </form>
+                        </div>
+                    {% endif %}
 
-            <h2 class="page-title">{{ title }}</h2>
-            <div class="info-group">
-                <table>
-                    <tr><th>Authors:</th><td id="authors">
-                        {% for cr in creators %}
-                            {% if cr.description %}<a href="{{ cr.description }}">{{ cr.name }}</a><span class="comma">,&nbsp</span>
-                            {% else %}<span>{{ cr.name }}</span><span class="comma">,&nbsp</span>{% endif %}
-                        {% endfor %}
-                    </td></tr>
-                    <tr><th>Owner:</th><td>{{ cm.user|contact|safe }}</td></tr>
-                    <tr><th>Resource type:</th><td>{{ cm|resource_type }}</td></tr>
-                    <tr><th>Created:</th><td>{{ cm.created }}</td></tr>
-                    <tr><th>Last updated:</th><td> {{ cm.updated }} by {%  if cm.last_changed_by %}{{ cm.last_changed_by|contact|safe }}{% endif %}</td></tr>
-                </table>
+                    <h2 class="page-title">{{ title }}</h2>
+                    <div class="info-group">
+                        <table>
+                            <tr><th>Authors:</th><td id="authors">
+                                {% for cr in creators %}
+                                    {% if cr.description %}<a href="{{ cr.description }}">{{ cr.name }}</a><span class="comma">,&nbsp</span>
+                                        {% else %}<span>{{ cr.name }}</span><span class="comma">,&nbsp</span>{% endif %}
+                                {% endfor %}
+                            </td></tr>
+                            <tr><th>Owner:</th><td>{{ cm.user|contact|safe }}</td></tr>
+                            <tr><th>Resource type:</th><td>{{ cm|resource_type }}</td></tr>
+                            <tr><th>Created:</th><td>{{ cm.created }}</td></tr>
+                            <tr><th>Last updated:</th><td> {{ cm.updated }} by {%  if cm.last_changed_by %}{{ cm.last_changed_by|contact|safe }}{% endif %}</td></tr>
+                        </table>
+                    </div>
+                </div>
+                {% block tools %}
+                    <div class="col-md-3">
+                        {# how about a dynamic list of resources with urls that include their tooltype? #}
+                        <div style="padding-bottom: 0.5em" class="btn-group">
+                            <a class="btn btn-primary btn-lg btn-block dropdown-toggle" data-toggle="dropdown" href="#">
+                                Launch Tools . . .
+                                <span class="caret"></span>
+                            </a>
+                            <ul class="dropdown-menu" role="menu" style="height: auto; max-height: 200px; overflow-x: hidden;">
+                                {% if tools != None %}
+                                    {% for tool in tools %}
+                                        <li><a href="/tools/_internal/{{ cm.short_id }}/{{ cm.user }}/{{ tool|lower|cut:" " }}/go-for-tools/">{{ tool }}</a></li>
+                                    {% endfor %}
+                                {% else %}
+                                    <li>No Tools</li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                    </div>
+                {% endblock %}
             </div>
 
             {% if abstract %}
