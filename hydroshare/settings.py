@@ -288,8 +288,8 @@ INSTALLED_APPS = (
     "hs_modelinstance",
     "hs_app_timeseries",
     "widget_tweaks",
-    "rest_framework",
-    "ratings_and_guagings",
+    # "rest_framework",
+    # "ratings_and_guagings",
 )
 
 # List of processors used by RequestContext to populate the context.
