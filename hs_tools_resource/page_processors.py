@@ -7,6 +7,7 @@ from hs_core import page_processors
 from hs_core.forms import MetaDataElementDeleteForm
 from django.forms.models import formset_factory
 from functools import *
+from hs_core.views import *
 
 @processor_for(ToolResource)
 def landing_page(request, page):
@@ -30,25 +31,18 @@ def landing_page(request, page):
         url_base_form = UrlBaseForm(instance=content_model.metadata.url_bases.first(), res_short_id=content_model.short_id,
                              element_id=content_model.metadata.url_bases.first().id if content_model.metadata.url_bases.first() else None)
 
-        #ResTypeFormSetEdit = formset_factory(wraps(ResTypeForm)(partial(ResTypeForm, allow_edit=edit_resource)), formset=BaseResTypeFormSet, extra=0)
         ResTypeFormSetEdit = formset_factory(wraps(ResTypeForm)(partial(ResTypeForm, allow_edit=edit_resource)), formset=BaseFormSet, extra=0)
         res_type_formset = ResTypeFormSetEdit(initial=content_model.metadata.res_types.all().values(), prefix='res_type')
-        add_res_type_modal_form = ResTypeForm(allow_edit=edit_resource, res_short_id=content_model.short_id)
-        # ext_md_layout = Layout(
-        #                         ResTypeLayoutEdit,
-        #                         ModalDialogLayoutAddResType
-        #                     )
+        add_toolresourcetype_modal_form = ResTypeForm(allow_edit=edit_resource, res_short_id=content_model.short_id)
+
         for form in res_type_formset.forms:
             if len(form.initial) > 0:
-                form.delete_modal_form = MetaDataElementDeleteForm(content_model.short_id, 'res_type', form.initial['id'])
+                form.delete_modal_form = MetaDataElementDeleteForm(content_model.short_id, 'toolresourcetype', form.initial['id'])
                 form.action = "/hsapi/_internal/%s/toolresourcetype/%s/update-metadata/" % (content_model.short_id, form.initial['id'])
                 form.number = form.initial['id']
             else:
                 form.action = "/hsapi/_internal/%s/toolresourcetype/add-metadata/" % content_model.short_id
 
-        # context = page_processors.get_page_context(page, request.user, resource_edit=edit_resource, extended_metadata_layout=ext_md_layout)
-        # context['res_type_formset'] = res_type_formset
-        # context['add_res_type_modal_form'] = add_res_type_modal_form
 
         fees_form = FeeForm(instance=content_model.metadata.fees.first(), res_short_id=content_model.short_id,
                                  element_id=content_model.metadata.fees.first().id if content_model.metadata.fees.first() else None)
@@ -70,14 +64,6 @@ def landing_page(request, page):
                                                ResTypeLayoutEdit),
                                 ModalDialogLayoutAddResType,
 
-
-                                # AccordionGroup('Method (required)',
-                                #      HTML('<div class="form-group" id="method"> '
-                                #         '{% load crispy_forms_tags %} '
-                                #         '{% crispy method_form %} '
-                                #      '</div> '),
-                                # ),
-
                                 AccordionGroup('Fees (optional)',
                                      HTML('<div class="form-group" id="fees"> '
                                         '{% load crispy_forms_tags %} '
@@ -86,7 +72,7 @@ def landing_page(request, page):
                                 ),
 
                                 AccordionGroup('Version (optional)',
-                                     HTML('<div class="form-group" id="fees"> '
+                                     HTML('<div class="form-group" id="version"> '
                                         '{% load crispy_forms_tags %} '
                                         '{% crispy version_form %} '
                                      '</div> '),
@@ -100,8 +86,11 @@ def landing_page(request, page):
         context['resource_type'] = 'Tool Resource'
         context['url_base_form'] = url_base_form
         context['res_types_formset'] = res_type_formset
-        context['add_res_type_modal_form'] = add_res_type_modal_form
+        context['add_toolresourcetype_modal_form'] = add_toolresourcetype_modal_form
         context['fees_form'] = fees_form
         context['version_form'] = version_form
+
+    hs_core_dublin_context = add_dublin_core(request, page)
+    context.update(hs_core_dublin_context)
 
     return context

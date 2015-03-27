@@ -257,13 +257,13 @@ class ToolMetaData(CoreMetaData):
 
         #inject resource specific metadata elements into container element
         for url in self.url_bases.all():
-            hsterms_method = etree.SubElement(container, '{%s}Request Url Base' % self.NAMESPACES['hsterms'])
+            hsterms_method = etree.SubElement(container, '{%s}RequestUrlBase' % self.NAMESPACES['hsterms'])
             hsterms_method_rdf_Description = etree.SubElement(hsterms_method, '{%s}Description' % self.NAMESPACES['rdf'])
             hsterms_name = etree.SubElement(hsterms_method_rdf_Description, '{%s}value' % self.NAMESPACES['hsterms'])
             hsterms_name.text = url.value
 
         for type in self.res_types.all():
-            hsterms_method = etree.SubElement(container, '{%s}Resource Types That Can Use This Tool' % self.NAMESPACES['hsterms'])
+            hsterms_method = etree.SubElement(container, '{%s}ResourceType' % self.NAMESPACES['hsterms'])
             hsterms_method_rdf_Description = etree.SubElement(hsterms_method, '{%s}Description' % self.NAMESPACES['rdf'])
             hsterms_name = etree.SubElement(hsterms_method_rdf_Description, '{%s}type' % self.NAMESPACES['hsterms'])
             hsterms_name.text = type.tool_res_type
@@ -277,7 +277,7 @@ class ToolMetaData(CoreMetaData):
             hsterms_name.text = fee.description
 
         for v in self.versions.all():
-            hsterms_method = etree.SubElement(container, '{%s}Tool Version' % self.NAMESPACES['hsterms'])
+            hsterms_method = etree.SubElement(container, '{%s}ToolVersion' % self.NAMESPACES['hsterms'])
             hsterms_method_rdf_Description = etree.SubElement(hsterms_method, '{%s}Description' % self.NAMESPACES['rdf'])
             hsterms_name = etree.SubElement(hsterms_method_rdf_Description, '{%s}value' % self.NAMESPACES['hsterms'])
             hsterms_name.text = v.value

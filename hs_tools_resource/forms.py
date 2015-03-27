@@ -6,6 +6,7 @@ from crispy_forms.layout import *
 from crispy_forms.bootstrap import *
 from models import *
 from hs_core.forms import BaseFormHelper
+from crispy_forms.helper import FormHelper
 
 #TODO: reference hs_core.forms
 class UrlBaseFormHelper(BaseFormHelper):
@@ -25,6 +26,7 @@ class UrlBaseForm(ModelForm):
         super(UrlBaseForm, self).__init__(*args, **kwargs)
         self.helper = UrlBaseFormHelper(allow_edit, res_short_id, element_id, element_name='RequestUrlBase')
 
+
     class Meta:
         model = RequestUrlBase
         fields = ['value']
@@ -35,23 +37,26 @@ class UrlBaseForm(ModelForm):
 class UrlBaseValidationForm(forms.Form):
     value = forms.CharField(max_length="500")
 
-
-class ResTypeFormHelper(BaseFormHelper):
-    def __init__(self, allow_edit=True, res_short_id=None, element_id=None, element_name=None, *args, **kwargs):
+# The following 3 classes need to have the "field" same as the fields defined in "ToolResourceType" table in models.py
+class ResTypeFormHelper(FormHelper):
+    def __init__(self, *args, **kwargs):
+        super(ResTypeFormHelper, self).__init__(*args, **kwargs)
         field_width = 'form-control input-sm'
+        self.form_tag = False
+        self.form_show_errors = True
+        self.error_text_inline = True
+        self.html5_required = False
         # change the fields name here
-        layout = Layout(
+        self.layout = Layout(
+            Fieldset('ToolResourceType',
                      Field('tool_res_type', css_class=field_width),
-                )
-
-        super(ResTypeFormHelper, self).__init__(allow_edit, res_short_id, element_id, element_name, layout,  *args, **kwargs)
-
+                ),
+        )
 
 class ResTypeForm(ModelForm):
-    def __init__(self, allow_edit=True, res_short_id=None, element_id=None, *args, **kwargs):
+    def __init__(self, allow_edit=True, res_short_id=None,  *args, **kwargs):
         super(ResTypeForm, self).__init__(*args, **kwargs)
-        self.helper = ResTypeFormHelper(allow_edit, res_short_id, element_id, element_name='ToolResourceType')
-        #TODO: implement a delete form
+        self.helper = ResTypeFormHelper()
         self.delete_modal_form = None
         self.number = 0
         self.allow_edit = allow_edit
@@ -59,7 +64,10 @@ class ResTypeForm(ModelForm):
             self.action = "/hsapi/_internal/%s/toolresourcetype/add-metadata/" % res_short_id
         else:
             self.action = ""
-
+        # if not allow_edit:
+        #     for field in self.fields.values():
+        #         field.widget.attrs['readonly'] = True
+        #         field.widget.attrs['style'] = "background-color:white;"
     @property
     def form_id(self):
         form_id = 'id_toolresourcetype_%s' % self.number
@@ -78,58 +86,14 @@ class ResTypeForm(ModelForm):
 
 
 class ResTypeValidationForm(forms.Form):
-    tool_res_type = forms.CharField()
+    tool_res_type = forms.CharField(max_length=300)
 
-
-# class BaseResTypeFormSet(BaseFormSet):
-#     def add_fields(self, form, index):
-#         super(BaseResTypeFormSet, self).add_fields(form, index)
-#
-#
-#     def get_metadata_dict(self):
-#         res_types_data = []
-#         for form in self.forms:
-#             res_type_data = {k: v for k, v in form.cleaned_data.iteritems()}
-#
-#             res_types_data.append({'ToolResourceType': res_type_data})
-#
-#         return res_types_data
-#
-# ResTypeFormSet = formset_factory(ResTypeForm, formset=BaseResTypeFormSet, extra=0)
-
-
-ModalDialogLayoutAddResType = Layout(
-                            HTML('<div class="modal fade" id="add-res-type-dialog" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">'
-                                    '<div class="modal-dialog">'
-                                        '<div class="modal-content">'
-                                            '<form action="{{ add_res_type_modal_form.action }}" method="POST" enctype="multipart/form-data"> '
-                                            '{% csrf_token %} '
-                                            '<input name="resource-mode" type="hidden" value="edit"/>'
-                                            '<div class="modal-header">'
-                                                '<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>'
-                                                '<h4 class="modal-title" id="myModalLabel">Add Resource Type</h4>'
-                                            '</div>'
-                                            '<div class="modal-body">'
-                                                '{% csrf_token %}'
-                                                '<div class="form-group">'
-                                                    '{% load crispy_forms_tags %} '
-                                                    '{% crispy add_res_type_modal_form %} '
-                                                '</div>'
-                                            '</div>'
-                                            '<div class="modal-footer">'
-                                                '<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>'
-                                                '<button type="submit" class="btn btn-primary">Save changes</button>'
-                                            '</div>'
-                                            '</form>'
-                                        '</div>'
-                                    '</div>'
-                                '</div>'
-                            )
-                        )
+from hs_core.forms import Helper
+ModalDialogLayoutAddResType = Helper.get_element_add_modal_form('ToolResourceType', 'add_toolresourcetype_modal_form')
 
 ResTypeLayoutEdit = Layout(
                             HTML('{% load crispy_forms_tags %} '
-                                 '{% for form in res_type_formset.forms %} '
+                                 '{% for form in res_types_formset.forms %} '
                                      '<div class="item form-group"> '
                                      '<form id={{form.form_id}} action="{{ form.action }}" method="POST" enctype="multipart/form-data"> '
                                      '{% crispy form %} '
@@ -152,6 +116,97 @@ ResTypeLayoutEdit = Layout(
                                  '</div>'
                             ),
                     )
+
+#
+#
+# class ResTypeForm(ModelForm):
+#     def __init__(self, allow_edit=True, res_short_id=None, element_id=None, *args, **kwargs):
+#         super(ResTypeForm, self).__init__(*args, **kwargs)
+#         self.helper = ResTypeFormHelper(allow_edit, res_short_id, element_id, element_name='ToolResourceType')
+#         #TODO: implement a delete form
+#         self.delete_modal_form = None
+#         self.number = 0
+#         self.allow_edit = allow_edit
+#         if res_short_id:
+#             self.action = "/hsapi/_internal/%s/toolresourcetype/add-metadata/" % res_short_id
+#         else:
+#             self.action = ""
+#         if not allow_edit:
+#             for field in self.fields.values():
+#                 field.widget.attrs['readonly'] = True
+#                 field.widget.attrs['style'] = "background-color:white;"
+#
+#     @property
+#     def form_id(self):
+#         form_id = 'id_toolresourcetype_%s' % self.number
+#         return form_id
+#
+#     @property
+#     def form_id_button(self):
+#         form_id = 'id_toolresourcetype_%s' % self.number
+#         return "'" + form_id + "'"
+#
+#     class Meta:
+#         model = ToolResourceType
+#         # change the fields same here
+#         fields = ['tool_res_type']
+#         exclude = ['content_object']
+#
+#
+# ModalDialogLayoutAddResType = Layout(
+#                             HTML('<div class="modal fade" id="add-res-type-dialog" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">'
+#                                     '<div class="modal-dialog">'
+#                                         '<div class="modal-content">'
+#                                             '<form action="{{ add_res_type_modal_form.action }}" method="POST" enctype="multipart/form-data"> '
+#                                             '{% csrf_token %} '
+#                                             '<input name="resource-mode" type="hidden" value="edit"/>'
+#                                             '<div class="modal-header">'
+#                                                 '<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>'
+#                                                 '<h4 class="modal-title" id="myModalLabel">Add Resource Type. Action: {{add_res_type_modal_form.action}}</h4>'
+#                                             '</div>'
+#                                             '<div class="modal-body">'
+#                                                 '{% csrf_token %}'
+#                                                 '<div class="form-group">'
+#                                                     '{% load crispy_forms_tags %} '
+#                                                     '{% crispy add_res_type_modal_form %} '
+#                                                 '</div>'
+#                                             '</div>'
+#                                             '<div class="modal-footer">'
+#                                                 '<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>'
+#                                                 '<button type="submit" class="btn btn-primary">Save changes</button>'
+#                                             '</div>'
+#                                             '</form>'
+#                                         '</div>'
+#                                     '</div>'
+#                                 '</div>'
+#                             )
+#                         )
+#
+# ResTypeLayoutEdit = Layout(
+#                             HTML('{% load crispy_forms_tags %} '
+#                                  '{% for form in res_type_formset.forms %} '
+#                                      '<div class="item form-group"> '
+#                                      '<form id={{form.form_id}} action="{{ form.action }}" method="POST" enctype="multipart/form-data"> '
+#                                      '{% crispy form %} '
+#                                     '<div class="row" style="margin-top:10px">'
+#                                         '<div class="col-md-10">'
+#                                             '<input class="btn-danger btn btn-md" type="button" data-toggle="modal" data-target="#delete-res-type-element-dialog_{{ form.number }}" value="Delete Resource Type">'
+#                                         '</div>' #change
+#                                         '<div class="col-md-2">'
+#                                             '<button type="button" class="btn btn-primary pull-right" onclick="metadata_update_ajax_submit({{ form.form_id_button }}); return false;">Save Changes</button>'  # change
+#                                         '</div>'
+#                                     '</div>'
+#                                     '{% crispy form.delete_modal_form %} '
+#                                     '</form> '
+#                                     '</div> '
+#                                 '{% endfor %}'
+#                             ),
+#                             HTML('<div style="margin-top:10px">'
+#                                  '<p><a id="add-res-type" class="btn btn-success" data-toggle="modal" data-target="#add-res-type-dialog">'
+#                                  '<i class="fa fa-plus"></i>Add another resource type</a>'
+#                                  '</div>'
+#                             ),
+#                     )
 
 
 class FeeFormHelper(BaseFormHelper):
