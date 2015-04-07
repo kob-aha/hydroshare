@@ -5,15 +5,15 @@
 {% block main %}
 
     <!-- Tool Page Title -->
-    <div id="title">
+    <div id="title" style="margin-bottom:30px">
         <h1>NetCDF Tools</h1>
     </div>
 
     <!-- Resource Info -->
     {% if nc_res %}
-        <div id="resource-info">
+        <div id="resource-info" style="margin-bottom:30px">
             <div id="res-back-btn">
-                <a href="{{ nc_res.get_absolute_url }}" type="button" class="btn btn-primary">Back to Resource Landing Page</a>
+                <a href="{{ nc_res.get_absolute_url }}" type="button" class="btn btn-primary pull-right">Back to Resource Landing Page</a>
             </div>
 
             <div id="nc-file-name">
@@ -26,12 +26,38 @@
         </div>
 
     {% else %}
-        <div id="error-info"><h4> There is no netCDF file available for the tools </h4></div>
+        <div class="content-block" id="error-info"><h4> There is no netCDF file available for the tools </h4></div>
         <!--TODO:make this section for uploading new netcdf file from local computer-->
 
     {% endif %}
 
-    <!-- Tools Section-->
+    <!-- Tool Tabs Section-->
+    <div class="tool-tabs">
+        <!-- tab header -->
+        <div class="panel-tabs">
+            <ul class="nav nav-tabs">
+                <li class="active col-md-2 col-sm-12 col-xs-12">
+                    <a href="#metaEditTab" data-toggle="tab">Edit Metadata</a>
+                </li>
+                <li class="col-md-2 col-sm-2 col-xs-12">
+                    <a href="#dataSubsetTab" data-toggle="tab">Data Subset</a>
+                </li>
+            </ul>
+        </div>
+
+         <!-- tab body -->
+        <div class="tabs-body">
+            <div class="tab-content">
+                <div class="active tab-pane" id="metaEditTab">
+                    <p> test me</p>
+                </div>
+                <div class="tab-pane" id="dataSubsetTab">
+                    <p> second tab</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
 
 
 {% endblock %}

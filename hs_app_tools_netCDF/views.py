@@ -8,7 +8,7 @@ def index(request, shortkey, **kwargs):
     res, _, _ = authorize(request, shortkey, edit=True, full=True, superuser=True)
     res_cls = res.__class__
     context = {}
-    
+
     if res_cls is NetcdfResource:
         context['nc_res'] = res
     else:
