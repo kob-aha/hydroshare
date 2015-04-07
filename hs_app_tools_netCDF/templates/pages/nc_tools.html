@@ -49,7 +49,11 @@
         <div class="tabs-body">
             <div class="tab-content">
                 <div class="active tab-pane" id="metaEditTab">
-                    <p> test me</p>
+                    <form action="{% url "nc_tools:meta_edit" nc_res.short_id  %}" method="post"> {% csrf_token %}
+                        {{ meta_elements_form.as_p }}
+                        <input type="submit" value="Edit Meta" class="btn btn-primary pull-right"/>
+                    </form>
+
                 </div>
                 <div class="tab-pane" id="dataSubsetTab">
                     <p> second tab</p>
