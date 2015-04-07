@@ -48,13 +48,19 @@
          <!-- tab body -->
         <div class="tabs-body">
             <div class="tab-content">
+                <!-- meta edit -->
                 <div class="active tab-pane" id="metaEditTab">
-                    <form action="{% url "nc_tools:meta_edit" nc_res.short_id  %}" method="post"> {% csrf_token %}
+                    <form class="col-md-6" action="{% url "nc_tools:meta_edit" nc_res.short_id  %}" method="post"> {% csrf_token %}
                         {{ meta_elements_form.as_p }}
-                        <input type="submit" value="Edit Meta" class="btn btn-primary pull-right"/>
+                        <input type="submit" value="Edit Meta" class="btn btn-primary"/>
                     </form>
 
+                    <p class="col-md-6">Term mapping table</p>
                 </div>
+
+
+
+                <!-- data subset -->
                 <div class="tab-pane" id="dataSubsetTab">
                     <p> second tab</p>
                 </div>
