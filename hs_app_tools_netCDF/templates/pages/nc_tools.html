@@ -1,5 +1,37 @@
 {# This template is used as the landing page for NetCDF Resource #}
 
 {% extends "pages/page.html" %}
+
 {% block main %}
+
+    <!-- Tool Page Title -->
+    <div id="title">
+        <h1>NetCDF Tools</h1>
+    </div>
+
+    <!-- Resource Info -->
+    {% if nc_res %}
+        <div id="resource-info">
+            <div id="res-back-btn">
+                <a href="{{ nc_res.get_absolute_url }}" type="button" class="btn btn-primary">Back to Resource Landing Page</a>
+            </div>
+
+            <div id="nc-file-name">
+                {% for f in nc_res.files.all %}
+                    {% if f.resource_file.name|slice:"-3:" == '.nc'%}
+                        <h4>NetCDF File: {{ f.resource_file.name|slice:"33:" }}</h4>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+
+    {% else %}
+        <div id="error-info"><h4> There is no netCDF file available for the tools </h4></div>
+        <!--TODO:make this section for uploading new netcdf file from local computer-->
+
+    {% endif %}
+
+    <!-- Tools Section-->
+
+
 {% endblock %}
