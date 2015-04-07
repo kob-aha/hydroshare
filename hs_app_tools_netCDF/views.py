@@ -38,5 +38,6 @@ def meta_edit(request, shortkey, **kwargs):
         file_process = request.POST.getlist('file_process')
         if meta_elements and file_process:
             # do the work for meta editing and add as new version
-            raise Http404
+            pass
+            #raise Http404
     return HttpResponseRedirect(request.META.get('HTTP_REFERER'))

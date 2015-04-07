@@ -16,7 +16,8 @@ class MetaElementsForm(forms.Form):
         ('temporal_coverage', 'Temporal Coverage'),
         ('rights', 'Right'),
         ('source', 'Source'),
-        ('variable', 'Variables')
+        ('variable', 'Variables'),
+        ('publisher', 'Publisher'),
     )
 
     FILE_PROCESS = (
