@@ -1,4 +1,4 @@
-﻿from django.http import HttpResponseRedirect, HttpResponse
+﻿from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.shortcuts import get_object_or_404, render_to_response, render
 from hs_core.views.utils import authorize
 from hs_app_netCDF.models import NetcdfResource
@@ -19,18 +19,6 @@ def index(request, shortkey, **kwargs):
 
     # context for meta edit tool form
     meta_elements_form = MetaElementsForm()
-    meta_elements_form.fields['meta_elements'].choices = [
-        ('title', 'Title'),
-        ('creator', 'Creator'),
-        ('contributor', 'Contributor'),
-        ('description', 'Abstract'),
-        ('subjects', 'Keyword'),
-        ('spatial_coverage', 'Spatial Coverage'),
-        ('temporal_coverage', 'Temporal Coverage'),
-        ('rights', 'Right'),
-        ('source', 'Source'),
-        ('variable', 'Variables')
-    ]
     context['meta_elements_form'] = meta_elements_form
 
     return render(request, 'pages/nc_tools.html', context)
@@ -47,6 +35,8 @@ def meta_edit(request, shortkey, **kwargs):
 
     if request.method == 'POST'and (res_cls is NetcdfResource):
         meta_elements = request.POST.getlist('meta_elements')
-        # do the work for meta editing and add as new version
-
+        file_process = request.POST.getlist('file_process')
+        if meta_elements and file_process:
+            # do the work for meta editing and add as new version
+            raise Http404
     return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
