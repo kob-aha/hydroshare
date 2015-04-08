@@ -1,10 +1,13 @@
 {# This template is used as the landing page for NetCDF Resource #}
 
 {% extends "pages/page.html" %}
+<!-- Add CSS or Js file -->
+{%  load staticfiles %}
 
 {% block main %}
+    <link rel="stylesheet" type="text/css" href="{% static 'hs_app_tools_netCDF/style.css'%}"/>
 
-    <!-- Tool Page Title -->
+    <!-- Page Title -->
     <div id="title" style="margin-bottom:30px">
         <h1>NetCDF Tools</h1>
     </div>
@@ -13,7 +16,7 @@
     {% if nc_res %}
         <div id="resource-info" style="margin-bottom:30px">
             <div id="res-back-btn">
-                <a href="{{ nc_res.get_absolute_url }}" type="button" class="btn btn-primary pull-right">Back to Resource Landing Page</a>
+                <a href="{{ nc_res.get_absolute_url }}" type="button" class="btn btn-success pull-right">Back to Resource Landing Page</a>
             </div>
 
             <div id="nc-file-name">
@@ -50,12 +53,86 @@
             <div class="tab-content">
                 <!-- meta edit tab-->
                 <div class="active tab-pane" id="metaEditTab">
-                    <form class="col-md-6"action="{% url "nc_tools:meta_edit" nc_res.short_id  %}" method="post"> {% csrf_token %}
+                    <form id="metaEditForm" class="col-md-6"action="{% url "nc_tools:meta_edit" nc_res.short_id  %}" method="post"> {% csrf_token %}
                         {{ meta_elements_form.as_p }}
-                        <input type="submit" value="Edit Meta" class="btn btn-primary"/>
+                        <input type="submit" value="Write Metadata to NetCDF File" class="btn btn-primary"/>
                     </form>
-                    <p class="col-md-t">tabel mapping info</p>
+                    <div id="metaEditTable">
+                        <p id='metaEditTableTitle' width="120"><strong>HydroShare Metadata Element and NetCDF Conventions Term Mapping</strong></p>
+                        <table class="col-md-6" id="metaEditTable">
+                        <col width="40">
+                        <col width="90">
+                        <tr>
+                            <th>Meta Element</th>
+                            <th>Conventions Term</th>
+                        </tr>
+                        <tr>
+                            <td>Title</td>
+                            <td>ACDD:title</td>
+                        </tr>
+                        <tr>
+                            <td>Creator</td>
+                            <td>ACDD:creator_name, creator_email, creator_url</td>
+                        </tr>
+                        <tr>
+                            <td>Contributor</td>
+                            <td>ACDD:contributor_name</td>
+                        </tr>
+                        <tr>
+                            <td>Abstract</td>
+                            <td>ACDD:summary</td>
+                        </tr>
+                        <tr>
+                            <td>Keyword</td>
+                            <td>ACDD:keywords</td>
+                        </tr>
+                        <tr>
+                            <td>Spatial Coverage</td>
+                            <td>ACDD:geospatial_lat_min, geospatial_lat_max, geospatial_lon_max, getospatial_lon_min</td>
+                        </tr>
+                        <tr>
+                            <td>Temporal Coverage</td>
+                            <td>ACDD:time_coverage_start, time_coverage_end</td>
+                        </tr>
+                        <tr>
+                            <td>Right</td>
+                            <td>ACDD:license</td>
+                        </tr>
+                        <tr>
+                            <td>Source</td>
+                            <td>ACDD:source</td>
+                        </tr>
+                        <tr>
+                            <td>Publisher</td>
+                            <td>ACDD:publisher_name, publisher_url</td>
+                        </tr>
+                        <tr>
+                            <td>Permanent Link</td>
+                            <td>ACDD:id</td>
+                        </tr>
+                        <tr>
+                            <td>Relation:cites</td>
+                            <td>ACDD:references</td>
+                        </tr>
+                        <tr>
+                            <td>Variable</td>
+                            <td>CF:units, long_name, missing_value, comment</td>
+                        </tr>
+                    </table>
+                        <p id='metaEditTableInfo'>
+                            *ACDD:<a target="_blank" href= "http://wiki.esipfed.org/index.php/Attribute_Convention_for_Data_Discovery_(ACDD)">
+                                Attribute Convention for Data Discovery
+                                </a>
+                        </p>
+                        <p id="metaEditTableInfo">
+                            *CF:<a target="_blank" href="http://cfconventions.org/">
+                            Climate and Forecast metadata Convention
+                            </a>
+                        </p>
+                    </div>
+
                 </div>
+
 
                 <!-- data subset tab -->
                 <div class="tab-pane" id="dataSubsetTab">

@@ -1,0 +1,16 @@
+
+/* Meta Edit Tab Style */
+
+#metaEditTable td {
+    border: 1px solid #357ebd;
+}
+
+#metaEditTable th {
+    color: white;
+    background-color: #428bca;
+    border: 1px solid #357ebd;
+}
+
+#metaEditTable tr:nth-child(even) {
+    background-color: #d7ebf9;
+}

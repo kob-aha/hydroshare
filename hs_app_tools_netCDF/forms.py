@@ -16,8 +16,10 @@ class MetaElementsForm(forms.Form):
         ('temporal_coverage', 'Temporal Coverage'),
         ('rights', 'Right'),
         ('source', 'Source'),
-        ('variable', 'Variables'),
         ('publisher', 'Publisher'),
+        ('identifier', 'Permanent Link'),
+        ('relation', 'Relation:cites'),
+        ('variable', 'Variable'),
     )
 
     FILE_PROCESS = (
@@ -25,5 +27,12 @@ class MetaElementsForm(forms.Form):
         ('download_file', "Download the edited netcdf file to local computer."),
     )
 
-    meta_elements = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple,choices=META_ELEMENTS)
-    file_process = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple,choices=FILE_PROCESS)
+    meta_elements = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple,
+                                              choices=META_ELEMENTS,
+                                              label='Select Meta Elements to Write to NetCDF File'
+                                            )
+
+    file_process = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple,
+                                             choices=FILE_PROCESS,
+                                             label='Select Actions after NetCDF File Meta Editing'
+                                            )
