@@ -29,10 +29,10 @@ class MetaElementsForm(forms.Form):
 
     meta_elements = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple,
                                               choices=META_ELEMENTS,
-                                              label='Select Meta Elements to Write to NetCDF File'
+                                              label='Select Meta Elements to Write to NetCDF File (required)'
                                             )
 
     file_process = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple,
                                              choices=FILE_PROCESS,
-                                             label='Select Actions after NetCDF File Meta Editing'
+                                             label='Select Actions after NetCDF File Meta Editing (required)'
                                             )

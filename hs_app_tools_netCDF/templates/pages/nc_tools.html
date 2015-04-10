@@ -1,11 +1,16 @@
 {# This template is used as the landing page for NetCDF Resource #}
 
 {% extends "pages/page.html" %}
-<!-- Add CSS or Js file -->
 {%  load staticfiles %}
 
-{% block main %}
+{# load extra css #}
+{% block extra_css %}
     <link rel="stylesheet" type="text/css" href="{% static 'hs_app_tools_netCDF/style.css'%}"/>
+{% endblock %}
+
+
+{# Page content #}
+{% block main %}
 
     <!-- Page Title -->
     <div id="title" style="margin-bottom:30px">
@@ -18,8 +23,7 @@
             <div id="res-back-btn">
                 <a href="{{ nc_res.get_absolute_url }}" type="button" class="btn btn-success pull-right">Back to Resource Landing Page</a>
             </div>
-
-            <div id="nc-file-name">
+            <div id="ncFileName">
                 {% for f in nc_res.files.all %}
                     {% if f.resource_file.name|slice:"-3:" == '.nc'%}
                         <h4>NetCDF File: {{ f.resource_file.name|slice:"33:" }}</h4>
@@ -51,14 +55,19 @@
          <!-- tab body -->
         <div class="tabs-body">
             <div class="tab-content">
+
                 <!-- meta edit tab-->
                 <div class="active tab-pane" id="metaEditTab">
                     <form id="metaEditForm" class="col-md-6"action="{% url "nc_tools:meta_edit" nc_res.short_id  %}" method="post"> {% csrf_token %}
                         {{ meta_elements_form.as_p }}
-                        <input type="submit" value="Write Metadata to NetCDF File" class="btn btn-primary"/>
+                        <input id="metaEditBtn" type="submit" value="Write Metadata to NetCDF File" class="btn btn-primary"/>
                     </form>
+                    <p id='metaEditIntro'>
+                        <strong style="font-size:130%">Metadata Editing tool</strong>
+                        <br/>This tool will write the metadata information of the Multidimensional Space and Time data resource in the .nc resource file.
+                        <br/>The mapping between the HydroShare resource metadata information and the NetCDF conventions terms is shown in the table.
+                    </p>
                     <div id="metaEditTable">
-                        <p id='metaEditTableTitle' width="120"><strong>HydroShare Metadata Element and NetCDF Conventions Term Mapping</strong></p>
                         <table class="col-md-6" id="metaEditTable">
                         <col width="40">
                         <col width="90">
@@ -143,5 +152,37 @@
 
     </div>
 
+{% endblock %}
+
+
+{# Load javascript #}
+{% block extra_js %}
+<script>
+
+    // Meta Edit Tab js
+    $(document).ready(function(){
+
+        //disable meta edit button and clean checked box
+        $('input[id^="id_meta_elements_"]').attr('checked', false);
+        $('input[id^="id_file_process_"]').attr('checked', false);
+        $('#metaEditBtn').attr('disabled', true);
+        //alert($('#metaEditBtn').attr('disabled'));
+
+        // enable meta edit button after valid check box
+        $('#metaEditForm').on('change', function(){
+            var meta_elements_checkbox = $('input[id^="id_meta_elements_"]:checked').length > 0;
+            var file_process_checkbox = $('input[id^="id_file_process_"]:checked').length > 0;
+            if (meta_elements_checkbox && file_process_checkbox) {
+                $('#metaEditBtn').attr('disabled', false);
+            }
+            else {
+                $('#metaEditBtn').attr('disabled',true);
+            }
+        })
+
+    })
+
+
+</script>
 
 {% endblock %}
