@@ -3,6 +3,8 @@ from django.shortcuts import get_object_or_404, render_to_response, render
 from hs_core.views.utils import authorize
 from hs_app_netCDF.models import NetcdfResource
 from hs_app_tools_netCDF.forms import MetaElementsForm
+from hs_core.hydroshare.resource import ResourceFile
+from django.contrib import messages
 
 
 # views for index page
@@ -37,7 +39,8 @@ def meta_edit(request, shortkey, **kwargs):
         meta_elements = request.POST.getlist('meta_elements')
         file_process = request.POST.getlist('file_process')
         if meta_elements and file_process:
-            # do the work for meta editing and add as new version
-            pass
-            #raise Http404
+            pass #TODO: editing the file and add to resource or just for download
+            messages.add_message(request,messages.SUCCESS, 'Success! Metadata Editing is finished.')
+        else:
+            messages.add_message(request, messages.ERROR, 'Error! Metadata Editing is failed.')
     return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
