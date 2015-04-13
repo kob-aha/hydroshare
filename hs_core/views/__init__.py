@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group, User
 from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.shortcuts import get_object_or_404, render_to_response, render
 from django.template import RequestContext
 from django.utils.timezone import now
@@ -471,12 +471,12 @@ def my_resources(request, page):
 #    if not request.user.is_authenticated():
 #        return HttpResponseRedirect('/accounts/login/')
 
-    # import sys
-    # sys.path.append("/home/docker/pycharm-debug")
-    # import pydevd
+    #import sys
+    #sys.path.append("/home/docker/pycharm-debug")
+    #import pydevd
     # IP Address for Ubuntu VM must be: 172.17.42.1
     # IP Address for boot2docker: varies
-    # pydevd.settrace('172.17.42.1', port=21000, suspend=False)
+    #pydevd.settrace('172.17.42.1', port=21000, suspend=False)
 
     frm = FilterForm(data=request.REQUEST)
     if frm.is_valid():
@@ -827,6 +827,24 @@ def get_file(request, *args, **kwargs):
     session.runCmd("iinit");
     session.runCmd('iget', [ name, 'tempfile.' + name ])
     return HttpResponse(open(name), content_type='x-binary/octet-stream')
+
+
+def get_metadata_term_type(request, resource_type, *args, **kwargs):
+    """
+    Get the web page that describes the resource type
+
+    :param resource_type: Resource type name (model class name)
+
+    :return: web page
+    """
+    try:
+        hydroshare.check_resource_type(resource_type)
+    except:
+        raise Http404(resource_type)
+
+    page_url = 'pages/type-%s.html' % resource_type.lower()
+    return render(request, page_url)
+
 
 processor_for(GenericResource)(resource_processor)
 

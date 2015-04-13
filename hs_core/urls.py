@@ -29,6 +29,7 @@ urlpatterns = patterns('',
     url(r'^publishResource/(?P<pk>[A-z0-9]+)/$', views.resource_api.PublishResource.as_view()), # raises not implemented
     url(r'^resolveDOI/(?P<doi>[A-z0-9]+)/$', views.resource_api.ResolveDOI.as_view()), # raises not implemented
     url(r'^save_inline/$', views.save_ajax),
+    url(r'^terms/(?P<resource_type>[A-z]+)/$', views.get_metadata_term_type),
 
     # internal API
 

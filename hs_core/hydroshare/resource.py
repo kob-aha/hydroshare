@@ -490,6 +490,9 @@ def create_resource(
                                      url='{0}/resource{1}{2}'.format(current_site_url(), '/', resource.short_id))
     resource.metadata.create_element('date', type='created', start_date=resource.created)
     resource.metadata.create_element('date', type='modified', start_date=resource.updated)
+    resource_type_url = '{base_url}/hsapi/terms/{resource_type}'.format(base_url=current_site_url(),
+                                                                        resource_type=resource_type)
+    resource.metadata.create_element('type', url=resource_type_url)
 
     if resource.creator.first_name:
         first_creator_name = "{first_name} {last_name}".format(first_name=resource.creator.first_name,

@@ -1,7 +1,7 @@
 from mezzanine.pages.page_processors import processor_for
 from dublincore.models import QualifiedDublinCoreElement
 from hs_core.hydroshare import current_site_url
-from hs_core.hydroshare.utils import get_file_mime_type, resource_modified
+from hs_core.hydroshare.utils import get_file_mime_type, resource_modified, user_from_id
 from hs_core.models import GenericResource
 from hs_core import languages_iso
 from forms import *
@@ -33,6 +33,14 @@ def get_page_context(page, user, resource_edit=False, extended_metadata_layout=N
         edit_mode = True
 
     metadata_status = _get_metadata_status(content_model)
+
+    # if needed create the core metadata element 'type'
+    if not content_model.metadata.type:
+        resource_type_url = '{base_url}/hsapi/terms/{resource_type}'.format(base_url=current_site_url(),
+                                                                resource_type=content_model.__class__.__name__)
+        content_model.metadata.create_element('type', url=resource_type_url)
+        admin_user = user_from_id('admin')
+        resource_modified(content_model, by_user=admin_user)
 
     if request:
         file_validation_error = check_for_file_validation(request)

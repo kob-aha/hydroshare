@@ -1,0 +1,30 @@
+{% extends 'pages/page.html' %}
+
+{% block main %}
+    <h2> Time Series Resource Type</h2>
+    <p>The time series is a sequence of individual data values that are ordered in time to record the
+        changing trend of a certain phenomenon. As time series are widely used for hydrologic research
+        and because they are also the primary granule of data sharing within the CUAHSI HIS,
+        the time series will be an important resource type in the HydroShare system. Currently,
+        we define a time series resource such that it can contain only one time series.
+        To define the entities and attributes of a time series, we adopt the definition of a time series as
+        specified by Version 2.0 of the Observations Data Model (ODM2) – see description of a time series result in
+        ODM2 <a href="https://github.com/UCHIC/ODM2/blob/master/doc/ODM2Docs/ext_results_timeseries.md">here</a>
+    </p>
+    <p> ODM2 does not limit the types of time series that can be supported.  Any time series supported by the
+        ODM2 information model will be valid for input as a time series resource in HydroShare. The specific
+        implementation of ODM2 that will be used for storing time series in HydroShare is described in more detail
+        in a subsequent section, but, in general, ODM2 describes a time series via the following entities:
+        <ul>
+            <li>Site/SamplingFeature: The location at which the time series was observed or generated</li>
+            <li>Person/Organization: The person and organization responsible for creating the time series</li>
+            <li>Method: The procedure used to create the time series</li>
+            <li>Variable/Units: The phenomenon that the time series represents and the units in which the values are recorded</li>
+            <li>Action: The specific action or event that created the time series</li>
+            <li>ProcessingLevel:The level of processing or quality control to which the time series has been subjected</li>
+            <li>Offset: The X, Y, and Z location of the time series measurements if offset from the site location</li>
+            <li>DataValues: The data values, their recorded dates/times,  and their value-level attributes</li>
+        </ul>
+    </p>
+{% endblock %}
+
