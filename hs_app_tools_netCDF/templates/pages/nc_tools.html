@@ -23,12 +23,23 @@
             <div id="res-back-btn">
                 <a href="{{ nc_res.get_absolute_url }}" type="button" class="btn btn-success pull-right">Back to Resource Landing Page</a>
             </div>
+
             <div id="ncFileName">
                 {% for f in nc_res.files.all %}
                     {% if f.resource_file.name|slice:"-3:" == '.nc'%}
-                        <h4>NetCDF File: {{ f.resource_file.name|slice:"33:" }}</h4>
+                        <h4>Resource NetCDF File:  <a href="{{ f.resource_file.url }}"> {{ f.resource_file.name|slice:"33:" }}</a> </h4>
                     {% endif %}
                 {% endfor %}
+            </div>
+
+            <div id="ncToolObjFilesLinks">
+                {% if nc_tools_obj %}
+                    {% if nc_tools_obj.meta_edit_file %}
+                        <h4>Metadata Editing File:
+                        <a href="{{ nc_tools_obj.meta_edit_file.url }}">{{ nc_tools_obj.meta_edit_file.name|slice:"2:" }}</a>
+                        </h4>
+                    {% endif %}
+                {% endif %}
             </div>
         </div>
 
@@ -58,7 +69,7 @@
 
                 <!-- meta edit tab-->
                 <div class="active tab-pane" id="metaEditTab">
-                    <form id="metaEditForm" class="col-md-6"action="{% url "nc_tools:meta_edit" nc_res.short_id  %}" method="post"> {% csrf_token %}
+                    <form id="metaEditForm" class="col-md-6"action="{% url "nc_tools:meta_edit" nc_res.short_id %}" method="post"> {% csrf_token %}
                         {{ meta_elements_form.as_p }}
                         <input id="metaEditBtn" type="submit" value="Write Metadata to NetCDF File" class="btn btn-primary"/>
                     </form>

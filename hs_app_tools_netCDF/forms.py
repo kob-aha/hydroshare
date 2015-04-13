@@ -23,8 +23,8 @@ class MetaElementsForm(forms.Form):
     )
 
     FILE_PROCESS = (
-        ('new_ver_res', "Create new version of resource with edited netcdf file."),
-        ('download_file', "Download the edited netcdf file to local computer."),
+        ('new_ver_res', "Create a new version of the existing resource with edited netcdf file."),
+        ('download_file', "Create a new resource with edited netcdf file."),
     )
 
     meta_elements = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple,
@@ -34,5 +34,5 @@ class MetaElementsForm(forms.Form):
 
     file_process = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple,
                                              choices=FILE_PROCESS,
-                                             label='Select Actions after NetCDF File Meta Editing (required)'
+                                             label='Select Actions after NetCDF File Meta Editing is finished (required)'
                                             )
