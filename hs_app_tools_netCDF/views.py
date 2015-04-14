@@ -166,6 +166,35 @@ def edit_meta_in_file(res, nc_file_name, meta_elements):
                         except:
                             pass
 
+        if 'temporal_coverage' in meta_elements and res.metadata.coverages.all().filter(type='period').first():
+            res_meta_cov = res.metadata.coverages.all().filter(type='period').first()
+            nc_dataset.time_coverage_start = res_meta_cov.value['start']
+            nc_dataset.time_coverage_end = res_meta_cov.value['end']
+
+        if 'spatial_coverage' in meta_elements and res.metadata.coverages.all().filter(type='box').first():
+            res_meta_cov = res.metadata.coverages.all().filter(type='box').first()
+            nc_dataset.geospatial_lat_min = res_meta_cov.value['southlimit']
+            nc_dataset.geospatial_lat_max = res_meta_cov.value['northlimit']
+            nc_dataset.geospatial_lon_min = res_meta_cov.value['westlimit']
+            nc_dataset.geospatial_lon_max = res_meta_cov.value['eastlimit']
+
+        res.metadata.contributors.all()
+        if 'contributor' in meta_elements and res.metadata.contributors.all():
+            res_contri_name = []
+            for contributor in res.metadata.contributors.all():
+                res_contri_name.append(contributor.name) # name, email, homepage, id
+            nc_dataset.contributor_name = ', '.join(res_contri_name)
+
+        if 'creator' in meta_elements and res.metadata.creators.all().filter(order=1):
+            creator = res.metadata.creators.all().filter(order=1).first()
+            nc_dataset.creator_name = creator.name
+            if creator.email:
+                nc_dataset.creator_email = creator.email
+            if creator.description or creator.homepage:
+                nc_dataset.creator_url = creator.homepage if creator.homepage else creator.description
+
+
+
         # edit convention meta if ACDD terms are edited in file:
         if meta_elements:
             ori_con = nc_dataset.Conventions if hasattr(nc_dataset, "Conventions") else ''
