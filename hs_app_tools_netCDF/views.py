@@ -10,7 +10,7 @@ import os
 from django.core.files import File
 from django.core.files.base import ContentFile
 from django.core.urlresolvers import reverse
-
+import numpy as np
 
 # views for index page
 def index_view(request, shortkey, state):
@@ -72,10 +72,13 @@ def run_meta_edit_tool(res, meta_elements, file_process):
     for f in ResourceFile.objects.filter(object_id=res.id):
         ext = os.path.splitext(f.resource_file.name)[-1]
         if ext == '.nc':
-            # create or get the nc_tools_obj
+            # initiate the nc_tools_obj for meta edit tool
             nc_tools_obj = NetcdfTools.objects.filter(short_id=res.short_id).first()
             if not nc_tools_obj:
                 nc_tools_obj = NetcdfTools(short_id=res.short_id)
+            else:
+                nc_tools_obj.meta_edit_file.delete()
+
 
             # add meta_edit initial file
             meta_edit_file_name = os.path.basename(f.resource_file.name)
@@ -103,26 +106,14 @@ def edit_meta_in_file(res, nc_file_name, meta_elements):
         check_info = ''
         nc_dataset = netCDF4.Dataset(nc_file_name, 'a')
 
-        # a= res.get_absolute_url() #'/resource/short_id/'
-        # a= res.metadata.subjects.all().first()
-        # a = res.metadata.subjects.all().first().value# relation object manager
-        # a= res.metadata.rights # meta object: statement, url is useful
-        # a = res.metadata.sources # relation object manager
-        # a = res.metadata.sources.all().frist()
-        # a=res.metadata.relations
-        # a=res.metadata.relations.all().first() # meta object: has attr as type, value,
-        # a=res.metadata.variables.all()
-        # a=res.metadata.variables.all().first()
-        # a= res.get_absolute_url
-        # a = res.metadata.description.abstract # string: value of the abstract
-
+        # edit metadata elements
         if 'title' in meta_elements and (res.metadata.title.value != 'Untitled Resource'):  # Done
             nc_dataset.title = res.metadata.title.value
 
-        if 'description' in meta_elements and res.metadata.description.abstract:  #Done
+        if 'description' in meta_elements and res.metadata.description.abstract:  # Done
             nc_dataset.summary = res.metadata.description.abstract
 
-        if 'subjects' in meta_elements and res.metadata.subjects.all().first():  #Done
+        if 'subjects' in meta_elements and res.metadata.subjects.all().first():  # Done
             res_meta_subjects = []
             for res_subject in res.metadata.subjects.all():
                 res_meta_subjects.append(res_subject.value)
@@ -131,33 +122,57 @@ def edit_meta_in_file(res, nc_file_name, meta_elements):
         if 'rights' in meta_elements and res.metadata.rights: #Done
             nc_dataset.license = "{0} \n {1}".format(res.metadata.rights.statement, res.metadata.rights.url)
 
-
-        if 'publisher' in meta_elements: #Done TODO not sure about this element info
+        if 'publisher' in meta_elements: #Done TODO need to confirm about this element info
             nc_dataset.publisher_name = 'HydroShare'
             nc_dataset.publisher_url = 'http://www.hydroshare.org'
 
-        if 'identifier' in meta_elements and res.metadata.identifiers.all(): #Done
+        if 'identifier' in meta_elements and res.metadata.identifiers.all():  # Done
             if res.metadata.identifiers.all().filter(name="doi"):
                 res_identifier = res.metadata.identifiers.all().filter(name="doi")[0]
             else:
                 res_identifier = res.metadata.identifiers.all().filter(name="hydroShareIdentifier")[0]
             nc_dataset.id = res_identifier.url
 
-        # if 'source' in meta_elements and res.metadata.sources.all():
-        #     pass
+        if 'source' in meta_elements and res.metadata.sources.all():  # Done
+            res_meta_source = []
+            for source in res.metadata.sources.all():
+                res_meta_source.append(source.derived_from)
+            nc_dataset.source = ' \n'.join(res_meta_source)
 
-        if 'relation' in meta_elements and res.metadata.relations.all().filter(type='cites'):
-            pass
+        if 'relation' in meta_elements and res.metadata.relations.all().filter(type='cites'): # Done
+            res_meta_ref = []
+            for reference in res.metadata.relations.all().filter(type='cites'):
+                res_meta_ref.append(reference.value)
+            nc_dataset.references = ' \n'.join(res_meta_ref)
 
-        if 'variable' in meta_elements and res.metadata.variables.all().first():
+        if 'variable' in meta_elements and res.metadata.variables.all():
+            meta_elements.remove('variable')
+            res_var_dict = nc_dataset.variables
             for variable in res.metadata.variables.all():
-                pass
+                if variable.name in res_var_dict.keys():
+                    res_var = res_var_dict[variable.name]
+                    b=res_var.__dict__.keys()
+                    if variable.unit != 'Unknown':
+                        res_var.setncattr('units', variable.unit)
+                    if variable.descriptive_name:
+                        res_var.setncattr('long_name', variable.descriptive_name)
+                    if variable.method:
+                        res_var.setncattr('comment', variable.method)
+                    if variable.missing_value:
+                        try:
+                            dt = np.dtype(res_var.datatype.name)
+                            missing_value = np.fromstring(variable.missing_value+' ', dtype=dt.type, sep=" ")
+                            res_var.setncattr('missing_value', missing_value)
+                        except:
+                            pass
 
+        # edit convention meta if ACDD terms are edited in file:
+        if meta_elements:
+            ori_con = nc_dataset.Conventions if hasattr(nc_dataset, "Conventions") else ''
+            nc_dataset.Conventions = ', '.join([ori_con, "ACDD-1.3"])
+
+        # close nc_dataset
         nc_dataset.close()
-
-        # just for testing
-        from hs_app_netCDF.nc_functions.nc_meta import get_nc_meta_dict
-        meta_info = get_nc_meta_dict(nc_file_name)
 
     except:
         nc_tools_obj = NetcdfTools.objects.filter(short_id=res.short_id).first()
@@ -166,10 +181,3 @@ def edit_meta_in_file(res, nc_file_name, meta_elements):
         check_info = "Error! Metadata Editing: failed to edit the meta info in the .nc file."
 
     return check_info
-
-META_ELEMENTS = (
-        ('creator', 'Creator'),
-        ('contributor', 'Contributor'),
-        ('spatial_coverage', 'Spatial Coverage'),
-        ('temporal_coverage', 'Temporal Coverage'),
-    )
