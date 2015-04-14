@@ -55,9 +55,8 @@ def meta_edit_view(request, shortkey, **kwargs):
         file_process = request.POST.getlist('file_process')
 
         if meta_elements and file_process:
-            check_info = write_meta_in_file(res)
+            check_info = run_meta_edit_tool(res, meta_elements, file_process)
             if check_info:
-                # TODO: check the file_process parameter and to the processes
                 messages.add_message(request, messages.ERROR, check_info)
             else:
                 messages.add_message(request, messages.SUCCESS, 'Success! Metadata Editing is finished.')
@@ -68,7 +67,7 @@ def meta_edit_view(request, shortkey, **kwargs):
     return HttpResponseRedirect(reverse('nc_tools:index', args=[res.short_id, 'processing']))
 
 
-def write_meta_in_file(res):
+def run_meta_edit_tool(res, meta_elements, file_process):
     check_info = ''
     for f in ResourceFile.objects.filter(object_id=res.id):
         ext = os.path.splitext(f.resource_file.name)[-1]
@@ -79,22 +78,98 @@ def write_meta_in_file(res):
                 nc_tools_obj = NetcdfTools(short_id=res.short_id)
 
             # add meta_edit initial file
-            meta_edit_file_content = ContentFile(f.resource_file.file.read())
             meta_edit_file_name = os.path.basename(f.resource_file.name)
-            nc_tools_obj.meta_edit_file.save(meta_edit_file_name, meta_edit_file_content)
-            nc_tools_obj.save()
+            meta_edit_file = open(f.resource_file.file.name)  # ContentFile(f.resource_file.file.read())
+            nc_tools_obj.meta_edit_file.save(meta_edit_file_name, File(meta_edit_file))
 
-            # write meta in the file TODO write meta back to nc_file
-            a= 'jamy'
-            # from hs_app_netCDF.nc_functions.nc_meta import *
-            # import netCDF4
-            #
-            # nc_dataset = netCDF4.Dataset(nc_tools_obj.meta_edit_file.file.name,'a')
-            # nc_dataset.title ='this is test for metaediting'
-            # nc_dataset.close()
-            # meta_info = get_nc_meta_dict(nc_tools_obj.meta_edit_file.file.name)
-            return check_info
+            # write meta in the file
+            nc_file_name = nc_tools_obj.meta_edit_file.file.name
+            check_info = edit_meta_in_file(res, nc_file_name, meta_elements)
 
-    check_info = "Error! Metadata Editing: there is no .nc file for editing. "
+            # file process after editing
+            if check_info:
+                return check_info
+            else:
+                return check_info
+
+    check_info = "Error! Metadata Editing: there is no .nc file in the resource. "
 
     return check_info
+
+
+def edit_meta_in_file(res, nc_file_name, meta_elements):
+    try:
+        import netCDF4
+        check_info = ''
+        nc_dataset = netCDF4.Dataset(nc_file_name, 'a')
+
+        # a= res.get_absolute_url() #'/resource/short_id/'
+        # a= res.metadata.subjects.all().first()
+        # a = res.metadata.subjects.all().first().value# relation object manager
+        # a= res.metadata.rights # meta object: statement, url is useful
+        # a = res.metadata.sources # relation object manager
+        # a = res.metadata.sources.all().frist()
+        # a=res.metadata.relations
+        # a=res.metadata.relations.all().first() # meta object: has attr as type, value,
+        # a=res.metadata.variables.all()
+        # a=res.metadata.variables.all().first()
+        # a= res.get_absolute_url
+        # a = res.metadata.description.abstract # string: value of the abstract
+
+        if 'title' in meta_elements and (res.metadata.title.value != 'Untitled Resource'):  # Done
+            nc_dataset.title = res.metadata.title.value
+
+        if 'description' in meta_elements and res.metadata.description.abstract:  #Done
+            nc_dataset.summary = res.metadata.description.abstract
+
+        if 'subjects' in meta_elements and res.metadata.subjects.all().first():  #Done
+            res_meta_subjects = []
+            for res_subject in res.metadata.subjects.all():
+                res_meta_subjects.append(res_subject.value)
+            nc_dataset.keywords = ','.join(res_meta_subjects)
+
+        if 'rights' in meta_elements and res.metadata.rights: #Done
+            nc_dataset.license = "{0} \n {1}".format(res.metadata.rights.statement, res.metadata.rights.url)
+
+
+        if 'publisher' in meta_elements: #Done TODO not sure about this element info
+            nc_dataset.publisher_name = 'HydroShare'
+            nc_dataset.publisher_url = 'http://www.hydroshare.org'
+
+        if 'identifier' in meta_elements and res.metadata.identifiers.all(): #Done
+            if res.metadata.identifiers.all().filter(name="doi"):
+                res_identifier = res.metadata.identifiers.all().filter(name="doi")[0]
+            else:
+                res_identifier = res.metadata.identifiers.all().filter(name="hydroShareIdentifier")[0]
+            nc_dataset.id = res_identifier.url
+
+        # if 'source' in meta_elements and res.metadata.sources.all():
+        #     pass
+
+        if 'relation' in meta_elements and res.metadata.relations.all().filter(type='cites'):
+            pass
+
+        if 'variable' in meta_elements and res.metadata.variables.all().first():
+            for variable in res.metadata.variables.all():
+                pass
+
+        nc_dataset.close()
+
+        # just for testing
+        from hs_app_netCDF.nc_functions.nc_meta import get_nc_meta_dict
+        meta_info = get_nc_meta_dict(nc_file_name)
+
+    except:
+        nc_tools_obj = NetcdfTools.objects.filter(short_id=res.short_id).first()
+        if nc_tools_obj:
+            nc_tools_obj.meta_edit_file.delete()
+        check_info = "Error! Metadata Editing: failed to edit the meta info in the .nc file."
+
+    return check_info
+
+META_ELEMENTS = (
+        ('creator', 'Creator'),
+        ('contributor', 'Contributor'),
+        ('spatial_coverage', 'Spatial Coverage'),
+        ('temporal_coverage', 'Temporal Coverage'),
+    )
