@@ -182,8 +182,8 @@
         // enable meta edit button after valid check box
         $('#metaEditForm').on('change', function(){
             var meta_elements_checkbox = $('input[id^="id_meta_elements_"]:checked').length > 0;
-            var file_process_checkbox = $('input[id^="id_file_process_"]:checked').length > 0;
-            if (meta_elements_checkbox && file_process_checkbox) {
+            //var file_process_checkbox = $('input[id^="id_file_process_"]:checked').length > 0;
+            if (meta_elements_checkbox) {
                 $('#metaEditBtn').attr('disabled', false);
             }
             else {
