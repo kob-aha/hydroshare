@@ -10,6 +10,9 @@ from hs_app_tools_netCDF.nc_tool_functions.nc_meta_edit import *
 
 # views for index page
 def index_view(request, shortkey, state):
+    """
+    Netcdf tool landing page view function
+    """
     res, _, _ = authorize(request, shortkey, edit=True, full=True, superuser=True)
     res_cls = res.__class__
     context = {}
@@ -40,7 +43,6 @@ def index_view(request, shortkey, state):
 def meta_edit_view(request, shortkey, **kwargs):
     """
     Meta Edit Tool view function
-
     """
 
     res, _, _ = authorize(request, shortkey, edit=True, full=True, superuser=True)

@@ -15,18 +15,18 @@ import uuid
 
 def create_nc_tools_obj(res, tool_name):
     """
-    creat ethe netcdf tool obj with and the tool file field
+    create the netcdf tool obj and add netcdf file to the the tool file field
 
     :param res: netcdf resource obj
-    :param tool_name: string name of the netcdf tools (e.g.: meta_edit)
-    :return: netcdf tool object with the original netcdf file stored in the tool filefield
+    :param tool_name: string name of the netcdf tools refer to NetcdfTool class field(e.g.: meta_edit)
+    :return: netcdf tool object with the original netcdf file stored in the tool file field
     """
 
     for f in ResourceFile.objects.filter(object_id=res.id):
         ext = os.path.splitext(f.resource_file.name)[-1]
         if ext == '.nc':
 
-            # initiate the nc_tools_obj for the resource
+            # initiate the nc_tools_obj and tool_file_filed for the resource
             nc_tools_obj = NetcdfTools.objects.filter(short_id=res.short_id).first()
             tool_file_field_name = tool_name+'_file'
             if nc_tools_obj and getattr(nc_tools_obj, tool_file_field_name):
@@ -37,17 +37,18 @@ def create_nc_tools_obj(res, tool_name):
             else:
                 nc_tools_obj = NetcdfTools(short_id=res.short_id)
 
-            # add initial tool nc file
+            # add initial netcdf file name for the tool file field
             res_nc_file_name = os.path.basename(f.resource_file.name).split('_')
             random = str(uuid.uuid4())[0:6]
             if 'HS' in res_nc_file_name[0] and len(res_nc_file_name[0]) == 8:
                 tool_file_name = '_'.join(['HS'+random]+res_nc_file_name[1:])
             else:
                 tool_file_name = '_'.join(['HS'+random]+res_nc_file_name)
-            res_nc_file = open(f.resource_file.file.name)  # ContentFile(f.resource_file.file.read())
 
-            if tool_name == 'meta_edit':
-                nc_tools_obj.meta_edit_file.save(tool_file_name, File(res_nc_file))
+            # add netcdf file to tool file field
+            res_nc_file = open(f.resource_file.file.name)  # ContentFile(f.resource_file.file.read())
+            tool_file_field = getattr(nc_tools_obj, tool_file_field_name)
+            tool_file_field.save(tool_file_name, File(res_nc_file))
 
             return nc_tools_obj
 
@@ -56,10 +57,11 @@ def create_nc_tools_obj(res, tool_name):
 
 def execute_file_process(res, file_process, nc_file_path):
     """
+    create a new version of resource or a new resource with given netcdf file
 
     :param res: netcdf resource obj
     :param nc_file_path: full file path name of the .nc file, this needs to be the file path accessible by system
-    :param file_process:
+    :param file_process: list including the options of the file processing e.g. ['new_ver_res', 'new_res']
     :return:
     """
     check_info = []
@@ -80,11 +82,10 @@ def create_new_ver_res(res, nc_file_path, nc_file_name=None):
 
     :param res: netcdf resource obj
     :param nc_file_path: full file path name of the .nc file, this needs to be the file path accessible by system
-    :param nc_file_name: a meaning full name of the netcdf file which will be shown as the resource file name(optional)
+    :param nc_file_name: a meaningful name of the netcdf file which will be shown as the resource file name(optional)
     :return: check_info: if success return '', otherwise return error info string
     """
 
-    check_info = ''
     try:
         # add new .nc file
         f = ResourceFile.objects.create(content_object=res)
@@ -99,11 +100,18 @@ def create_new_ver_res(res, nc_file_path, nc_file_name=None):
         # add new ncdump .txt file
         check_info = add_nc_dump_file(res, nc_file_path, nc_file_name)
 
-        # delete resource files
-        for f in ResourceFile.objects.filter(object_id=res.id):
-            if nc_file_name.replace('.nc', '') not in f.resource_file.name:
-                f.resource_file.delete()
-                f.delete()
+        # delete resource files based on execution
+        new_res_file_name = os.path.basename(f.resource_file.name)
+        if not check_info:
+            for f in ResourceFile.objects.filter(object_id=res.id):
+                if new_res_file_name.replace('.nc', '') not in f.resource_file.name:
+                    f.resource_file.delete()
+                    f.delete()
+        else:
+            for f in ResourceFile.objects.filter(object_id=res.id):
+                if new_res_file_name.replace('.nc', '') in f.resource_file.name:
+                    f.resource_file.delete()
+                    f.delete()
 
     except:
         for f in ResourceFile.objects.filter(object_id=res.id):
@@ -165,7 +173,7 @@ def add_nc_dump_file(res, nc_file_path, nc_file_name=None):
     return check_info
 
 
-def create_new_res(res, nc_tools_obj):
+def create_new_res(nc_tools_obj):
     check_info = ''
 
     return check_info
