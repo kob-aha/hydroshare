@@ -1,5 +1,6 @@
 """
-Module providing utility functions to support netcdf tools function
+Module providing utility functions to support netcdf tools function in HydroShare
+
 """
 
 from hs_core.hydroshare.resource import ResourceFile
@@ -148,12 +149,12 @@ def create_new_res(request, nc_file_path):
         meta_elements = request.POST.getlist('meta_elements')
         if 'identifier' in meta_elements and res.metadata.identifiers.all():
             res_identifier = res.metadata.identifiers.all().filter(name="hydroShareIdentifier")[0]
-        nc_dataset = netCDF4.Dataset(nc_file_path, 'a')
-        nc_dataset.setncattr('id', res_identifier.url)
-        nc_dataset.close()
-        
+            nc_dataset = netCDF4.Dataset(nc_file_path, 'a')
+            nc_dataset.setncattr('id', res_identifier.url)
+            nc_dataset.close()
+
         # add new .nc file to resource
-        nc_res_file_obj =add_nc_file_to_res(res, nc_file_path, nc_file_name)
+        nc_res_file_obj = add_nc_file_to_res(res, nc_file_path, nc_file_name)
 
         # add new ncdump file to resource
         ncdump_res_file_obj = add_ncdump_file_to_res(res,nc_file_path, nc_file_name)
@@ -274,6 +275,7 @@ def get_nc_meta_populate_list(nc_file_path, nc_res_title="Untitled resource"):
                       'url': 'http://creativecommons.org/licenses/by/4.0/'
                      }
                 })
+
     metadata.append({'title': {'value': nc_res_title}})
 
     # extract the metadata from netcdf file
@@ -311,6 +313,24 @@ def get_nc_meta_populate_list(nc_file_path, nc_res_title="Untitled resource"):
     if res_dublin_core_meta.get('box'):
         box = {'coverage': {'type': 'box', 'value': res_dublin_core_meta['box']}}
         metadata.append(box)
+    # add creator:
+    if res_dublin_core_meta.get('creator_name'):
+        name = res_dublin_core_meta['creator_name']
+        email = res_dublin_core_meta.get('creator_email', '')
+        url = res_dublin_core_meta.get('creator_url', '')
+        creator = {'creator': {'name': name, 'email': email, 'url': url}}
+        metadata.append(creator)
+    # add contributor:
+    if res_dublin_core_meta.get('contributor_name'):
+        name_list = res_dublin_core_meta['contributor_name'].split(',')
+        for name in name_list:
+            contributor = {'contributor': {'name': name}}
+            metadata.append(contributor)
+    # add keywords
+    if res_dublin_core_meta.get('subject'):
+        keywords = res_dublin_core_meta['subject'].split(',')
+        for keyword in keywords:
+            metadata.append({'subject': {'value': keyword}})
 
     # Save extended meta to metadata variable
     for var_name, var_meta in res_type_specific_meta.items():

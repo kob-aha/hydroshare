@@ -44,10 +44,10 @@ def edit_meta_in_file(res, meta_elements, nc_file_path):
         # edit metadata elements
         nc_dataset = netCDF4.Dataset(nc_file_path, 'a')
 
-        if 'title' in meta_elements and (res.metadata.title.value != 'Untitled Resource'):  # Done
+        if 'title' in meta_elements and (res.metadata.title.value != 'Untitled Resource'):
             nc_dataset.title = res.metadata.title.value
 
-        if 'description' in meta_elements and res.metadata.description.abstract:  # Done
+        if 'description' in meta_elements and res.metadata.description:
             nc_dataset.summary = res.metadata.description.abstract
 
         if 'subjects' in meta_elements and res.metadata.subjects.all().first():
