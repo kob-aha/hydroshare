@@ -53,7 +53,7 @@ def meta_edit_view(request, shortkey, **kwargs):
         file_process = request.POST.getlist('file_process')
 
         if meta_elements:
-            check_info = run_meta_edit_tool(res, meta_elements, file_process)
+            check_info = run_meta_edit_tool(res, meta_elements, file_process, request)
 
             if check_info:
                 check_info = 'Error! Metadata Editing: ' + check_info

@@ -8,7 +8,7 @@ import numpy as np
 import netCDF4
 
 
-def run_meta_edit_tool(res, meta_elements, file_process):
+def run_meta_edit_tool(res, meta_elements, file_process, request):
 
     check_info = ''
 
@@ -23,7 +23,7 @@ def run_meta_edit_tool(res, meta_elements, file_process):
 
         # file process after writing meta
         if (not check_info) and file_process:
-            check_info = execute_file_process(res, file_process, nc_file_path)
+            check_info = execute_file_process(res, file_process, nc_file_path, request)
     else:
         check_info = "there is no .nc file in the resource. "
 
