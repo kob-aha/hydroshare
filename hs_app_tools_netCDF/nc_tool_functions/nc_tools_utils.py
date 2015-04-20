@@ -144,19 +144,18 @@ def create_new_res(request, nc_file_path):
                     content=nc_file_name,
         )
 
-        # add new .nc file and check identifier info
+        # check identifier info
         meta_elements = request.POST.getlist('meta_elements')
         if 'identifier' in meta_elements and res.metadata.identifiers.all():
             res_identifier = res.metadata.identifiers.all().filter(name="hydroShareIdentifier")[0]
         nc_dataset = netCDF4.Dataset(nc_file_path, 'a')
-        a = nc_dataset.id
-        b = res_identifier.url
-        a == b
         nc_dataset.setncattr('id', res_identifier.url)
         nc_dataset.close()
+        
+        # add new .nc file to resource
         nc_res_file_obj =add_nc_file_to_res(res, nc_file_path, nc_file_name)
 
-        # add new ncdump file
+        # add new ncdump file to resource
         ncdump_res_file_obj = add_ncdump_file_to_res(res,nc_file_path, nc_file_name)
 
         # check info:
