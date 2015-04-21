@@ -72,4 +72,32 @@ def meta_edit_view(request, shortkey, **kwargs):
     return HttpResponseRedirect(reverse('nc_tools:index', args=[res.short_id, 'processing']))
 
 
+# views for create ncdump file button
+def create_ncdump_view(request, shortkey):
+    """
+    create ncdump file function for create ncdump button in landing page
+    """
 
+    res, _, _ = authorize(request, shortkey, edit=True, full=True, superuser=True)
+    res_cls = res.__class__
+
+    if res_cls is NetcdfResource:
+        nc_file_obj = None
+        nc_file_name = ''
+        for f in ResourceFile.objects.filter(object_id=res.id):
+            ext = os.path.splitext(f.resource_file.name)[-1]
+            if ext == '.nc':
+                nc_file_obj = f
+                nc_file_name = os.path.basename(f.resource_file.name)
+                break
+
+        if nc_file_obj:
+            nc_file_path = nc_file_obj.resource_file.file.name
+            nc_dump_file_obj = add_ncdump_file_to_res(res, nc_file_path, nc_file_name)
+
+    if nc_dump_file_obj:
+        messages.add_message(request, messages.SUCCESS, 'The netcdf header info .txt file is created')
+    else:
+        messages.add_message(request, messages.ERROR, 'Failed to create the netcdf header info .txt file.')
+
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))

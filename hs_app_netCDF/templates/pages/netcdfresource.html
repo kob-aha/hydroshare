@@ -9,7 +9,7 @@
             <div class="col-md-12">
                 <h2>Extended Metadata</h2>
                 <div>
-                {# Add the view mode html code below #}
+                {# Add the view mode html code below for resource extended meta tab #}
 
                     {# Add the original coverage meta #}
                     {% if original_coverage %}
@@ -129,36 +129,51 @@
                     {% endif %}
 
                 {# Add ncdump info #}
+                <h3>NetCDF Data Header Information</h3>
                 {% for f in cm.files.all %}
                     {% if f.resource_file.name|slice:"-3:" == 'txt'%}
-                        <div>
-                        <h3>NetCDF Data Header Information</h3>
-                        <p>{{ f.resource_file.name|slice:"33:" }}</p>
-                        {% if f.resource_file.size <= 5000000 %}
-                            <textarea readonly rows="20" cols="100">{{ f.resource_file.read}}</textarea>
-                        {% else %}
-                            <textarea readonly rows="2" cols="100">The size of the netCDF header information text file is too large for loading on the page.</textarea>
+                        <div id="showNcdump">
+                            <p>{{ f.resource_file.name|slice:"33:" }}</p>
+                            {% if f.resource_file.size <= 5000000 %}
+                                <textarea readonly rows="20" cols="100">{{ f.resource_file.read}}</textarea>
+                            {% else %}
+                                <textarea readonly rows="2" cols="100">The size of the netCDF header information text file is too large for loading on the page.</textarea>
                         {% endif %}
                         </div>
+                    {% else %}
+                        <div id="createNcdump" style="margin-bottom: 25px">
+                            <p>Click the button to create a new header info .txt file for the resource.</p>
+                            <a id="create-ncdump-btn" type="button" class="btn btn-success" href="{% url "nc_tools:create_ncdump" cm.short_id %}">
+                                <span class="button-label"> Create header info file</span>
+                            </a>
+                        </div>
                     {% endif %}
+
                 {% endfor %}
 
-                {# Add the view mode html code above #}
+                {# Add the view mode html code for resource extended meta tababove #}
                 </div>
-
 
             </div>
         </div>
     {%  endif %}
 
-    {# Add netcdf tool button  #}
-    {% for f in cm.files.all %}
-        {% if f.resource_file.name|slice:"-3:" == '.nc'%}
-            <td><a style="margin-left:15px" id="btn-netcdf-tools" type="button" class="btn btn-success" href="{% url "nc_tools:index" cm.short_id 'initial' %}">
-                <span class="button-label"> NetCDF Tools</span>
-            </a></td>
-        {% endif %}
-    {% endfor %}
+
+    {#  Add the code of extended section on the landing page below #}
+    {% block extended_section %}
+
+        {# Add netcdf tool button  #}
+        {% for f in cm.files.all %}
+            {% if f.resource_file.name|slice:"-3:" == '.nc'%}
+                <td><a style="margin-left:15px" id="btn-netcdf-tools" type="button" class="btn btn-success" href="{% url "nc_tools:index" cm.short_id 'initial' %}">
+                    <span class="button-label"> NetCDF Tools</span>
+                </a></td>
+            {% endif %}
+        {% endfor %}
+
+
+    {% endblock %}
+
 
 {%  endblock %}
 
@@ -189,6 +204,14 @@
     // netcdf tool button
     $(document).ready(function(){
         $("#btn-netcdf-tools").insertAfter("#btn-download-all");
+    })
+
+    // netcdf ncdump button
+    $(document).ready(function(){
+        if($('#showNcdump').length !=0){
+            $('#createNcdump').hide()
+        }
+
     })
 </script>
 
