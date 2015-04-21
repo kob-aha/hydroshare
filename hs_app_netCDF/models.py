@@ -207,9 +207,9 @@ class Variable(AbstractMetaDataElement):
     def remove(cls, element_id):
         variable = Variable.objects.get(id=element_id)
         if variable:
-            # make sure we are not deleting all coverages of a resource
-            if Variable.objects.filter(object_id=variable.object_id, content_type__pk=variable.content_type.id).count()== 1:
-                raise ValidationError("The only variable of the resource can't be deleted.")
+            # # make sure we are not deleting all variables of a resource
+            # if Variable.objects.filter(object_id=variable.object_id, content_type__pk=variable.content_type.id).count()== 1:
+            #     raise ValidationError("The only variable of the resource can't be deleted.")
             variable.delete()
         else:
             raise ObjectDoesNotExist("No variable element was found for id:%d." % element_id)
