@@ -4,17 +4,17 @@
 {% load geoanalytics_tags pages_tags mezzanine_tags crispy_forms_tags %}
 
 {% block extended_metadata %}
-    {% if extended_metadata_exists %}
         <div class="row">
             <div class="col-md-12">
                 <h2>Extended Metadata</h2>
                 <div>
                 {# Add the view mode html code below for resource extended meta tab #}
 
+                {% if extended_metadata_exists %}
                     {# Add the original coverage meta #}
                     {% if original_coverage %}
                         <h4><strong>Original Coverage:</strong></h4>
-                        <hr style="margin-top: 0px;margin-bottom: 2px">
+                        <hr style="border-color: dodgerblue; margin-top: 0px;margin-bottom: 2px">
                         {% if original_coverage.name %}
                             <div class="row">
                                 <div class="col-sm-4"><strong>Place/Area Name:</strong></div>
@@ -78,7 +78,7 @@
                             </div>
                         {%  endif %}
 
-                        <hr>
+                        </hr>
                     {% endif %}
 
                     {# Add the Variable meta #}
@@ -123,10 +123,13 @@
                                     <div class="col-sm-8">{{ variable.missing_value }}</div>
                                 </div>
                             {% endif %}
-
+                            </hr>
                         {% endfor %}
-                    <hr>
-                    {% endif %}
+
+                    {% endif %} {# variable section end #}
+
+                {%  endif %}{# extended meta section end #}
+
 
                 {# Add ncdump info #}
                 <h3>NetCDF Data Header Information</h3>
@@ -148,15 +151,14 @@
                             </a>
                         </div>
                     {% endif %}
-
                 {% endfor %}
+
 
                 {# Add the view mode html code for resource extended meta tababove #}
                 </div>
-
             </div>
         </div>
-    {%  endif %}
+
 
 
     {#  Add the code of extended section on the landing page below #}
