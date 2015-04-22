@@ -27,6 +27,9 @@ def run_meta_edit_tool(res, meta_elements, file_process, request):
     else:
         check_info = "there is no .nc file in the resource. "
 
+    # delete tool obj after function run
+    nc_tools_obj.delete()
+
     return check_info
 
 

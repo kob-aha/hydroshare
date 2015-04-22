@@ -59,14 +59,14 @@ def index_view(request, shortkey, state):
     meta_elements_form = MetaElementsForm()
     context['meta_elements_form'] = meta_elements_form
 
-    # context for the nc_tool_obj:
-    nc_tools_obj = NetcdfTools.objects.filter(short_id=res.short_id).first()
-    if state == 'initial':
-        if nc_tools_obj:
-            nc_tools_obj.delete()
-        context['nc_tools_obj'] = None
-    elif state == 'processing':
-        context['nc_tools_obj'] = nc_tools_obj
+    # # context for the nc_tool_obj:
+    # nc_tools_obj = NetcdfTools.objects.filter(short_id=res.short_id).first()
+    # if state == 'initial':
+    #     if nc_tools_obj:
+    #         nc_tools_obj.delete()
+    #     context['nc_tools_obj'] = None
+    # elif state == 'processing':
+    #     context['nc_tools_obj'] = nc_tools_obj
 
     return render(request, 'pages/nc_tools.html', context)
 
@@ -84,22 +84,22 @@ def meta_edit_view(request, shortkey, **kwargs):
         meta_elements = request.POST.getlist('meta_elements')
         file_process = request.POST.getlist('file_process')
 
-        if meta_elements:
+        if meta_elements and file_process:
             check_info = run_meta_edit_tool(res, meta_elements, file_process, request)
 
             if check_info:
                 check_info = 'Error! Metadata Editing: ' + check_info
                 messages.add_message(request, messages.ERROR, check_info)
             else:
-                suc_message = 'Success! Meta Edting is finished. '
+                suc_message = 'Success! Meta Editing is finished. '
                 if 'new_ver_res' in file_process:
                     suc_message += 'A new version of resource is created. '
-                if 'new_res' in file_process:
+                elif 'new_res' in file_process:
                     suc_message += 'A new resource is created. '
                 messages.add_message(request, messages.SUCCESS, suc_message)
         else:
             messages.add_message(request, messages.ERROR,
-                                 'Error! Metadata Editing: please select the metadata elements.')
+                                 'Error! Metadata Editing: please select the required options.')
 
     return HttpResponseRedirect(reverse('nc_tools:index', args=[res.short_id, 'processing']))
 

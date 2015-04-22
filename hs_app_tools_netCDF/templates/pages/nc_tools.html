@@ -32,15 +32,15 @@
                 {% endfor %}
             </div>
 
-            <div id="ncToolObjFilesLinks">
-                {% if nc_tools_obj %}
-                    {% if nc_tools_obj.meta_edit_file %}
-                        <h4>Metadata Editing File:
-                        <a href="{{ nc_tools_obj.meta_edit_file.url }}">{{ nc_tools_obj.meta_edit_file.name|slice:"2:" }}</a>
-                        </h4>
-                    {% endif %}
-                {% endif %}
-            </div>
+{#            <div id="ncToolObjFilesLinks">#}
+{#                {% if nc_tools_obj %}#}
+{#                    {% if nc_tools_obj.meta_edit_file %}#}
+{#                        <h4>Metadata Editing File:#}
+{#                        <a href="{{ nc_tools_obj.meta_edit_file.url }}">{{ nc_tools_obj.meta_edit_file.name|slice:"2:" }}</a>#}
+{#                        </h4>#}
+{#                    {% endif %}#}
+{#                {% endif %}#}
+{#            </div>#}
         </div>
 
     {% else %}
@@ -182,8 +182,8 @@
         // enable meta edit button after valid check box
         $('#metaEditForm').on('change', function(){
             var meta_elements_checkbox = $('input[id^="id_meta_elements_"]:checked').length > 0;
-            //var file_process_checkbox = $('input[id^="id_file_process_"]:checked').length > 0;
-            if (meta_elements_checkbox) {
+            var file_process_checkbox = $('input[id^="id_file_process_"]:checked').length > 0;
+            if (meta_elements_checkbox && file_process_checkbox) {
                 $('#metaEditBtn').attr('disabled', false);
             }
             else {

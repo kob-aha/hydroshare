@@ -29,10 +29,16 @@ class MetaElementsForm(forms.Form):
 
     meta_elements = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple,
                                               choices=META_ELEMENTS,
-                                              label='Select Meta Elements to Write to NetCDF File (required)'
+                                              label='Select Meta Elements to Write to NetCDF File (Required)'
                                             )
 
-    file_process = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple,
+    # file_process = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple,
+    #                                          choices=FILE_PROCESS,
+    #                                          label='Select Actions after NetCDF File Meta Editing is finished (optional)'
+    #                                         )
+
+    file_process = forms.ChoiceField(widget=forms.RadioSelect(),
                                              choices=FILE_PROCESS,
-                                             label='Select Actions after NetCDF File Meta Editing is finished (optional)'
+                                             label='Select Actions After NetCDF File Meta Editing is Finished (Requird)',
+                                             initial={'new_ver_res': "Create a new version of the existing resource with edited netcdf file."}
                                             )
