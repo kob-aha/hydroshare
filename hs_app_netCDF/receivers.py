@@ -41,7 +41,7 @@ def netcdf_pre_create_resource(sender, **kwargs):
                     name = res_dublin_core_meta['creator_name']
                     email = res_dublin_core_meta.get('creator_email', '')
                     url = res_dublin_core_meta.get('creator_url', '')
-                    creator = {'creator': {'name': name, 'email': email, 'url': url}}
+                    creator = {'creator': {'name': name, 'email': email, 'homepage': url}}
                     metadata.append(creator)
 
                 # add contributor:
