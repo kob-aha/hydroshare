@@ -6,9 +6,11 @@ from hs_app_tools_netCDF.forms import MetaElementsForm
 from django.contrib import messages
 from django.core.urlresolvers import reverse
 from hs_app_tools_netCDF.nc_tool_functions.nc_meta_edit import *
+from django.contrib.auth.decorators import login_required
 
 
 # view for create ncdump file button
+@login_required
 def create_ncdump_view(request, shortkey):
     """
     create ncdump file function for create ncdump button in landing page
@@ -40,6 +42,7 @@ def create_ncdump_view(request, shortkey):
 
 
 # view for index page
+@login_required
 def index_view(request, shortkey, state):
     """
     Netcdf tool landing page view function
@@ -72,6 +75,7 @@ def index_view(request, shortkey, state):
 
 
 # view for meta edit Tool
+@login_required
 def meta_edit_view(request, shortkey, **kwargs):
     """
     Meta Edit Tool view function
