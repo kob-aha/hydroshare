@@ -1,13 +1,14 @@
 ﻿from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.shortcuts import get_object_or_404, render_to_response, render
-from hs_core.views.utils import authorize
-from hs_app_netCDF.models import NetcdfResource
-from hs_app_tools_netCDF.forms import MetaElementsForm
+from django.forms.formsets import formset_factory
 from django.contrib import messages
 from django.core.urlresolvers import reverse
-from hs_app_tools_netCDF.nc_tool_functions.nc_meta_edit import *
 from django.contrib.auth.decorators import login_required
-
+from hs_core.views.utils import authorize
+from hs_app_netCDF.models import NetcdfResource
+from hs_app_tools_netCDF.forms import *
+from hs_app_tools_netCDF.nc_tool_functions.nc_meta_edit import *
+from hs_app_tools_netCDF.nc_tool_functions.nc_data_subset import *
 
 # view for create ncdump file button
 @login_required
@@ -61,6 +62,17 @@ def index_view(request, shortkey, state):
     # context for meta edit tool form
     meta_elements_form = MetaElementsForm()
     context['meta_elements_form'] = meta_elements_form
+
+    # context for data subset tool form
+    dimension_formset= create_dimension_formset(res)
+    context['dimension_formset'] = dimension_formset
+
+    variable_names_form = create_variable_names_form(res)
+    context['variable_names_form'] = variable_names_form
+
+    # context for file process form
+    file_process = FileProcess()
+    context['file_process_form'] = file_process
 
     # # context for the nc_tool_obj:
     # nc_tools_obj = NetcdfTools.objects.filter(short_id=res.short_id).first()

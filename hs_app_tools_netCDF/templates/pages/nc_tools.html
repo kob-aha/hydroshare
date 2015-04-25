@@ -71,6 +71,7 @@
                 <div class="active tab-pane" id="metaEditTab">
                     <form id="metaEditForm" class="col-md-6"action="{% url "nc_tools:meta_edit" nc_res.short_id %}" method="post"> {% csrf_token %}
                         {{ meta_elements_form.as_p }}
+                        {{ file_process_form.as_p }}
                         <input id="metaEditBtn" type="submit" value="Write Metadata to NetCDF File" class="btn btn-primary"/>
                     </form>
                     <p id='metaEditIntro'>
@@ -156,8 +157,45 @@
 
                 <!-- data subset tab -->
                 <div class="tab-pane" id="dataSubsetTab">
-                    <p> second tab</p>
+                    <form id="dataSubset" action=" " method="post"> {% csrf_token %}
+                        <div class="col-md-6">
+                            {# dimension formset #}
+                            <label>Define Dimension Index Value for Data Subset (in the form of "Start:Step:End" ) :</label>
+                            {% if dimension_formset %}
+                                {{ dimension_formset.management_form }}
+                                    {% for form in dimension_formset %}
+                                        {{ form.as_p }}
+                                    {% endfor %}
+                            {% else %}
+                                <p>Failed to extract the dimension info for data subsetting</p>
+                            {% endif %}
+
+                            {# file process form #}
+                            <p style="margin-bottom:30px"></p>
+                            {{ file_process_form.as_p }}
+
+                            {# submit button #}
+                            {% if dimension_formset and variable_names_form %}
+                                <input id="dataSubsetBtn" type="submit" value="Subset NetCDF File" class="btn btn-primary "/>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6" style="overflow-y:scroll; height:200px">
+                            {# variable names form #}
+                            {% if variable_names_form %}
+                                {{ variable_names_form }}
+                            {% else %}
+                                <p>Failed to extract the data variable information for data subsetting.</p>
+                            {% endif %}
+
+                        </div>
+
+
+
+                    </form>
+
                 </div>
+
             </div>
         </div>
 

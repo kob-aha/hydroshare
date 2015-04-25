@@ -353,3 +353,37 @@ def get_nc_meta_populate_list(nc_file_path, nc_res_title="Untitled resource"):
     return metadata
 
 
+# independent util functions ######################################################################3
+def get_nc_file_path_from_res(nc_res):
+    """
+    get the .nc file full path from netcdf resource object
+
+    :param res: netcdf resource obj
+    :return: string presenting the netcdf resource file full file path in the system
+    """
+
+    nc_file_path = ''
+    for f in ResourceFile.objects.filter(object_id=nc_res.id):
+        if '.nc' in f.resource_file.name[-3:]:
+            nc_file_path = f.resource_file.file.name
+            break
+
+    return nc_file_path
+
+
+def get_nc_file_name_from_res(nc_res):
+    """
+    get the .nc file name from netcdf resource object
+
+    :param nc_res: netcdf resource obj
+    :return: string representing the netcdf resource file full file path in the system
+    """
+
+    nc_file_name = ''
+    for f in ResourceFile.objects.filter(object_id=nc_res.id):
+        if '.nc' in f.resource_file.name[-3:]:
+            import os
+            nc_file_name = os.path.basename(f.resource_file.name)
+            break
+
+    return nc_file_name
