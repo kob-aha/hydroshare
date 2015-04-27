@@ -69,87 +69,98 @@
 
                 <!-- meta edit tab-->
                 <div class="active tab-pane" id="metaEditTab">
-                    <form id="metaEditForm" class="col-md-6"action="{% url "nc_tools:meta_edit" nc_res.short_id %}" method="post"> {% csrf_token %}
-                        {{ meta_elements_form.as_p }}
-                        {{ file_process_form.as_p }}
-                        <input id="metaEditBtn" type="submit" value="Write Metadata to NetCDF File" class="btn btn-primary"/>
-                    </form>
-                    <p id='metaEditIntro'>
-                        <strong style="font-size:130%">Metadata Editing tool</strong>
-                        <br/>This tool will write the metadata information of the Multidimensional Space and Time data resource in the .nc resource file.
-                        <br/>The mapping between the HydroShare resource metadata information and the NetCDF conventions terms is shown in the table.
-                    </p>
-                    <div id="metaEditTable">
-                        <table class="col-md-6" id="metaEditTable">
-                        <col width="40">
-                        <col width="90">
-                        <tr>
-                            <th>Meta Element</th>
-                            <th>Conventions Term</th>
-                        </tr>
-                        <tr>
-                            <td>Title</td>
-                            <td>ACDD:title</td>
-                        </tr>
-                        <tr>
-                            <td>Creator</td>
-                            <td>ACDD:creator_name, creator_email, creator_url</td>
-                        </tr>
-                        <tr>
-                            <td>Contributor</td>
-                            <td>ACDD:contributor_name</td>
-                        </tr>
-                        <tr>
-                            <td>Abstract</td>
-                            <td>ACDD:summary</td>
-                        </tr>
-                        <tr>
-                            <td>Keyword</td>
-                            <td>ACDD:keywords</td>
-                        </tr>
-                        <tr>
-                            <td>Spatial Coverage</td>
-                            <td>ACDD:geospatial_lat_min, geospatial_lat_max, geospatial_lon_max, getospatial_lon_min</td>
-                        </tr>
-                        <tr>
-                            <td>Temporal Coverage</td>
-                            <td>ACDD:time_coverage_start, time_coverage_end</td>
-                        </tr>
-                        <tr>
-                            <td>Right</td>
-                            <td>ACDD:license</td>
-                        </tr>
-                        <tr>
-                            <td>Source</td>
-                            <td>ACDD:source</td>
-                        </tr>
-                        <tr>
-                            <td>Publisher</td>
-                            <td>ACDD:publisher_name, publisher_url</td>
-                        </tr>
-                        <tr>
-                            <td>Permanent Link</td>
-                            <td>ACDD:id</td>
-                        </tr>
-                        <tr>
-                            <td>Relation:cites</td>
-                            <td>ACDD:references</td>
-                        </tr>
-                        <tr>
-                            <td>Variable</td>
-                            <td>CF:units, long_name, missing_value, comment</td>
-                        </tr>
-                    </table>
-                        <p id='metaEditTableInfo'>
-                            *ACDD:<a target="_blank" href= "http://wiki.esipfed.org/index.php/Attribute_Convention_for_Data_Discovery_(ACDD)">
-                                Attribute Convention for Data Discovery
+
+                    {# meta edit tool intro and mapping table #}
+                    <div class="col-md-6">
+                        {# meta edit tool intro #}
+                        <p><strong style="font-size:130%">Metadata Editing Tool</strong></p>
+                            <ul id="metaEditIntro">
+                                <li>This tool will write the resource metadata information stored in HydroShare into the existing .nc resource file.</li>
+                                <li>The mapping between the HydroShare resource metadata information and the NetCDF conventions terms is shown in the table.</li>
+                            </ul>
+
+                        {# meta terms mapping table #}
+                        <div  id="metaEditTable">
+                            <table id="metaEditTable">
+                            <col width="150px">
+                            <col width="350px">
+                            <tr>
+                                <th>Meta Element</th>
+                                <th>Conventions Term</th>
+                            </tr>
+                            <tr>
+                                <td>Title</td>
+                                <td>ACDD:title</td>
+                            </tr>
+                            <tr>
+                                <td>Creator</td>
+                                <td>ACDD:creator_name, creator_email, creator_url</td>
+                            </tr>
+                            <tr>
+                                <td>Contributor</td>
+                                <td>ACDD:contributor_name</td>
+                            </tr>
+                            <tr>
+                                <td>Abstract</td>
+                                <td>ACDD:summary</td>
+                            </tr>
+                            <tr>
+                                <td>Keyword</td>
+                                <td>ACDD:keywords</td>
+                            </tr>
+                            <tr>
+                                <td>Spatial Coverage</td>
+                                <td>ACDD:geospatial_lat_min, geospatial_lat_max, geospatial_lon_max, getospatial_lon_min</td>
+                            </tr>
+                            <tr>
+                                <td>Temporal Coverage</td>
+                                <td>ACDD:time_coverage_start, time_coverage_end</td>
+                            </tr>
+                            <tr>
+                                <td>Right</td>
+                                <td>ACDD:license</td>
+                            </tr>
+                            <tr>
+                                <td>Source</td>
+                                <td>ACDD:source</td>
+                            </tr>
+                            <tr>
+                                <td>Publisher</td>
+                                <td>ACDD:publisher_name, publisher_url</td>
+                            </tr>
+                            <tr>
+                                <td>Permanent Link</td>
+                                <td>ACDD:id</td>
+                            </tr>
+                            <tr>
+                                <td>Relation:cites</td>
+                                <td>ACDD:references</td>
+                            </tr>
+                            <tr>
+                                <td>Variable</td>
+                                <td>CF:units, long_name, missing_value, comment</td>
+                            </tr>
+                        </table>
+                            <p id='metaEditTableInfo'>
+                                *ACDD:<a target="_blank" href= "http://wiki.esipfed.org/index.php/Attribute_Convention_for_Data_Discovery_(ACDD)">
+                                    Attribute Convention for Data Discovery
+                                    </a>
+                            </p>
+                            <p id="metaEditTableInfo">
+                                *CF:<a target="_blank" href="http://cfconventions.org/">
+                                Climate and Forecast metadata Convention
                                 </a>
-                        </p>
-                        <p id="metaEditTableInfo">
-                            *CF:<a target="_blank" href="http://cfconventions.org/">
-                            Climate and Forecast metadata Convention
-                            </a>
-                        </p>
+                            </p>
+                        </div>
+                    </div>
+
+                    {# meta editing tool forms #}
+                    <div class="col-md-6">
+                        <form id="metaEditForm" action="{% url "nc_tools:meta_edit" nc_res.short_id %}" method="post"> {% csrf_token %}
+                            {{ meta_elements_form.as_p }}
+                            {{ file_process_form.as_p }}
+                            <input id="metaEditBtn" type="submit" value="Write Metadata to NetCDF File" class="btn btn-primary pull-right"/>
+                        </form>
                     </div>
 
                 </div>
@@ -157,18 +168,48 @@
 
                 <!-- data subset tab -->
                 <div class="tab-pane" id="dataSubsetTab">
+
+                    {# Tool introduction and dimenstion inspector #}
+                    <div class="col-md-6">
+                        {# data subset tool intro #}
+                        <p><strong style="font-size:130%">Data Subset Tool</strong></p>
+                        <ul id='dataSubsetIntro'>
+                        <li>
+                            This tool will subset the data from the existing .nc resource file and create a new .nc file.
+                            (The corresponding coordinate variables data will be saved in the new .nc file.)
+                        </li>
+                        <li>User needs to specify the information required on the right and then click on "Subset NetCDF Data" to run this tool.</li>
+                        <li>To inspect the dimension value if that dimension is defined with a variable, please use the "Dimension Inspector" below.</li>
+                        </ul>
+
+                        {# dimension inspector #}
+
+                    </div>
+
+                    {# Forms for Datasubset #}
                     <form id="dataSubset" action=" " method="post"> {% csrf_token %}
                         <div class="col-md-6">
                             {# dimension formset #}
-                            <label>Define Dimension Index Value for Data Subset (in the form of "Start:Step:End" ) :</label>
+                            <div id="dimensionFormset" style="overflow-y:scroll; height:200px; border-style: solid; border-color:gainsboro">
+                            <p><strong>Define Dimension Index for Data Subset (Index in the form  of "Start:Step:End") :</strong></p>
                             {% if dimension_formset %}
                                 {{ dimension_formset.management_form }}
                                     {% for form in dimension_formset %}
-                                        {{ form.as_p }}
+                                        {{ form.as_table}}
                                     {% endfor %}
                             {% else %}
                                 <p>Failed to extract the dimension info for data subsetting</p>
                             {% endif %}
+                            </div>
+
+                            {# variable names form #}
+                            <div id="variableNamesForm" style="overflow-y:scroll; height:200px">
+                            {% if variable_names_form %}
+                                {{ variable_names_form }}
+                            {% else %}
+                                <p>Failed to extract the data variable information for data subsetting.</p>
+                            {% endif %}
+                            </div>
 
                             {# file process form #}
                             <p style="margin-bottom:30px"></p>
@@ -176,23 +217,17 @@
 
                             {# submit button #}
                             {% if dimension_formset and variable_names_form %}
-                                <input id="dataSubsetBtn" type="submit" value="Subset NetCDF File" class="btn btn-primary "/>
+                                <input id="dataSubsetBtn" type="submit" value="Subset NetCDF Data" class="btn btn-primary pull-right "/>
                             {% endif %}
                         </div>
 
-                        <div class="col-md-6" style="overflow-y:scroll; height:200px">
-                            {# variable names form #}
-                            {% if variable_names_form %}
-                                {{ variable_names_form }}
-                            {% else %}
-                                <p>Failed to extract the data variable information for data subsetting.</p>
-                            {% endif %}
 
-                        </div>
 
 
 
                     </form>
+
+
 
                 </div>
 

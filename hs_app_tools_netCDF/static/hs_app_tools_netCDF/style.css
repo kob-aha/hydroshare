@@ -1,3 +1,11 @@
+/* General Style */
+ul {
+    padding-left: 0;
+    margin-left:1.2em;
+}
+
+
+
 
 /* Meta Edit Tab Style */
 
@@ -13,4 +21,30 @@
 
 #metaEditTable tr:nth-child(even) {
     background-color: #d7ebf9;
+}
+
+
+
+/* Data Subset Tab Style */
+
+#dimensionFormset {
+    overflow-y: auto;
+    height: 200px;
+    border-style: solid;
+    border-color: gainsboro;
+    border-width: thin;
+    margin-bottom:30px;
+}
+
+#variableNamesForm {
+    overflow-y: auto;
+    height: 200px;
+    border-style: solid;
+    border-color: gainsboro;
+    border-width: thin;
+}
+
+#dataSubsetIntro {
+    padding-left: 0;
+    margin-left:1.2em;
 }
