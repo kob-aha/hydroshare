@@ -58,12 +58,12 @@ class VariableNamesForm(forms.Form):
                                             )
 
 
-class DimensionInspectorForm(forms.Form):
-    dim_names = forms.ChoiceField(label='Dimension Name',
+class DataInspectorForm(forms.Form):
+    var_names = forms.ChoiceField(label='Variable Name',
     )
 
-    dim_value = forms.CharField(max_length=10000,
-                                label='Dimension Data',
+    var_value = forms.CharField(max_length=10000,
+                                label='Variable Data',
                                 widget=forms.Textarea(attrs={'readonly':'readonly',
                                                              'rows':10,
                                                              'cols':55

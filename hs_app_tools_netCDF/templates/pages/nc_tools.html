@@ -179,20 +179,23 @@
                             (The corresponding coordinate variables data will be saved in the new .nc file.)
                         </li>
                         <li>Please specify the information required on the right and then click on "Subset NetCDF Data" to run this tool.</li>
-                        <li>To know the dimension values if that dimension is defined with a coordinate variable, please use the "Dimension Inspector" below.</li>
+                        <li>To know the coordinate and auxiliary coordinate variables data , please use the "Data Inspector" below.</li>
                         </ul>
 
                         {# dimension inspector #}
 
                         <div id="dimensionInspector" >
-                            <p><strong style="font-size:110%">Dimension Inspector</strong></p>
-                            {% if dimension_inspector_form %}
+                            <p><strong style="font-size:110%">Data Inspector</strong></p>
+                            {% if data_inspector_form %}
                                 <form id="dimensionInspectorForm" action=" " method="post"> {% csrf_token %}
-                                    {{ dimension_inspector_form.as_p }}
+                                    {{ data_inspector_form.as_p }}
                                     <input id="dimensionInspectorBtn" type="submit" value="Get Dimension Data" class="btn btn-danger"/>
                                 </form>
                             {% else %}
-                                <p>Failed to extract dimension names information. Please check the .nc file.</p>
+                                <p style="color:red;">
+                                    Failed to get the coordinate variables information.
+                                    <br/>Please check if the .nc file follows the CF convention to define coordinate variables.
+                                </p>
                             {% endif %}
                         </div>
 

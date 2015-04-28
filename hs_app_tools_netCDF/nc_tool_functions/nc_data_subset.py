@@ -4,7 +4,7 @@ Module data subset in for .nc file in netcdf resource
 """
 from collections import OrderedDict
 from django.forms.formsets import formset_factory
-from hs_app_tools_netCDF.forms import DimensionForm, VariableNamesForm, DimensionInspectorForm
+from hs_app_tools_netCDF.forms import DimensionForm, VariableNamesForm, DataInspectorForm
 from hs_app_netCDF.nc_functions.nc_utils import get_nc_dataset, get_nc_data_variables
 from hs_core.models import ResourceFile
 from hs_app_tools_netCDF.nc_tool_functions.nc_tools_utils import *
@@ -108,42 +108,49 @@ def get_variable_names_info(nc_file_path):
     return variable_names_info
 
 
-def create_dimension_inspector_form(nc_res):
+def create_data_inspector_form(nc_res):
     """
-    create form for dimension inspector in data subset tool
+    create form for data inspector in data subset tool
 
     :param res: netcdf resource obj
-    :return: dimension inspector form with the dimension names information
+    :return: data inspector form with the coordinate and auxiliary coordinate variable names information
     """
+
     # get the dimension names info:
     nc_file_path = get_nc_file_path_from_res(nc_res)
-    dimension_names= get_dimension_names(nc_file_path)
+    coor_var_info = get_coor_var_info(nc_file_path)
 
     # create the dimension names form
-    if dimension_names:
-        dimension_inspector_form = DimensionInspectorForm()
-        dimension_names_choices = [(n, v) for n, v in dimension_names.iteritems()]
-        dimension_inspector_form.fields['dim_names'].choices = dimension_names_choices
+    if coor_var_info:
+        data_inspector_form = DataInspectorForm()
+        var_names_choices = [(n, v) for n, v in coor_var_info.iteritems()]
+        data_inspector_form.fields['var_names'].choices = var_names_choices
     else:
-        dimension_inspector_form = None
+        data_inspector_form = None
 
-    return dimension_inspector_form
+    return data_inspector_form
 
 
-def get_dimension_names(nc_file_path):
+def get_coor_var_info(nc_file_path):
     """
-    get the dimension names with length information ordered dict with given netcdf file path
+    get the coordinate and auxiliary coordinate names with dimension information
 
     :param nc_file_path: netcdf file path which can be recognized by the system
-    :return: dictionary including the dimensions names information which is {dim_name: dim_name(length=xx)}
+    :return: dictionary including the coordinate and auxiliary coordinate variable names information which is {var_name: var_name(dim1,dim2)}
     """
 
     nc_dataset = get_nc_dataset(nc_file_path)
-    dimension_names = OrderedDict()
+    coor_var_info = {}
+    from hs_app_netCDF.nc_functions.nc_utils import get_nc_coordinate_variables, get_nc_auxiliary_coordinate_variables
 
     if nc_dataset:
-        for dim_name, dim_obj in nc_dataset.dimensions.items():
-            value = "{0} (length={1})".format(dim_name, len(dim_obj))
-            dimension_names[dim_name] = value
+        nc_coordinate_variables = get_nc_coordinate_variables(nc_dataset)
+        nc_auxiliary_coordinate_variables = get_nc_auxiliary_coordinate_variables(nc_dataset)
+        coor_var_info.update(nc_coordinate_variables)
+        coor_var_info.update(nc_auxiliary_coordinate_variables)
+        for var_name, var_obj in coor_var_info.items():
+            shape_list = [str(x) for x in var_obj.dimensions]
+            value = "{0} ({1})".format(var_name, ', '.join(shape_list))
+            coor_var_info[var_name] = value
 
-    return dimension_names
+    return coor_var_info
