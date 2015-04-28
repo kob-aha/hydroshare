@@ -4,7 +4,14 @@ ul {
     margin-left:1.2em;
 }
 
-
+#ncToolTabsBody {
+    border-color:gainsboro;
+    max-height:1000px;
+    padding-bottom:20px;
+    padding-top:20px;
+    padding-right:2px;
+    padding-left:2px;
+}
 
 
 /* Meta Edit Tab Style */
@@ -29,22 +36,31 @@ ul {
 
 #dimensionFormset {
     overflow-y: auto;
-    height: 200px;
+    height: 180px;
     border-style: solid;
     border-color: gainsboro;
     border-width: thin;
     margin-bottom:30px;
+    padding:5px;
 }
 
 #variableNamesForm {
     overflow-y: auto;
-    height: 200px;
+    height: 180px;
     border-style: solid;
     border-color: gainsboro;
     border-width: thin;
+    padding:5px
 }
 
 #dataSubsetIntro {
     padding-left: 0;
     margin-left:1.2em;
+}
+
+#dimensionInspector {
+    border-color:gainsboro;
+    border-style:outset;
+    padding:10px;
+    margin-top: 20px;
 }

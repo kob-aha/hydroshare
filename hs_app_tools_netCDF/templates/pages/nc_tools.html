@@ -50,7 +50,7 @@
     {% endif %}
 
     <!-- Tool Tabs Section-->
-    <div class="tool-tabs">
+    <div class="tab-elements">
         <!-- tab header -->
         <div class="panel-tabs">
             <ul class="nav nav-tabs">
@@ -64,7 +64,7 @@
         </div>
 
          <!-- tab body -->
-        <div class="tabs-body">
+        <div class="tabs-body" id="ncToolTabsBody">
             <div class="tab-content">
 
                 <!-- meta edit tab-->
@@ -178,11 +178,23 @@
                             This tool will subset the data from the existing .nc resource file and create a new .nc file.
                             (The corresponding coordinate variables data will be saved in the new .nc file.)
                         </li>
-                        <li>User needs to specify the information required on the right and then click on "Subset NetCDF Data" to run this tool.</li>
-                        <li>To inspect the dimension value if that dimension is defined with a variable, please use the "Dimension Inspector" below.</li>
+                        <li>Please specify the information required on the right and then click on "Subset NetCDF Data" to run this tool.</li>
+                        <li>To know the dimension values if that dimension is defined with a coordinate variable, please use the "Dimension Inspector" below.</li>
                         </ul>
 
                         {# dimension inspector #}
+
+                        <div id="dimensionInspector" >
+                            <p><strong style="font-size:110%">Dimension Inspector</strong></p>
+                            {% if dimension_inspector_form %}
+                                <form id="dimensionInspectorForm" action=" " method="post"> {% csrf_token %}
+                                    {{ dimension_inspector_form.as_p }}
+                                    <input id="dimensionInspectorBtn" type="submit" value="Get Dimension Data" class="btn btn-danger"/>
+                                </form>
+                            {% else %}
+                                <p>Failed to extract dimension names information. Please check the .nc file.</p>
+                            {% endif %}
+                        </div>
 
                     </div>
 
@@ -190,7 +202,7 @@
                     <form id="dataSubset" action=" " method="post"> {% csrf_token %}
                         <div class="col-md-6">
                             {# dimension formset #}
-                            <div id="dimensionFormset" style="overflow-y:scroll; height:200px; border-style: solid; border-color:gainsboro">
+                            <div id="dimensionFormset">
                             <p><strong>Define Dimension Index for Data Subset (Index in the form  of "Start:Step:End") :</strong></p>
                             {% if dimension_formset %}
                                 {{ dimension_formset.management_form }}
@@ -203,7 +215,7 @@
                             </div>
 
                             {# variable names form #}
-                            <div id="variableNamesForm" style="overflow-y:scroll; height:200px">
+                            <div id="variableNamesForm">
                             {% if variable_names_form %}
                                 {{ variable_names_form }}
                             {% else %}

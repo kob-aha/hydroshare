@@ -10,7 +10,7 @@ class FileProcess(forms.Form):
 
     file_process = forms.ChoiceField(widget=forms.RadioSelect(), #forms.CheckboxSelectMultiple
                                      choices=FILE_PROCESS,
-                                     label='Select the Action after Tool Processing is Finished (Requird)',
+                                     label='Select the Action after Tool Processing is Finished (Required)',
                                     )
 
 # Forms for Meta Edit Tool
@@ -43,12 +43,30 @@ class MetaElementsForm(forms.Form):
 # Forms for Data Subset Tool:
 class DimensionForm(forms.Form):
     dim_name = forms.CharField(max_length=100,
-                               widget=forms.TextInput(attrs={'readonly':'readonly'}))
+                               widget=forms.TextInput(attrs={'readonly':'readonly'}),
+                               label='Dim Name')
 
-    dim_subset_value = forms.CharField(max_length=100)
+    dim_subset_value = forms.CharField(max_length=100,
+                                       label='Subset Index',
+                                       # widget=forms.TextInput(attrs={'readonly':'readonly'})
+    )
 
 
 class VariableNamesForm(forms.Form):
     variable_names = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple,
                                               label='Select the Data Variable Names for Data Subset (Required)',
                                             )
+
+
+class DimensionInspectorForm(forms.Form):
+    dim_names = forms.ChoiceField(label='Dimension Name',
+    )
+
+    dim_value = forms.CharField(max_length=10000,
+                                label='Dimension Data',
+                                widget=forms.Textarea(attrs={'readonly':'readonly',
+                                                             'rows':10,
+                                                             'cols':55
+                                                             }),
+
+    )

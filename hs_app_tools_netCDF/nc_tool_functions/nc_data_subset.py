@@ -4,7 +4,7 @@ Module data subset in for .nc file in netcdf resource
 """
 from collections import OrderedDict
 from django.forms.formsets import formset_factory
-from hs_app_tools_netCDF.forms import DimensionForm, VariableNamesForm
+from hs_app_tools_netCDF.forms import DimensionForm, VariableNamesForm, DimensionInspectorForm
 from hs_app_netCDF.nc_functions.nc_utils import get_nc_dataset, get_nc_data_variables
 from hs_core.models import ResourceFile
 from hs_app_tools_netCDF.nc_tool_functions.nc_tools_utils import *
@@ -88,7 +88,7 @@ def create_variable_names_form(nc_res):
 
 def get_variable_names_info(nc_file_path):
     """
-    create the variable names with shape information ordered dict with given netcdf file path
+    get the variable names with shape information ordered dict with given netcdf file path
 
     :param nc_file_path: netcdf file path which can be recognized by the system
     :return: dictionary including the dimensions information which is {var_name: var_name(dim1,dim2)}
@@ -106,3 +106,44 @@ def get_variable_names_info(nc_file_path):
             variable_names_info.append((choice_backend, choice_frontend))
 
     return variable_names_info
+
+
+def create_dimension_inspector_form(nc_res):
+    """
+    create form for dimension inspector in data subset tool
+
+    :param res: netcdf resource obj
+    :return: dimension inspector form with the dimension names information
+    """
+    # get the dimension names info:
+    nc_file_path = get_nc_file_path_from_res(nc_res)
+    dimension_names= get_dimension_names(nc_file_path)
+
+    # create the dimension names form
+    if dimension_names:
+        dimension_inspector_form = DimensionInspectorForm()
+        dimension_names_choices = [(n, v) for n, v in dimension_names.iteritems()]
+        dimension_inspector_form.fields['dim_names'].choices = dimension_names_choices
+    else:
+        dimension_inspector_form = None
+
+    return dimension_inspector_form
+
+
+def get_dimension_names(nc_file_path):
+    """
+    get the dimension names with length information ordered dict with given netcdf file path
+
+    :param nc_file_path: netcdf file path which can be recognized by the system
+    :return: dictionary including the dimensions names information which is {dim_name: dim_name(length=xx)}
+    """
+
+    nc_dataset = get_nc_dataset(nc_file_path)
+    dimension_names = OrderedDict()
+
+    if nc_dataset:
+        for dim_name, dim_obj in nc_dataset.dimensions.items():
+            value = "{0} (length={1})".format(dim_name, len(dim_obj))
+            dimension_names[dim_name] = value
+
+    return dimension_names

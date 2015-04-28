@@ -66,9 +66,9 @@ def index_view(request, shortkey, state):
     # context for data subset tool form
     dimension_formset= create_dimension_formset(res)
     context['dimension_formset'] = dimension_formset
-
     variable_names_form = create_variable_names_form(res)
     context['variable_names_form'] = variable_names_form
+    context['dimension_inspector_form'] = create_dimension_inspector_form(res)
 
     # context for file process form
     file_process = FileProcess()
