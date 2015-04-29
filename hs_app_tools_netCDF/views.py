@@ -1,4 +1,5 @@
-﻿from django.http import HttpResponseRedirect, HttpResponse, Http404
+﻿import json
+from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.shortcuts import get_object_or_404, render_to_response, render
 from django.forms.formsets import formset_factory
 from django.contrib import messages
@@ -120,4 +121,21 @@ def meta_edit_view(request, shortkey, **kwargs):
     return HttpResponseRedirect(reverse('nc_tools:index', args=[res.short_id, 'processing']))
 
 
+# views for data subset tool
+@login_required
+def data_inspector_view(request, shortkey, **kwargs):
+    """
+    data inspector view function in data subset tool
+    """
 
+    res, _, _ = authorize(request, shortkey, edit=True, full=True, superuser=True)
+    res_cls = res.__class__
+
+    if request.is_ajax and res_cls is NetcdfResource:
+        var_name = request.POST.getlist('var_name')[0]
+        nc_file_path = get_nc_file_path_from_res(res)
+        ajax_response_data = {'var_data': get_var_data_as_string(nc_file_path, var_name)}
+    else:
+        ajax_response_data = {'var_data': 'Failed to run the data inspector'}
+
+    return HttpResponse(json.dumps(ajax_response_data))

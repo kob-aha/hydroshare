@@ -59,10 +59,10 @@ class VariableNamesForm(forms.Form):
 
 
 class DataInspectorForm(forms.Form):
-    var_names = forms.ChoiceField(label='Variable Name',
+    var_name = forms.ChoiceField(label='Variable Name',
     )
 
-    var_value = forms.CharField(max_length=10000,
+    var_data = forms.CharField(max_length=10000,
                                 label='Variable Data',
                                 widget=forms.Textarea(attrs={'readonly':'readonly',
                                                              'rows':10,

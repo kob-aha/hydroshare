@@ -11,6 +11,8 @@ urlpatterns = patterns('',
     url(r'^nc_tools/meta_edit/(?P<shortkey>[A-z0-9]+)/$', views.meta_edit_view, name='meta_edit'),
 
     # url for create ncdump button
-    url(r'^nc_tools/create_ncdump/(?P<shortkey>[A-z0-9]+)/$', views.create_ncdump_view, name='create_ncdump')
+    url(r'^nc_tools/create_ncdump/(?P<shortkey>[A-z0-9]+)/$', views.create_ncdump_view, name='create_ncdump'),
 
+    # url for data inspector button
+    url(r'^nc_tools/data_inspector/(?P<shortkey>[A-z0-9]+)/$', views.data_inspector_view, name='data_inspector'),
 )

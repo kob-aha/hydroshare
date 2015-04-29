@@ -5,7 +5,7 @@ Module data subset in for .nc file in netcdf resource
 from collections import OrderedDict
 from django.forms.formsets import formset_factory
 from hs_app_tools_netCDF.forms import DimensionForm, VariableNamesForm, DataInspectorForm
-from hs_app_netCDF.nc_functions.nc_utils import get_nc_dataset, get_nc_data_variables
+from hs_app_netCDF.nc_functions.nc_utils import get_nc_dataset, get_nc_data_variables, get_nc_variable_data
 from hs_core.models import ResourceFile
 from hs_app_tools_netCDF.nc_tool_functions.nc_tools_utils import *
 
@@ -124,7 +124,7 @@ def create_data_inspector_form(nc_res):
     if coor_var_info:
         data_inspector_form = DataInspectorForm()
         var_names_choices = [(n, v) for n, v in coor_var_info.iteritems()]
-        data_inspector_form.fields['var_names'].choices = var_names_choices
+        data_inspector_form.fields['var_name'].choices = var_names_choices
     else:
         data_inspector_form = None
 
@@ -154,3 +154,17 @@ def get_coor_var_info(nc_file_path):
             coor_var_info[var_name] = value
 
     return coor_var_info
+
+
+def get_var_data_as_string(nc_file_path, var_name):
+    """
+    get the coordinate and auxiliary coordinate names with dimension information
+
+    :param nc_file_path: netcdf file path which can be recognized by the system
+    :param var_name: variable name which is o
+    :return:
+    """
+
+    var_data = str(get_nc_variable_data(nc_file_path, var_name))
+    var_data = var_data if len(var_data) <= 10000-1 else ''.join(list(var_data)[:10000])
+    return var_data

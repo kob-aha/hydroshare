@@ -42,12 +42,30 @@ def get_nc_variable(nc_file_name, nc_variable_name):
     else:
         nc_dataset = get_nc_dataset(nc_file_name)
 
-    if nc_variable_name in nc_dataset.variables.keys():
-        nc_variable = nc_dataset.variables[nc_variable_name]
-    else:
-        nc_variable = None
+    if nc_dataset:
+        if nc_variable_name in nc_dataset.variables.keys():
+            nc_variable = nc_dataset.variables[nc_variable_name]
+        else:
+            nc_variable = None
 
     return nc_variable
+
+
+def get_nc_variable_data(nc_file_name, nc_variable_name):
+    """
+    (String, string) -> list
+
+    Return: numpy array of the variable data
+    """
+
+    nc_variable = get_nc_variable(nc_file_name, nc_variable_name)
+    if nc_variable:
+        nc_variable_data = nc_variable[:]
+    else:
+        nc_variable_data = None
+
+    return nc_variable_data
+
 
 def get_nc_variable_original_meta(nc_dataset, nc_variable_name):
     """

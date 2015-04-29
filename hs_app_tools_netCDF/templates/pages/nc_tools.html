@@ -184,12 +184,12 @@
 
                         {# dimension inspector #}
 
-                        <div id="dimensionInspector" >
+                        <div id="dataInspector" >
                             <p><strong style="font-size:110%">Data Inspector</strong></p>
                             {% if data_inspector_form %}
-                                <form id="dimensionInspectorForm" action=" " method="post"> {% csrf_token %}
+                                <form id="dataInspectorForm" action="{% url 'nc_tools:data_inspector' nc_res.short_id %}" method="post"> {% csrf_token %}
                                     {{ data_inspector_form.as_p }}
-                                    <input id="dimensionInspectorBtn" type="submit" value="Get Dimension Data" class="btn btn-danger"/>
+                                    <input id="dataInspectorBtn" type="submit" value="Get Variable Data" class="btn btn-danger"/>
                                 </form>
                             {% else %}
                                 <p style="color:red;">
@@ -236,10 +236,6 @@
                             {% endif %}
                         </div>
 
-
-
-
-
                     </form>
 
 
@@ -278,8 +274,42 @@
                 $('#metaEditBtn').attr('disabled',true);
             }
         })
+    })
+
+
+    // Data Subset Tab js
+    $(document).ready(function(){
+
+        // Test for getting the element
+{#        $('#id_var_name').change(function() {#}
+{#            var a = $("#id_var_name option:selected").val();#}
+{#            alert(a);#}
+{#            $('#id_var_data').text(a); })#}
+
+        // ajax call function
+        var data_inspector_form= $('#dataInspectorForm');
+        data_inspector_form.submit(function(){
+        $.ajax({
+            type: data_inspector_form.attr('method'),
+            url: data_inspector_form.attr('action'),
+            data: data_inspector_form.serialize(),
+            success: function(result) {
+                console.log(result);
+                json_response = JSON.parse(result);
+                console.log(json_response);
+                $("#id_var_data").text(json_response.var_data);
+            },
+            error: function(data) {
+                $('#id_var_data').text('Failed to run the data inspector.');
+            }
+        });
+        return false;
+    });
+
 
     })
+
+
 
 
 </script>
