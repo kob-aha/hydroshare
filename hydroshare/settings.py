@@ -274,11 +274,9 @@ INSTALLED_APPS = (
     "mezzanine.mobile",
     "autocomplete_light",
     "jquery_ui",
-    "tastypie",
-    # "tastypie_swagger",
     "ga_ows",
     "ga_resources",
-    "dublincore",
+    #"dublincore",
     "hs_core",
     "hs_metrics",
     #"hs_rhessys_inst_resource",
@@ -288,8 +286,14 @@ INSTALLED_APPS = (
     "hs_modelinstance",
     "hs_app_timeseries",
     "widget_tweaks",
+<<<<<<< HEAD
     # "rest_framework",
     # "ratings_and_guagings",
+=======
+    "hs_app_netCDF",
+    "hs_model_program",
+    "hs_tools_resource",
+>>>>>>> 7dd246b58c82338a3fc2c9b5f307ab414d3dc09e
 )
 
 # List of processors used by RequestContext to populate the context.
@@ -406,9 +410,6 @@ except ImportError:
     pass
 else:
     set_dynamic_settings(globals())
-
-
-TASTYPIE_SWAGGER_API_MODULE = 'hydroshare.urls.v1_api'
 
 #
 AUTH_PROFILE_MODULE = "theme.UserProfile"
