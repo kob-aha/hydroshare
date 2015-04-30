@@ -74,7 +74,7 @@ def execute_file_process(res, file_process, nc_file_path, request=None):
         check_info.append(create_new_ver_res(res, nc_file_path))
 
     if 'new_res' in file_process and request:
-        check_info.append(create_new_res(request, nc_file_path))
+        check_info.append(create_new_res(request, nc_file_path, res))
 
     check_info = ' and '.join(filter(None, check_info))
 
@@ -118,7 +118,7 @@ def create_new_ver_res(res, nc_file_path, nc_file_name=None):
     return check_info
 
 
-def create_new_res(request, nc_file_path):
+def create_new_res(request, nc_file_path, source_res=None, ):
     """
     create a new resource with given netcdf file
 
@@ -145,7 +145,17 @@ def create_new_res(request, nc_file_path):
                     content=nc_file_name,
         )
 
-        # check identifier info
+        # updata source info for new resource if the source_res is available
+        if source_res:
+            source_res_identifier = source_res.metadata.identifiers.all().filter(name="hydroShareIdentifier")[0]
+            nc_dataset = netCDF4.Dataset(nc_file_path, 'a')
+            ori_source_info = nc_dataset.source if hasattr(nc_dataset,'source') else ''
+            new_source_info = '\n'.join([ori_source_info, str(source_res_identifier.url)] )
+            nc_dataset.setncattr('source', new_source_info)
+            nc_dataset.close()
+            res.metadata.create_element('source', derived_from=str(source_res_identifier.url))
+
+        # update identifier info for meta edit tool
         meta_elements = request.POST.getlist('meta_elements')
         if 'identifier' in meta_elements and res.metadata.identifiers.all():
             res_identifier = res.metadata.identifiers.all().filter(name="hydroShareIdentifier")[0]
@@ -157,7 +167,7 @@ def create_new_res(request, nc_file_path):
         nc_res_file_obj = add_nc_file_to_res(res, nc_file_path, nc_file_name)
 
         # add new ncdump file to resource
-        ncdump_res_file_obj = add_ncdump_file_to_res(res,nc_file_path, nc_file_name)
+        ncdump_res_file_obj = add_ncdump_file_to_res(res, nc_file_path, nc_file_name)
 
         # check info:
         if nc_res_file_obj and ncdump_res_file_obj:
