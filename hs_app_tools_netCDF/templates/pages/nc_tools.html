@@ -54,12 +54,16 @@
         <!-- tab header -->
         <div class="panel-tabs">
             <ul class="nav nav-tabs">
-                <li class="active col-md-2 col-sm-12 col-xs-12">
+                <li class="active col-md-2 col-sm-2 col-xs-12">
                     <a href="#metaEditTab" data-toggle="tab">Metadata Editing</a>
+                </li>
+                <li class="col-md-2 col-sm-2 col-xs-12">
+                    <a href="#dataInspectorTab" data-toggle="tab">Data Inspector</a>
                 </li>
                 <li class="col-md-2 col-sm-2 col-xs-12">
                     <a href="#dataSubsetTab" data-toggle="tab">Data Subset</a>
                 </li>
+
             </ul>
         </div>
 
@@ -165,45 +169,60 @@
 
                 </div>
 
+                <!-- data inspector tab -->
+                <div class="tab-pane" id="dataInspectorTab">
+                    {# data inspector tool intro #}
+                    <div class="col-md-5">
+                        <p><strong style="font-size:130%">Data Inspector Tool</strong></p>
+                        <ul id="metaEditIntro">
+                            <li>This tool will help you to look into the .nc file and get information of the attributes and data for selected variable name.</li>
+                            <li>Please select the "Variable Name" from the dropdown box and click on the "Inspect NetCDF Variable" to run this tool.</li>
+                            <li>Note:
+                                <ol>
+                                    <li>For coordinate variable (please see CF convention for definition), the "Variable Data" will show the index as well as corresponding value.</li>
+                                    <li>For other types of variable, the "Variable Data" will show the original data structure defined in the file</li>
+                                    <li>If the size of the variable data is too large, it will show the limited part of the data.</li>
+                                </ol>
+                            </li>
+                        </ul>
+                    </div>
+
+                    {# datainspector form #}
+                    <div class="col-md-7">
+                            {% if data_inspector_form %}
+                                <form id="dataInspectorForm" action="{% url 'nc_tools:data_inspector' nc_res.short_id %}" method="post"> {% csrf_token %}
+                                    {{ data_inspector_form.as_p }}
+                                    <input id="dataInspectorBtn" type="submit" value="Inspect NetCDF Variable" class="btn btn-primary pull-right"/>
+                                </form>
+                            {% else %}
+                                <p style="color:red;">
+                                    Failed to get the variable names information.
+                                    <br/>Please check if the .nc file includes valid data and metadata information.
+                                </p>
+                            {% endif %}
+
+
+                    </div>
+
+                </div>
 
                 <!-- data subset tab -->
                 <div class="tab-pane" id="dataSubsetTab">
 
-                    {# Tool introduction and dimenstion inspector #}
-                    <div class="col-md-6">
+                    {# data subset tool intro  #}
+                    <div class="col-md-5">
                         {# data subset tool intro #}
                         <p><strong style="font-size:130%">Data Subset Tool</strong></p>
                         <ul id='dataSubsetIntro'>
-                        <li>
-                            This tool will subset the data from the existing .nc resource file and create a new .nc file.
-                            (The corresponding coordinate variables data will be saved in the new .nc file.)
-                        </li>
-                        <li>Please specify the information required on the right and then click on "Subset NetCDF Data" to run this tool.</li>
-                        <li>To know the coordinate and auxiliary coordinate variables data , please use the "Data Inspector" below.</li>
+                            <li>This tool will subset the data from the existing .nc resource file and create a new .nc file.</li>
+                            <li>Please specify the information required on the right and then click on "Subset NetCDF Data" to run this tool.</li>
+{#                            <li>To know the variable and dimension information, please use the "Data Inspector" tool.</li>#}
                         </ul>
-
-                        {# dimension inspector #}
-
-                        <div id="dataInspector" >
-                            <p><strong style="font-size:110%">Data Inspector</strong></p>
-                            {% if data_inspector_form %}
-                                <form id="dataInspectorForm" action="{% url 'nc_tools:data_inspector' nc_res.short_id %}" method="post"> {% csrf_token %}
-                                    {{ data_inspector_form.as_p }}
-                                    <input id="dataInspectorBtn" type="submit" value="Get Variable Data" class="btn btn-danger"/>
-                                </form>
-                            {% else %}
-                                <p style="color:red;">
-                                    Failed to get the coordinate variables information.
-                                    <br/>Please check if the .nc file follows the CF convention to define coordinate variables.
-                                </p>
-                            {% endif %}
-                        </div>
-
                     </div>
 
-                    {# Forms for Datasubset #}
-                    <form id="dataSubset" action=" " method="post"> {% csrf_token %}
-                        <div class="col-md-6">
+                    {# Datasubset tool forms#}
+                    <div class="col-md-7">
+                        <form id="dataSubset" action=" " method="post"> {% csrf_token %}
                             {# dimension formset #}
                             <div id="dimensionFormset">
                             <p><strong>Define Dimension Index for Data Subset (Index in the form  of "Start:Step:End") :</strong></p>
@@ -234,11 +253,9 @@
                             {% if dimension_formset and variable_names_form %}
                                 <input id="dataSubsetBtn" type="submit" value="Subset NetCDF Data" class="btn btn-primary pull-right "/>
                             {% endif %}
-                        </div>
 
-                    </form>
-
-
+                        </form>
+                    </div>
 
                 </div>
 
@@ -254,7 +271,7 @@
 {% block extra_js %}
 <script>
 
-    // Meta Edit Tab js
+    // Meta Edit Tab js //////////////////////////////////////////////////////////////////
     $(document).ready(function(){
 
         //disable meta edit button and clean checked box
@@ -277,16 +294,17 @@
     })
 
 
-    // Data Subset Tab js
+    // Data Inspector Tab js ///////////////////////////////////////////////////////////////
     $(document).ready(function(){
 
-        // Test for getting the element
+{#        // Test for getting the element#}
 {#        $('#id_var_name').change(function() {#}
 {#            var a = $("#id_var_name option:selected").val();#}
 {#            alert(a);#}
-{#            $('#id_var_data').text(a); })#}
+{#            $('#id_var_data').text(a);#}
+{#            $('#id_var_attr').text(a)})#}
 
-        // ajax call function
+        // ajax call function to get var_attribute and var_data info
         var data_inspector_form= $('#dataInspectorForm');
         data_inspector_form.submit(function(){
         $.ajax({
@@ -298,9 +316,11 @@
                 json_response = JSON.parse(result);
                 console.log(json_response);
                 $("#id_var_data").text(json_response.var_data);
+                $('#id_var_attr').text(json_response.var_attr);
             },
             error: function(data) {
-                $('#id_var_data').text('Failed to run the data inspector.');
+                $('#id_var_data').text('Failed to start the tool, please click the button again.');
+                $('#id_var_attr').text('Failed to start the tool, please click the button again.')
             }
         });
         return false;

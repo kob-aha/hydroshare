@@ -10,6 +10,7 @@ from hs_app_netCDF.models import NetcdfResource
 from hs_app_tools_netCDF.forms import *
 from hs_app_tools_netCDF.nc_tool_functions.nc_meta_edit import *
 from hs_app_tools_netCDF.nc_tool_functions.nc_data_subset import *
+from hs_app_tools_netCDF.nc_tool_functions.nc_data_inspector import *
 
 # view for create ncdump file button
 @login_required
@@ -43,7 +44,7 @@ def create_ncdump_view(request, shortkey):
     return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
 
-# view for index page
+# view for tool landing page
 @login_required
 def index_view(request, shortkey, state):
     """
@@ -68,6 +69,8 @@ def index_view(request, shortkey, state):
     dimension_formset= create_dimension_formset(res)
     context['dimension_formset'] = dimension_formset
     variable_names_form = create_variable_names_form(res)
+
+    # context for data inspector form
     context['variable_names_form'] = variable_names_form
     context['data_inspector_form'] = create_data_inspector_form(res)
 
@@ -121,11 +124,11 @@ def meta_edit_view(request, shortkey, **kwargs):
     return HttpResponseRedirect(reverse('nc_tools:index', args=[res.short_id, 'processing']))
 
 
-# views for data subset tool
+# views for data inspector tool
 @login_required
 def data_inspector_view(request, shortkey, **kwargs):
     """
-    data inspector view function in data subset tool
+    Data Inspector tool view function
     """
 
     res, _, _ = authorize(request, shortkey, edit=True, full=True, superuser=True)
@@ -134,8 +137,11 @@ def data_inspector_view(request, shortkey, **kwargs):
     if request.is_ajax and res_cls is NetcdfResource:
         var_name = request.POST.getlist('var_name')[0]
         nc_file_path = get_nc_file_path_from_res(res)
-        ajax_response_data = {'var_data': get_var_data_as_string(nc_file_path, var_name)}
+        data_inspector_info = get_data_inspector_info(nc_file_path, var_name)
+        ajax_response_data = data_inspector_info
+
     else:
-        ajax_response_data = {'var_data': 'Failed to run the data inspector'}
+        messages.add_message(request, messages.ERROR,
+                             'Error! Data Inspector: please check if the tool is running for NetCDF resource.')
 
     return HttpResponse(json.dumps(ajax_response_data))

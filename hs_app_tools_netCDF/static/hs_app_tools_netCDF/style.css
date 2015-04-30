@@ -36,7 +36,7 @@ ul {
 
 #dimensionFormset {
     overflow-y: auto;
-    height: 180px;
+    height: 220px;
     border-style: solid;
     border-color: gainsboro;
     border-width: thin;
@@ -46,7 +46,7 @@ ul {
 
 #variableNamesForm {
     overflow-y: auto;
-    height: 180px;
+    height: 220px;
     border-style: solid;
     border-color: gainsboro;
     border-width: thin;
@@ -58,9 +58,9 @@ ul {
     margin-left:1.2em;
 }
 
-#dataInspector {
-    border-color:gainsboro;
-    border-style:outset;
-    padding:10px;
-    margin-top: 20px;
-}
+/*#dataInspector {*/
+    /*border-color:cornflowerblue;*/
+    /*border-style:outset;*/
+    /*padding:10px;*/
+    /*margin-top: 20px;*/
+/*}*/

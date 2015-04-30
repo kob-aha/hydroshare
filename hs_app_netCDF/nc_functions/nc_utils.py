@@ -53,18 +53,44 @@ def get_nc_variable(nc_file_name, nc_variable_name):
 
 def get_nc_variable_data(nc_file_name, nc_variable_name):
     """
-    (String, string) -> list
+    (String, string) -> numpy array
 
     Return: numpy array of the variable data
     """
 
     nc_variable = get_nc_variable(nc_file_name, nc_variable_name)
-    if nc_variable:
-        nc_variable_data = nc_variable[:]
+
+    if nc_variable is not None and nc_variable.shape:
+        try:
+            nc_variable_data = nc_variable[:]
+        except:
+            nc_variable_data = None
     else:
         nc_variable_data = None
 
     return nc_variable_data
+
+
+def get_nc_variable_attr(nc_file_name, nc_variable_name):
+    """
+    (String, string) -> Dict
+
+    Return: attribute information and attribute name of the variable
+    """
+    nc_variable = get_nc_variable(nc_file_name, nc_variable_name)
+    nc_variable_attr = OrderedDict()
+    if nc_variable.__dict__:
+        try:
+            nc_variable_attr['variable_dimension'] = "({0})".format(', '.join(nc_variable.dimensions))
+            nc_variable_attr['variable_shape'] = str(nc_variable.shape)
+            nc_variable_attr['variable_datatype'] = nc_variable.dtype
+        except:
+            pass
+
+        for attr_name, attr_value in nc_variable.__dict__.items():
+            nc_variable_attr[attr_name] = str(attr_value)
+
+    return nc_variable_attr
 
 
 def get_nc_variable_original_meta(nc_dataset, nc_variable_name):

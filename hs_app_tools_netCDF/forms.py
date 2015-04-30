@@ -43,12 +43,12 @@ class MetaElementsForm(forms.Form):
 # Forms for Data Subset Tool:
 class DimensionForm(forms.Form):
     dim_name = forms.CharField(max_length=100,
-                               widget=forms.TextInput(attrs={'readonly':'readonly'}),
+                               widget=forms.TextInput(attrs={'readonly':'readonly', 'size':25}),
                                label='Dim Name')
 
     dim_subset_value = forms.CharField(max_length=100,
                                        label='Subset Index',
-                                       # widget=forms.TextInput(attrs={'readonly':'readonly'})
+                                       widget=forms.TextInput(attrs={'size':25})
     )
 
 
@@ -59,14 +59,20 @@ class VariableNamesForm(forms.Form):
 
 
 class DataInspectorForm(forms.Form):
-    var_name = forms.ChoiceField(label='Variable Name',
+    var_name = forms.ChoiceField(label='Select Variable Name',
     )
-
+    var_attr = forms.CharField( max_length=1000,
+                                label='Variable Attributes',
+                                widget=forms.Textarea(attrs={'readonly':'readonly',
+                                                             'rows':9,
+                                                             'cols':75
+                                }),
+    )
     var_data = forms.CharField(max_length=10000,
                                 label='Variable Data',
                                 widget=forms.Textarea(attrs={'readonly':'readonly',
-                                                             'rows':10,
-                                                             'cols':55
+                                                             'rows':15,
+                                                             'cols':75
                                                              }),
 
     )
