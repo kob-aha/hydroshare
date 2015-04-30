@@ -87,14 +87,12 @@ def get_var_data_info(nc_dataset, var_name):
     :param var_name:
     :return: string including data information
     """
-    var_data = get_nc_variable_data(nc_dataset, var_name)
+    var_data = get_nc_variable_data(nc_dataset, var_name,time_convert=True)
 
     if var_data is not None:
         import numpy
-        numpy.set_printoptions(threshold=2000, edgeitems=500)
-        # b = str(var_data)
-
-        var_data_info = '[1] 23 \n {0}'.format(var_data)
+        numpy.set_printoptions(threshold=50000, edgeitems=500)  # set the numpy string representation format
+        var_data_info = '{0}'.format(numpy.array_str(var_data))
 
     else:
         var_data_info = 'No data is defined for this variable.'

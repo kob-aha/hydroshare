@@ -176,12 +176,11 @@
                         <p><strong style="font-size:130%">Data Inspector Tool</strong></p>
                         <ul id="metaEditIntro">
                             <li>This tool will help you to look into the .nc file and get information of the attributes and data for selected variable name.</li>
-                            <li>Please select the "Variable Name" from the dropdown box and click on the "Inspect NetCDF Variable" to run this tool.</li>
+                            <li>Please select the "Variable Name" from the dropdown list and click on "Inspect NetCDF Variable" to run this tool.</li>
                             <li>Note:
                                 <ol>
-                                    <li>For coordinate variable (please see CF convention for definition), the "Variable Data" will show the index as well as corresponding value.</li>
-                                    <li>For other types of variable, the "Variable Data" will show the original data structure defined in the file</li>
-                                    <li>If the size of the variable data is too large, it will show the limited part of the data.</li>
+                                    <li>If the size of the variable data is too large, it will show the "snippet" of the data as a summary of beginning and end of each dimension.</li>
+                                    <li>If the netCDF data follows CF convention to define the time coordinate variable with "units" and "calandar" attributes(not required), the variable data will be converted to time string.</li>
                                 </ol>
                             </li>
                         </ul>

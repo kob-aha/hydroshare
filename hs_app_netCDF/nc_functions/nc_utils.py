@@ -51,11 +51,12 @@ def get_nc_variable(nc_file_name, nc_variable_name):
     return nc_variable
 
 
-def get_nc_variable_data(nc_file_name, nc_variable_name):
+def get_nc_variable_data(nc_file_name, nc_variable_name, time_convert=False):
     """
-    (String, string) -> numpy array
+    (String, string, bool) -> numpy array
 
     Return: numpy array of the variable data
+            if time_convert = True, the time coordinate variable will be changed as time string format.
     """
 
     nc_variable = get_nc_variable(nc_file_name, nc_variable_name)
@@ -67,6 +68,22 @@ def get_nc_variable_data(nc_file_name, nc_variable_name):
             nc_variable_data = None
     else:
         nc_variable_data = None
+
+    if time_convert and nc_variable_data is not None:
+        coordinate_type = get_nc_variable_coordinate_type(nc_variable)
+        if coordinate_type == "T" and len(nc_variable.shape) == 1:
+            time_values = []
+            time_units = nc_variable.units if hasattr(nc_variable, 'units') else ''
+            time_calendar = nc_variable.calendar if hasattr(nc_variable, 'calendar') else 'standard'
+            if time_units and time_calendar:
+                try:
+                    for value in numpy.nditer(nc_variable_data, op_flags=['readwrite']):
+                        time_obj = netCDF4.num2date(value, units=time_units, calendar=time_calendar)
+                        time_str = time_obj.strftime('%Y-%m-%d %H:%M:%S')
+                        time_values.append(time_str)
+                    nc_variable_data = numpy.array(time_values)
+                except:
+                    pass
 
     return nc_variable_data
 
@@ -93,6 +110,7 @@ def get_nc_variable_attr(nc_file_name, nc_variable_name):
     return nc_variable_attr
 
 
+# Deprecated Function
 def get_nc_variable_original_meta(nc_dataset, nc_variable_name):
     """
     (object, string)-> OrderedDict
@@ -174,8 +192,24 @@ def get_nc_variable_coordinate_type(nc_variable):
             return 'Y'
         else:
             info = nc_variable.units.split(' ')
-            time_units = ['days', 'hours', 'minutes', 'seconds', 'milliseconds', 'microseconds'] # see python netcdf4
-            if len(info) >= 3 and (info[0].lower() in time_units) and info[1].lower() == 'since':
+
+            # form time_units list
+            day_units = ['days', 'day', 'd']
+            hour_units = ['hours', 'hour', 'hr', 'h']
+            min_units = ['minutes', 'min', 'm']
+            sec_units = ['seconds', 'sec', 's']
+            milliseconds_units = ['milliseconds', 'millisecond']
+            microseconds_units = ['microseconds', 'microsecond']
+            time_units_list = [day_units, hour_units, min_units, sec_units,milliseconds_units, microseconds_units] # see python netcdf4
+
+            original_units = info[0].lower()
+            check_unit = False
+            for sub_list in time_units_list:
+                if original_units in sub_list:
+                    check_unit = True
+                    break
+
+            if len(info) >= 3 and check_unit and info[1].lower() == 'since':
                 return 'T'
 
     return 'Unknown'
