@@ -91,7 +91,7 @@ def get_var_data_info(nc_dataset, var_name):
 
     if var_data is not None:
         import numpy
-        numpy.set_printoptions(threshold=50000, edgeitems=500)  # set the numpy string representation format
+        numpy.set_printoptions(threshold=30000, edgeitems=100)  # set the numpy string representation format
         var_data_info = '{0}'.format(numpy.array_str(var_data))
 
     else:
