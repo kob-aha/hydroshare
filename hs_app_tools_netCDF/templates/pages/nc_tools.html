@@ -6,6 +6,8 @@
 {# load extra css #}
 {% block extra_css %}
     <link rel="stylesheet" type="text/css" href="{% static 'hs_app_tools_netCDF/style.css'%}"/>
+
+
 {% endblock %}
 
 
@@ -199,8 +201,6 @@
                                     <br/>Please check if the .nc file includes valid data and metadata information.
                                 </p>
                             {% endif %}
-
-
                     </div>
 
                 </div>
@@ -263,6 +263,13 @@
 
     </div>
 
+    <!-- wait dialog for Ajax Call -->
+    <div id="waitDialog">
+      <img src="{% static 'hs_app_tools_netCDF/loading.gif' %}" alt="loading" style="margin-top:40px; width:60px; height:60px"/>
+      <p style="color:gray;font-weight:normal;font-size:200%;margin-top:40px">Please wait while running the tool....</p>
+    </div>
+
+
 {% endblock %}
 
 
@@ -307,27 +314,31 @@
         // ajax call function to get var_attribute and var_data info
         var data_inspector_form= $('#dataInspectorForm');
         data_inspector_form.submit(function(){
-        $.ajax({
-            type: data_inspector_form.attr('method'),
-            url: data_inspector_form.attr('action'),
-            data: data_inspector_form.serialize(),
-            success: function(result) {
-                console.log(result);
-                json_response = JSON.parse(result);
-                console.log(json_response);
-                $("#id_var_data").text(json_response.var_data);
-                $('#id_var_attr').text(json_response.var_attr);
-            },
-            error: function(data) {
-                $('#id_var_data').text('Failed to start the tool, please click the button again.');
-                $('#id_var_attr').text('Failed to start the tool, please click the button again.')
-            }
+            $('#waitDialog').show();
+            $.ajax({
+                type: data_inspector_form.attr('method'),
+                url: data_inspector_form.attr('action'),
+                data: data_inspector_form.serialize(),
+                success: function(result) {
+                    console.log(result);
+                    json_response = JSON.parse(result);
+                    console.log(json_response);
+                    $('#waitDialog').hide();
+                    $("#id_var_data").text(json_response.var_data);
+                    $('#id_var_attr').text(json_response.var_attr);
+
+                },
+                error: function(data) {
+                    $('#waitDialog').hide();
+                    $('#id_var_data').text('Oops, please click the button again or try other variables.');
+                    $('#id_var_attr').text('Oops, please click the button again or try other variables.');
+                }
+            });
+            return false;
+
         });
-        return false;
-    });
-
-
     })
+
 
 
     // Data Subsetting Tab js /////////////////////////////////////////
