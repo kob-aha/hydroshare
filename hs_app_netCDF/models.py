@@ -314,11 +314,11 @@ class NetcdfMetaData(CoreMetaData):
             hsterms_shape.text = variable.shape
 
             if variable.descriptive_name:
-                hsterms_descriptive_name = etree.SubElement(hsterms_variable_rdf_Description,'{%s}descriptiveName' % self.NAMESPACES['hsterms'])
+                hsterms_descriptive_name = etree.SubElement(hsterms_variable_rdf_Description,'{%s}longName' % self.NAMESPACES['hsterms'])
                 hsterms_descriptive_name.text = variable.descriptive_name
 
             if variable.method:
-                hsterms_method = etree.SubElement(hsterms_variable_rdf_Description, '{%s}method' % self.NAMESPACES['hsterms'])
+                hsterms_method = etree.SubElement(hsterms_variable_rdf_Description, '{%s}comment' % self.NAMESPACES['hsterms'])
                 hsterms_method.text = variable.method
 
             if variable.missing_value:

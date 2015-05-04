@@ -162,7 +162,7 @@
                     <div class="col-md-6">
                         <form id="metaEditForm" action="{% url "nc_tools:meta_edit" nc_res.short_id %}" method="post"> {% csrf_token %}
                             {{ meta_elements_form.as_p }}
-                            {{ file_process_form.as_p }}
+{#                            {{ file_process_form.as_p }}#}
                             <input id="metaEditBtn" type="submit" value="Write Metadata to NetCDF File" class="btn btn-primary pull-right"/>
                         </form>
                     </div>
@@ -186,7 +186,7 @@
                         </ul>
                     </div>
 
-                    {# datainspector form #}
+                    {# data inspector form #}
                     <div class="col-md-7">
                             {% if data_inspector_form %}
                                 <form id="dataInspectorForm" action="{% url 'nc_tools:data_inspector' nc_res.short_id %}" method="post"> {% csrf_token %}
@@ -221,7 +221,7 @@
 
                     {# Datasubset tool forms#}
                     <div class="col-md-7">
-                        <form id="dataSubset" action=" " method="post"> {% csrf_token %}
+                        <form id="dataSubsetForm" action=" " method="post"> {% csrf_token %}
                             {# dimension formset #}
                             <div id="dimensionFormset">
                             <p><strong>Define Dimension Index for Data Subset (Index in the form  of "Start:Step:End") :</strong></p>
@@ -275,14 +275,15 @@
 
         //disable meta edit button and clean checked box
         $('input[id^="id_meta_elements_"]').attr('checked', false);
-        $('input[id^="id_file_process_"]').attr('checked', false);
+        $('input[id^="id_meta_edit_file_process_"]').attr('checked', false);
         $('#metaEditBtn').attr('disabled', true);
         //alert($('#metaEditBtn').attr('disabled'));
 
         // enable meta edit button after valid check box
         $('#metaEditForm').on('change', function(){
-            var meta_elements_checkbox = $('input[id^="id_meta_elements_"]:checked').length > 0;
-            var file_process_checkbox = $('input[id^="id_file_process_"]:checked').length > 0;
+            var meta_elements_checkbox = $('#metaEditForm').find('input[id^="id_meta_elements_"]:checked').length > 0;
+            var file_process_checkbox = $('#metaEditForm').find('input[id^="id_meta_edit_file_process_"]:checked').length > 0;
+
             if (meta_elements_checkbox && file_process_checkbox) {
                 $('#metaEditBtn').attr('disabled', false);
             }
@@ -329,7 +330,38 @@
     })
 
 
+    // Data Subsetting Tab js /////////////////////////////////////////
+    $(document).ready(function(){
 
+        //disable data subset button and clean checked box
+        $('input[id^="id_variable_names_"]').attr('checked', false);
+        $('input[id^="id_file_process_"]').attr('checked', false);
+        $('#dataSubsetBtn').attr('disabled', true);
+
+        // enable data subset button after valid check box
+        $('#dataSubsetForm').on('change', function(){
+            var variable_names_checkbox = $('#dataSubsetForm').find('input[id^="id_variable_names_"]:checked').length > 0;
+            var file_process_checkbox= $('#dataSubsetForm').find('input[id^="id_file_process_"]:checked').length > 0;
+            if (variable_names_checkbox && file_process_checkbox) {
+
+                $('#dataSubsetBtn').attr('disabled', false);
+
+                $('#dataSubsetForm input:text').each(function(){
+
+                    if (!$(this).val()){
+                        $('#dataSubsetBtn').attr('disabled',true);
+                    }
+                })
+            }
+            else {
+                $('#dataSubsetBtn').attr('disabled',true);
+            }
+        })
+
+{#        var test = $('#dataSubsetForm input:text').length;#}
+{#        alert(test);#}
+
+    })
 
 </script>
 
