@@ -13,6 +13,7 @@ class FileProcess(forms.Form):
                                      label='Select the Action after Tool Processing is Finished (Required)',
                                     )
 
+
 # Forms for Meta Edit Tool
 class MetaElementsForm(forms.Form):
     """
@@ -38,12 +39,20 @@ class MetaElementsForm(forms.Form):
                                               choices=META_ELEMENTS,
                                               label='Select Meta Elements to Write to NetCDF File (Required)'
                                             )
+    FILE_PROCESS = (
+        ('new_ver_res', "Create a new version of the existing resource with edited netcdf file."),
+        ('new_res', "Create a new resource with edited netcdf file."),
+    )
 
+    meta_edit_file_process = forms.ChoiceField(widget=forms.RadioSelect(), #forms.CheckboxSelectMultiple
+                                     choices=FILE_PROCESS,
+                                     label='Select the Action after Tool Processing is Finished (Required)',
+                                    )
 
 # Forms for Data Subset Tool:
 class DimensionForm(forms.Form):
     dim_name = forms.CharField(max_length=100,
-                               widget=forms.TextInput(attrs={'readonly':'readonly', 'size':25}),
+                               widget=forms.TextInput(attrs={'readonly': 'readonly', 'size':25}),
                                label='Dim Name')
 
     dim_subset_value = forms.CharField(max_length=100,
@@ -55,22 +64,23 @@ class DimensionForm(forms.Form):
 class VariableNamesForm(forms.Form):
     variable_names = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple,
                                               label='Select the Data Variable Names for Data Subset (Required)',
-                                            )
+                    )
 
 
+# Forms for Data Inspector Tool
 class DataInspectorForm(forms.Form):
     var_name = forms.ChoiceField(label='Variable Name',
     )
-    var_attr = forms.CharField( max_length=1000,
-                                label='Variable Attributes',
-                                widget=forms.Textarea(attrs={'readonly':'readonly',
-                                                             'rows':10,
-                                                             'cols':75
+    var_attr = forms.CharField(max_length=1000,
+                               label='Variable Attributes',
+                               widget=forms.Textarea(attrs={'readonly': 'readonly',
+                                                             'rows': 10,
+                                                             'cols': 75
                                 }),
     )
     var_data = forms.CharField(max_length=10000,
-                                label='Variable Data',
-                                widget=forms.Textarea(attrs={'readonly':'readonly',
+                               label='Variable Data',
+                               widget=forms.Textarea(attrs={'readonly':'readonly',
                                                              'rows':15,
                                                              'cols':75
                                                              }),
