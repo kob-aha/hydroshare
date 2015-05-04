@@ -90,9 +90,12 @@ def get_var_data_info(nc_dataset, var_name):
     var_data = get_nc_variable_data(nc_dataset, var_name,time_convert=True)
 
     if var_data is not None:
-        import numpy
-        numpy.set_printoptions(threshold=30000, edgeitems=100)  # set the numpy string representation format
-        var_data_info = '{0}'.format(numpy.array_str(var_data))
+        try:
+            import numpy
+            numpy.set_printoptions(threshold=10000, edgeitems=100)  # set the numpy string representation format
+            var_data_info = '{0}'.format(numpy.array_str(var_data))
+        except:
+            var_data_info = 'Failed to get the data defined for this variable.'
 
     else:
         var_data_info = 'No data is defined for this variable.'
@@ -113,9 +116,12 @@ def get_var_attr_info(nc_dataset, var_name):
     var_attr_info = []
 
     if var_attr:
-        for attr_name, attr_info in var_attr.items():
-            var_attr_info.append('{0} : {1}'.format(attr_name, attr_info))
-        var_attr_info = '\n'.join(var_attr_info)
+        try:
+            for attr_name, attr_info in var_attr.items():
+                var_attr_info.append('{0} : {1}'.format(attr_name, attr_info))
+            var_attr_info = '\n'.join(var_attr_info)
+        except:
+            var_attr_info = 'Failed to get the attribute info for this variable.'
     else:
         var_attr_info = 'No attribute information is defined for the variable.'
 

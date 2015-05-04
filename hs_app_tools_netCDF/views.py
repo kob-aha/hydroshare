@@ -102,7 +102,7 @@ def meta_edit_view(request, shortkey, **kwargs):
 
     if request.method == 'POST'and (res_cls is NetcdfResource):
         meta_elements = request.POST.getlist('meta_elements')
-        file_process = request.POST.getlist('file_process')
+        file_process = request.POST.getlist('meta_edit_file_process')
 
         if meta_elements and file_process:
             check_info = run_meta_edit_tool(res, meta_elements, file_process, request)
