@@ -7,12 +7,12 @@ import netCDF4
 import uuid
 from django.core.files import File
 from django.core.files.uploadedfile import InMemoryUploadedFile
+from hs_core.views.utils import authorize
 from hs_core.hydroshare.resource import ResourceFile
 from hs_core import hydroshare
 from hs_core.hydroshare import utils
 from hs_app_tools_netCDF.models import *
 import hs_app_netCDF.nc_functions.nc_meta as nc_meta
-
 
 
 def create_nc_tools_obj(res, tool_name):
@@ -148,8 +148,11 @@ def create_new_res(request, nc_file_path, source_res=None, ):
         if source_res:
             source_res_identifier = source_res.metadata.identifiers.all().filter(name="hydroShareIdentifier")[0]
             nc_dataset = netCDF4.Dataset(nc_file_path, 'a')
-            ori_source_info = nc_dataset.source if hasattr(nc_dataset,'source') else ''
-            new_source_info = '\n'.join([ori_source_info, str(source_res_identifier.url)] )
+            ori_source_info = nc_dataset.source if hasattr(nc_dataset, 'source') else ''
+            if not ori_source_info:
+                new_source_info = '\n'.join([ori_source_info, str(source_res_identifier.url)])
+            else:
+                new_source_info = str(source_res_identifier.url)
             nc_dataset.setncattr('source', new_source_info)
             nc_dataset.close()
             res.metadata.create_element('source', derived_from=str(source_res_identifier.url))
@@ -363,6 +366,21 @@ def get_nc_meta_populate_list(nc_file_path, nc_res_title="Untitled resource"):
 
 
 # independent functions ######################################################################3
+
+def get_res_and_class(request, shortkey):
+    """
+    get the resource object and the corresponding resource class
+
+    :param request:
+    :param shortkey: resource shortkey
+    :return:
+    """
+    res, _, _ = authorize(request, shortkey, edit=True, full=True, superuser=True)
+    res_cls = res.__class__
+
+    return [res, res_cls]
+
+
 def get_nc_file_path_from_res(nc_res):
     """
     get the .nc file full path from netcdf resource object
