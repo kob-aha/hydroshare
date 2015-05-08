@@ -5,8 +5,7 @@ Module variable inspector for .nc file in netcdf resource
 
 from collections import OrderedDict
 from hs_app_tools_netCDF.forms import DataInspectorForm
-from hs_app_netCDF.nc_functions.nc_utils import get_nc_dataset, get_nc_variable, get_nc_variable_data, get_nc_variable_attr
-from hs_core.models import ResourceFile
+from hs_app_netCDF.nc_functions.nc_utils import get_nc_dataset, get_nc_variable_data, get_nc_variable_attr
 from hs_app_tools_netCDF.nc_tool_functions.nc_tools_utils import *
 
 

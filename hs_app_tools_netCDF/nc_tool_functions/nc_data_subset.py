@@ -81,7 +81,7 @@ def create_variable_names_form(nc_res):
         variable_names_form = VariableNamesForm()
         variable_names_form.fields['variable_names'].choices = variable_names_info
     else:
-        variable_names_form= None
+        variable_names_form = None
 
     return variable_names_form
 
@@ -108,3 +108,4 @@ def get_variable_names_info(nc_file_path):
     return variable_names_info
 
 
+# functions for data subset tool backend #####################################################################33

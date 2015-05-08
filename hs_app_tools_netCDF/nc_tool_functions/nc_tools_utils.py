@@ -2,18 +2,17 @@
 Module providing utility functions to support netcdf tools function in HydroShare
 
 """
-
-from hs_core.hydroshare.resource import ResourceFile
+import StringIO, os
+import netCDF4
+import uuid
 from django.core.files import File
 from django.core.files.uploadedfile import InMemoryUploadedFile
-import StringIO, os
+from hs_core.hydroshare.resource import ResourceFile
 from hs_core import hydroshare
 from hs_core.hydroshare import utils
-from django.core.files import File
-import uuid
 from hs_app_tools_netCDF.models import *
 import hs_app_netCDF.nc_functions.nc_meta as nc_meta
-import netCDF4
+
 
 
 def create_nc_tools_obj(res, tool_name):
@@ -363,7 +362,7 @@ def get_nc_meta_populate_list(nc_file_path, nc_res_title="Untitled resource"):
     return metadata
 
 
-# independent util functions ######################################################################3
+# independent functions ######################################################################3
 def get_nc_file_path_from_res(nc_res):
     """
     get the .nc file full path from netcdf resource object

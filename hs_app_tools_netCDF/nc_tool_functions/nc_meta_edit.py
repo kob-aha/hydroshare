@@ -2,10 +2,10 @@
 Module edit meta data in netcdf resource file based on the resource metadata information
 
 """
-
-from hs_app_tools_netCDF.nc_tool_functions.nc_tools_utils import *
 import numpy as np
 import netCDF4
+from hs_app_tools_netCDF.nc_tool_functions.nc_tools_utils import *
+
 
 
 def run_meta_edit_tool(res, meta_elements, file_process, request):
