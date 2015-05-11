@@ -157,12 +157,14 @@ def create_new_res(request, nc_file_path, source_res=None, ):
             nc_dataset.close()
             res.metadata.create_element('source', derived_from=str(source_res_identifier.url))
 
-        # update identifier info for meta edit tool
-        meta_elements = request.POST.getlist('meta_elements')
-        if 'identifier' in meta_elements and res.metadata.identifiers.all():
+        # update identifier info if "id" in .nc file or in 'meta_elements'
+        if res.metadata.identifiers.all():
             res_identifier = res.metadata.identifiers.all().filter(name="hydroShareIdentifier")[0]
+            meta_elements = request.POST.getlist('meta_elements')
             nc_dataset = netCDF4.Dataset(nc_file_path, 'a')
-            nc_dataset.setncattr('id', res_identifier.url)
+
+            if ('identifier' in meta_elements) or hasattr(nc_dataset, 'id'):
+                nc_dataset.setncattr('id', res_identifier.url)
             nc_dataset.close()
 
         # add new .nc file to resource
