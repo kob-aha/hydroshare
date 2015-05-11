@@ -28,10 +28,10 @@ def create_nc_tools_obj(res, tool_name):
         ext = os.path.splitext(f.resource_file.name)[-1]
         if ext == '.nc':
 
-            # initiate the nc_tools_obj and tool_file_filed for the resource
+            # initiate the nc_tools_obj and tool_file_field for the resource
             nc_tools_obj = NetcdfTools.objects.filter(short_id=res.short_id).first()
             tool_file_field_name = tool_name+'_file'
-            if nc_tools_obj and getattr(nc_tools_obj, tool_file_field_name):
+            if nc_tools_obj and hasattr(nc_tools_obj, tool_file_field_name):
                 tool_file_field = getattr(nc_tools_obj, tool_file_field_name)
                 storage, path = tool_file_field.storage, tool_file_field.path
                 tool_file_field.delete()

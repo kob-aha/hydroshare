@@ -11,6 +11,7 @@ from hs_app_tools_netCDF.forms import *
 from hs_app_tools_netCDF.nc_tool_functions.nc_meta_edit import *
 from hs_app_tools_netCDF.nc_tool_functions.nc_data_subset import *
 from hs_app_tools_netCDF.nc_tool_functions.nc_data_inspector import *
+from hs_app_tools_netCDF.nc_tool_functions.nc_tools_utils import *
 
 # view for create ncdump file button
 @login_required
@@ -19,8 +20,7 @@ def create_ncdump_view(request, shortkey):
     create ncdump file function for create ncdump button in landing page
     """
 
-    res, _, _ = authorize(request, shortkey, edit=True, full=True, superuser=True)
-    res_cls = res.__class__
+    res, res_cls = get_res_and_class(request, shortkey)
 
     if res_cls is NetcdfResource:
         nc_file_obj = None
@@ -51,8 +51,7 @@ def index_view(request, shortkey, state):
     Netcdf tool landing page view function
     """
 
-    res, _, _ = authorize(request, shortkey, edit=True, full=True, superuser=True)
-    res_cls = res.__class__
+    res, res_cls = get_res_and_class(request, shortkey)
     context = {}
 
     # context for resource obj
@@ -66,7 +65,7 @@ def index_view(request, shortkey, state):
     context['meta_elements_form'] = meta_elements_form
 
     # context for data subset tool form
-    dimension_formset= create_dimension_formset(res)
+    dimension_formset = create_dimension_formset(res)
     context['dimension_formset'] = dimension_formset
     variable_names_form = create_variable_names_form(res)
 
@@ -97,8 +96,7 @@ def meta_edit_view(request, shortkey, **kwargs):
     Meta Edit Tool view function
     """
 
-    res, _, _ = authorize(request, shortkey, edit=True, full=True, superuser=True)
-    res_cls = res.__class__
+    res, res_cls = get_res_and_class(request, shortkey)
 
     if request.method == 'POST'and (res_cls is NetcdfResource):
         meta_elements = request.POST.getlist('meta_elements')
@@ -124,15 +122,14 @@ def meta_edit_view(request, shortkey, **kwargs):
     return HttpResponseRedirect(reverse('nc_tools:index', args=[res.short_id, 'processing']))
 
 
-# views for data inspector tool
+# view for data inspector tool
 @login_required
 def data_inspector_view(request, shortkey, **kwargs):
     """
     Data Inspector tool view function
     """
 
-    res, _, _ = authorize(request, shortkey, edit=True, full=True, superuser=True)
-    res_cls = res.__class__
+    res, res_cls = get_res_and_class(request, shortkey)
 
     if request.is_ajax and res_cls is NetcdfResource:
         var_name = request.POST.getlist('var_name')[0]
@@ -145,3 +142,23 @@ def data_inspector_view(request, shortkey, **kwargs):
                              'Error! Data Inspector: please check if the tool is running for NetCDF resource.')
 
     return HttpResponse(json.dumps(ajax_response_data))
+
+
+# views for data subset tool
+@login_required
+def data_subset_view(request, shortkey, **kwargs):
+    """
+    Data subset tool view function
+    """
+
+    if request.method == 'POST':
+        execute_info = run_data_subset_tool(request, shortkey)
+
+        if execute_info[0].lower == 'error':
+            error_info = 'Error! Data Subset: ' + execute_info[1]
+            messages.add_message(request, messages.ERROR, error_info)
+        else:
+            suc_message = execute_info[1]
+            messages.add_message(request, messages.SUCCESS, suc_message)
+
+    return HttpResponseRedirect(reverse('nc_tools:index', args=[shortkey, 'processing']))

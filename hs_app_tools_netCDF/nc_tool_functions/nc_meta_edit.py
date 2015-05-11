@@ -7,7 +7,6 @@ import netCDF4
 from hs_app_tools_netCDF.nc_tool_functions.nc_tools_utils import *
 
 
-
 def run_meta_edit_tool(res, meta_elements, file_process, request):
 
     check_info = ''
