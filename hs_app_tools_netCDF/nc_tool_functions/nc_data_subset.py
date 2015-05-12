@@ -3,10 +3,10 @@ Module data subset for .nc file in netcdf resource
 
 """
 from collections import OrderedDict
+import subprocess
 from django.forms.formsets import formset_factory
 from hs_app_tools_netCDF.forms import DimensionForm, VariableNamesForm, DataInspectorForm
 from hs_app_netCDF.nc_functions.nc_utils import get_nc_dataset, get_nc_data_variables, get_nc_variable_data
-from hs_core.models import ResourceFile
 from hs_app_tools_netCDF.nc_tool_functions.nc_tools_utils import *
 from hs_app_netCDF.models import NetcdfResource
 
@@ -187,26 +187,34 @@ def get_data_subset_form_info(request):
 
 def refine_data_subset_form_dimension_info(data_subset_dimension_info, pattern=['start', 'step', 'end']):
     for form_dim_name, form_dim_subset_value in data_subset_dimension_info.items():
-        dim_name = ''.join(list(form_dim_name)[:form_dim_name.index('(')])
 
-        # rearrange the index sequence and convert as integer value
+        # refine dimension name
+        dim_name = ''.join(list(form_dim_name)[:form_dim_name.index(' (')])
+
+        # refine dim_subset_value
         try:
             dim_subset_value = [int(x) for x in form_dim_subset_value.split(':')]
-            dim_subset_value = [dim_subset_value[pattern.index('start')],
-                                dim_subset_value[pattern.index('end')],
-                                dim_subset_value[pattern.index('step')]
-                                ]
+            if len(dim_subset_value) == 3:
+                dim_subset_value = [dim_subset_value[pattern.index('start')],
+                                    dim_subset_value[pattern.index('end')],
+                                    dim_subset_value[pattern.index('step')]
+                                    ]
+            else:
+                dim_subset_value = []
         except:
             dim_subset_value = []
 
         del data_subset_dimension_info[form_dim_name]
 
-        # validate the index value
-        dim_length = int(form_dim_name[form_dim_name.find("=")+1:form_dim_name.find(")")])
+        # validate dim_subset_value
         if dim_subset_value:
-            if (dim_subset_value[1] >= dim_length) or (dim_subset_value[0] > dim_subset_value[1]):
+            dim_length = int(form_dim_name[form_dim_name.find("=")+1:form_dim_name.find(")")])
+            start = dim_subset_value[0]
+            end = dim_subset_value[1]
+            step = dim_subset_value[2]
+            if (end >= dim_length) or (start > end) or (start < 0) or (step <= 0):
                 dim_subset_value = []
-            elif dim_subset_value[0] == 0 and dim_subset_value[1] == dim_length and dim_subset_value[2] == 1:
+            elif start == 0 and end == dim_length-1 and step == 1:
                 continue
 
         # assign the refined dim info
@@ -216,7 +224,7 @@ def refine_data_subset_form_dimension_info(data_subset_dimension_info, pattern=[
 
 
 def run_data_subset_info_check(data_subset_form_info):
-    if data_subset_form_info['dimension_info'] and data_subset_form_info['variable_info']:
+    if data_subset_form_info['variable_info']:
         error_dim_info = []
         for dim_name, dim_subset_value in data_subset_form_info['dimension_info'].items():
             if not dim_subset_value:
@@ -224,7 +232,7 @@ def run_data_subset_info_check(data_subset_form_info):
 
         if error_dim_info:
             execute_info = ['error',
-                             'please provide correct dimension subset index for: {0}'.format(', '.join(error_dim_info))]
+                             'invalid dimension subset index for {0}'.format(', '.join(error_dim_info))]
         else:
             execute_info = ['success']
 
@@ -235,10 +243,41 @@ def run_data_subset_info_check(data_subset_form_info):
 
 
 def create_data_subset_nco_cmd(data_subset_form_info, nc_file_path):
-    pass
+    # header cmd
+    header_cmd = ['ncks', '-O']
 
+    # dimension cmd
+    dimension_cmd = []
+    for dim_name, dim_subset_value in data_subset_form_info['dimension_info'].items():
+        dimension_cmd.extend(['-d', '{0},{1}'.format(dim_name, ','.join(map(str, dim_subset_value)))])
+
+    # variable cmd
+    variable_cmd = []
+    if data_subset_form_info['variable_info']:
+        variable_cmd = ['-v', ','.join(data_subset_form_info['variable_info'])]
+
+    # file cmd
+    file_cmd = []
+    if nc_file_path:
+        file_cmd = [nc_file_path, nc_file_path]
+
+    # nco cmd
+    if file_cmd:
+        data_subset_nco_cmd = header_cmd + dimension_cmd + variable_cmd + file_cmd
+
+    return data_subset_nco_cmd
 
 
 def run_nco_data_subset(data_subset_cmd):
-    execute_info = ['success']
+    try:
+        process = subprocess.Popen(data_subset_cmd, stdout=subprocess.PIPE)
+        state = process.communicate()[0]
+    except:
+        state = 'error'
+
+    if state:
+        execute_info = ['error', 'failed to run data subset tool']
+    else:
+        execute_info = ['success', None]
+
     return execute_info

@@ -154,7 +154,7 @@ def data_subset_view(request, shortkey, **kwargs):
     if request.method == 'POST':
         execute_info = run_data_subset_tool(request, shortkey)
 
-        if execute_info[0].lower == 'error':
+        if execute_info[0] == 'error':
             error_info = 'Error! Data Subset: ' + execute_info[1]
             messages.add_message(request, messages.ERROR, error_info)
         else:
