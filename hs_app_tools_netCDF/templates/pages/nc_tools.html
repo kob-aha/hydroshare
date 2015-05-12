@@ -219,9 +219,9 @@
                         </ul>
                     </div>
 
-                    {# Datasubset tool forms#}
+                    {# Datasubset tool forms #}
                     <div class="col-md-7">
-                        <form id="dataSubsetForm" action=" " method="post"> {% csrf_token %}
+                        <form id="dataSubsetForm" action="{% url 'nc_tools:data_subset' nc_res.short_id %} " method="post"> {% csrf_token %}
                             {# dimension formset #}
                             <div id="dimensionFormset">
                             <p><strong>Define Dimension Index for Data Subset (Index in the form  of "Start:Step:End") :</strong></p>
@@ -265,7 +265,7 @@
 
     <!-- wait dialog for Ajax Call -->
     <div id="waitDialog">
-      <img src="{% static 'hs_app_tools_netCDF/loading.gif' %}" alt="loading" style="margin-top:40px; width:60px; height:60px"/>
+      <img src="{% static 'hs_app_tools_netCDF/loading.gif' %}" alt="loading" style="margin-top:80px; width:400px; height:30px"/>
       <p style="color:gray;font-weight:normal;font-size:200%;margin-top:40px">Please wait while running the tool....</p>
     </div>
 
