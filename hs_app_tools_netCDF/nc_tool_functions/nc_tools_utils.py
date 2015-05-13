@@ -117,7 +117,7 @@ def create_new_ver_res(res, nc_file_path, nc_file_name=None):
     return check_info
 
 
-def create_new_res(request, nc_file_path, source_res=None, ):
+def create_new_res(request, nc_file_path, source_res=None):
     """
     create a new resource with given netcdf file
 
@@ -149,7 +149,7 @@ def create_new_res(request, nc_file_path, source_res=None, ):
             source_res_identifier = source_res.metadata.identifiers.all().filter(name="hydroShareIdentifier")[0]
             nc_dataset = netCDF4.Dataset(nc_file_path, 'a')
             ori_source_info = nc_dataset.source if hasattr(nc_dataset, 'source') else ''
-            if not ori_source_info:
+            if len(ori_source_info) > 0:
                 new_source_info = '\n'.join([ori_source_info, str(source_res_identifier.url)])
             else:
                 new_source_info = str(source_res_identifier.url)
