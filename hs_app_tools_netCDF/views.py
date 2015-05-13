@@ -100,21 +100,14 @@ def meta_edit_view(request, shortkey, **kwargs):
 
     if request.method == 'POST'and (res_cls is NetcdfResource):
         meta_elements = request.POST.getlist('meta_elements')
-        file_process = request.POST.getlist('meta_edit_file_process')
 
-        if meta_elements and file_process:
-            check_info = run_meta_edit_tool(res, meta_elements, file_process, request)
+        if meta_elements:
+            check_info = run_meta_edit_tool(res, meta_elements, request)
 
             if check_info:
-                check_info = 'Error! Metadata Editing: ' + check_info
-                messages.add_message(request, messages.ERROR, check_info)
+                messages.add_message(request, messages.ERROR, 'Error! Metadata Editing: ' + check_info)
             else:
-                suc_message = 'Success! Meta Editing is finished. '
-                if 'new_ver_res' in file_process:
-                    suc_message += 'A new version of resource is created. '
-                elif 'new_res' in file_process:
-                    suc_message += 'A new resource is created. '
-                messages.add_message(request, messages.SUCCESS, suc_message)
+                messages.add_message(request, messages.SUCCESS, 'Success! Meta Editing is finished. ')
         else:
             messages.add_message(request, messages.ERROR,
                                  'Error! Metadata Editing: please select the required options.')

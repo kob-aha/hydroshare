@@ -29,6 +29,9 @@ ul {
  }
 
 /* Meta Edit Tab Style */
+#metaEditTable{
+    margin-bottom:10px;
+}
 
 #metaEditTable td {
     border: 1px solid #357ebd;
@@ -44,7 +47,14 @@ ul {
     background-color: #d7ebf9;
 }
 
+#metaEditForm {
+    margin-top:30px;
+    margin-left:30px;
+}
 
+#metaEditBtn {
+    margin-top:30px;
+}
 
 /* Data Subset Tab Style */
 

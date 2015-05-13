@@ -7,7 +7,7 @@ import netCDF4
 from hs_app_tools_netCDF.nc_tool_functions.nc_tools_utils import *
 
 
-def run_meta_edit_tool(res, meta_elements, file_process, request):
+def run_meta_edit_tool(res, meta_elements,request):
 
     check_info = ''
 
@@ -21,7 +21,8 @@ def run_meta_edit_tool(res, meta_elements, file_process, request):
         check_info = edit_meta_in_file(res, meta_elements, nc_file_path)
 
         # file process after writing meta
-        if (not check_info) and file_process:
+        if not check_info:
+            file_process = ['new_ver_res']
             check_info = execute_file_process(res, file_process, nc_file_path, request)
     else:
         check_info = "there is no .nc file in the resource. "

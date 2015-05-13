@@ -165,7 +165,6 @@
                     <div class="col-md-6">
                         <form id="metaEditForm" action="{% url "nc_tools:meta_edit" nc_res.short_id %}" method="post"> {% csrf_token %}
                             {{ meta_elements_form.as_p }}
-{#                            {{ file_process_form.as_p }}#}
                             <input id="metaEditBtn" type="submit" value="Write Metadata to NetCDF File" class="btn btn-primary pull-right"/>
                         </form>
                     </div>
@@ -292,16 +291,15 @@
 
         //disable meta edit button and clean checked box
         $('input[id^="id_meta_elements_"]').attr('checked', false);
-        $('input[id^="id_meta_edit_file_process_"]').attr('checked', false);
+{#        $('input[id^="id_meta_edit_file_process_"]').attr('checked', false);#}
         $('#metaEditBtn').attr('disabled', true);
-        //alert($('#metaEditBtn').attr('disabled'));
 
         // enable meta edit button after valid check box
         $('#metaEditForm').on('change', function(){
             var meta_elements_checkbox = $('#metaEditForm').find('input[id^="id_meta_elements_"]:checked').length > 0;
-            var file_process_checkbox = $('#metaEditForm').find('input[id^="id_meta_edit_file_process_"]:checked').length > 0;
+{#            var file_process_checkbox = $('#metaEditForm').find('input[id^="id_meta_edit_file_process_"]:checked').length > 0;#}
 
-            if (meta_elements_checkbox && file_process_checkbox) {
+            if (meta_elements_checkbox) {
                 $('#metaEditBtn').attr('disabled', false);
             }
             else {

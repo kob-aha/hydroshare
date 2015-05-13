@@ -39,15 +39,15 @@ class MetaElementsForm(forms.Form):
                                               choices=META_ELEMENTS,
                                               label='Select Meta Elements to Write to NetCDF File (Required)'
                                             )
-    FILE_PROCESS = (
-        ('new_ver_res', "Create a new version of the existing resource with edited netcdf file."),
-        ('new_res', "Create a new resource with edited netcdf file."),
-    )
-
-    meta_edit_file_process = forms.ChoiceField(widget=forms.RadioSelect(), #forms.CheckboxSelectMultiple
-                                     choices=FILE_PROCESS,
-                                     label='Select the Action after Tool Processing is Finished (Required)',
-                                    )
+    # FILE_PROCESS = (
+    #     ('new_ver_res', "Create a new version of the existing resource with edited netcdf file."),
+    #     ('new_res', "Create a new resource with edited netcdf file."),
+    # )
+    #
+    # meta_edit_file_process = forms.ChoiceField(widget=forms.RadioSelect(), #forms.CheckboxSelectMultiple
+    #                                  choices=FILE_PROCESS,
+    #                                  label='Select the Action after Tool Processing is Finished (Required)',
+    #                                 )
 
 
 # Forms for Data Inspector Tool
