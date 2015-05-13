@@ -1,13 +1,12 @@
 {# This template is used as the landing page for NetCDF Resource #}
 
 {% extends "pages/page.html" %}
-{%  load staticfiles %}
+{% load staticfiles %}
+{% load geoanalytics_tags ratings_tags pages_tags mezzanine_tags comments_tags keyword_tags hydroshare_tags crispy_forms_tags inplace_edit %}
 
 {# load extra css #}
 {% block extra_css %}
     <link rel="stylesheet" type="text/css" href="{% static 'hs_app_tools_netCDF/style.css'%}"/>
-
-
 {% endblock %}
 
 
@@ -81,8 +80,10 @@
                         {# meta edit tool intro #}
                         <p><strong style="font-size:130%">Metadata Editing Tool</strong></p>
                             <ul id="metaEditIntro">
-                                <li>This tool will write the resource metadata information stored in HydroShare into the existing .nc resource file.</li>
+                                <li>This tool will write the resource metadata which is stored in HydroShare into the existing ".nc" resource file.</li>
+                                <li>Please select the "Meta Elements" on the right and click on "Write Metadata to NetCDF File" to run this tool. </li>
                                 <li>The mapping between the HydroShare resource metadata information and the NetCDF conventions terms is shown in the table.</li>
+
                             </ul>
 
                         {# meta terms mapping table #}
@@ -177,12 +178,12 @@
                     <div class="col-md-5">
                         <p><strong style="font-size:130%">Data Inspector Tool</strong></p>
                         <ul id="metaEditIntro">
-                            <li>This tool will help you to look into the .nc file and get information of the attributes and data for selected variable name.</li>
-                            <li>Please select the "Variable Name" from the dropdown list and click on "Inspect NetCDF Variable" to run this tool.</li>
-                            <li>Note:
+                            <li>This tool will help you to look into the .nc resource file and get information of the attributes and data for selected variable name.</li>
+                            <li>Please select the "Variable Name" from the drop-down list and click on "Inspect NetCDF Variable" to run this tool.</li>
+                            <li>Notes for "Variable Data":
                                 <ol>
                                     <li>If the size of the variable data is too large, it will show the "snippet" of the data as a summary of beginning and end of each dimension.</li>
-                                    <li>If the netCDF data follows CF convention to define the time coordinate variable with "units" and "calandar" attributes(not required), the variable data will be converted to time string.</li>
+                                    <li>If the netCDF data follows CF convention to define the time coordinate variable with "units" and "calendar" attributes, the variable data will be converted as datetime string.</li>
                                 </ol>
                             </li>
                         </ul>
@@ -213,9 +214,18 @@
                         {# data subset tool intro #}
                         <p><strong style="font-size:130%">Data Subset Tool</strong></p>
                         <ul id='dataSubsetIntro'>
-                            <li>This tool will subset the data from the existing .nc resource file and create a new .nc file.</li>
-                            <li>Please specify the information required on the right and then click on "Subset NetCDF Data" to run this tool.</li>
-{#                            <li>To know the variable and dimension information, please use the "Data Inspector" tool.</li>#}
+                            <li>This tool will subset the data from the existing .nc resource file and create a new "Multidimensional (NetCDF)" resource.</li>
+                            <li>Please specify "Subset index" and "Data Variable Names" information on the right and click on "Subset NetCDF Data" to run this tool.</li>
+                            <li>Notes for "Dimension Subset Index":
+                                <ol>
+                                    <li>The "start" and "end" index need to be non-negative integers.</li>
+                                    <li>The "step" index needs to be positive integer. </li>
+                                    <li>The "start" index should be smaller or equal to the "end" index. </li>
+                                    <li>The "step" index can be larger than "end" index. </li>
+                                    <li>If the dimensions are not related to the selected variables, keep the default subset index values unchanged.</li>
+                                </ol>
+
+                            </li>
                         </ul>
                     </div>
 
@@ -224,14 +234,14 @@
                         <form id="dataSubsetForm" action="{% url 'nc_tools:data_subset' nc_res.short_id %} " method="post"> {% csrf_token %}
                             {# dimension formset #}
                             <div id="dimensionFormset">
-                            <p><strong>Define Dimension Index for Data Subset (Index in the form  of "Start:Step:End") :</strong></p>
+                            <p><strong>Define Dimension Subset Index in the Form of "Start:Step:End" (Required):</strong></p>
                             {% if dimension_formset %}
                                 {{ dimension_formset.management_form }}
                                     {% for form in dimension_formset %}
                                         {{ form.as_table}}
                                     {% endfor %}
                             {% else %}
-                                <p>Failed to extract the dimension info for data subsetting</p>
+                                <p>Failed to extract the dimension info for data subset.</p>
                             {% endif %}
                             </div>
 
@@ -240,13 +250,13 @@
                             {% if variable_names_form %}
                                 {{ variable_names_form }}
                             {% else %}
-                                <p>Failed to extract the data variable information for data subsetting.</p>
+                                <p>Failed to extract the data variable information for data subset.</p>
                             {% endif %}
                             </div>
 
                             {# file process form #}
-                            <p style="margin-bottom:30px"></p>
-                            {{ file_process_form.as_p }}
+{#                            <p style="margin-bottom:30px"></p>#}
+{#                            {{ file_process_form.as_p }}#}
 
                             {# submit button #}
                             {% if dimension_formset and variable_names_form %}
@@ -346,14 +356,14 @@
 
         //disable data subset button and clean checked box
         $('input[id^="id_variable_names_"]').attr('checked', false);
-        $('input[id^="id_file_process_"]').attr('checked', false);
+{#        $('input[id^="id_file_process_"]').attr('checked', false);#}
         $('#dataSubsetBtn').attr('disabled', true);
 
         // enable data subset button after valid check box
         $('#dataSubsetForm').on('change', function(){
             var variable_names_checkbox = $('#dataSubsetForm').find('input[id^="id_variable_names_"]:checked').length > 0;
-            var file_process_checkbox= $('#dataSubsetForm').find('input[id^="id_file_process_"]:checked').length > 0;
-            if (variable_names_checkbox && file_process_checkbox) {
+{#            var file_process_checkbox= $('#dataSubsetForm').find('input[id^="id_file_process_"]:checked').length > 0;#}
+            if (variable_names_checkbox) {
 
                 $('#dataSubsetBtn').attr('disabled', false);
 

@@ -1,7 +1,7 @@
 from django import forms
 
 
-# Forms for File Process:
+# Forms for File Process: (not used now, initially used for data subset tab)
 class FileProcess(forms.Form):
     FILE_PROCESS = (
         ('new_ver_res', "Create a new version of the existing resource with edited netcdf file."),
@@ -49,23 +49,6 @@ class MetaElementsForm(forms.Form):
                                      label='Select the Action after Tool Processing is Finished (Required)',
                                     )
 
-# Forms for Data Subset Tool:
-class DimensionForm(forms.Form):
-    dim_name = forms.CharField(max_length=100,
-                               widget=forms.TextInput(attrs={'readonly': 'readonly', 'size':25}),
-                               label='Dim Name')
-
-    dim_subset_value = forms.CharField(max_length=100,
-                                       label='Subset Index',
-                                       widget=forms.TextInput(attrs={'size':25})
-    )
-
-
-class VariableNamesForm(forms.Form):
-    variable_names = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple,
-                                              label='Select the Data Variable Names for Data Subset (Required)',
-                    )
-
 
 # Forms for Data Inspector Tool
 class DataInspectorForm(forms.Form):
@@ -86,3 +69,23 @@ class DataInspectorForm(forms.Form):
                                                              }),
 
     )
+
+
+# Forms for Data Subset Tool:
+class DimensionForm(forms.Form):
+    dim_name = forms.CharField(max_length=100,
+                               widget=forms.TextInput(attrs={'readonly': 'readonly', 'size':25}),
+                               label='Dim Name')
+
+    dim_subset_value = forms.CharField(max_length=100,
+                                       label='Subset Index',
+                                       widget=forms.TextInput(attrs={'size':25})
+    )
+
+
+class VariableNamesForm(forms.Form):
+    variable_names = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple,
+                                              label='Select the Data Variable Names (Required)',
+                    )
+
+

@@ -64,7 +64,8 @@ ul {
     border-style: solid;
     border-color: gainsboro;
     border-width: thin;
-    padding:5px
+    padding:5px;
+    margin-bottom:30px;
 }
 
 #dataSubsetIntro {

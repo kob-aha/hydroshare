@@ -119,7 +119,7 @@ def run_data_subset_tool(request, shortkey):
     """
 
     res, res_cls = get_res_and_class(request, shortkey)
-    file_process = request.POST.getlist('file_process')
+
 
     if res_cls is NetcdfResource:
 
@@ -143,6 +143,7 @@ def run_data_subset_tool(request, shortkey):
 
         # run file process
         if execute_info[0] == 'success':
+            file_process = ['new_res']  # request.POST.getlist('file_process')
             check_info = execute_file_process(res, file_process, nc_file_path, request)
             if check_info:
                 execute_info = ['error', check_info]
@@ -232,7 +233,7 @@ def run_data_subset_info_check(data_subset_form_info):
 
         if error_dim_info:
             execute_info = ['error',
-                             'invalid dimension subset index for {0}'.format(', '.join(error_dim_info))]
+                             'invalid dimension subset index of {0}'.format(', '.join(error_dim_info))]
         else:
             execute_info = ['success']
 

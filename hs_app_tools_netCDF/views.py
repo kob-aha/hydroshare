@@ -73,9 +73,9 @@ def index_view(request, shortkey, state):
     context['variable_names_form'] = variable_names_form
     context['data_inspector_form'] = create_data_inspector_form(res)
 
-    # context for file process form
-    file_process = FileProcess()
-    context['file_process_form'] = file_process
+    # # context for file process form
+    # file_process = FileProcess()
+    # context['file_process_form'] = file_process
 
     # # context for the nc_tool_obj:
     # nc_tools_obj = NetcdfTools.objects.filter(short_id=res.short_id).first()
