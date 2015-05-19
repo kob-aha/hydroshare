@@ -1,0 +1,5 @@
+#!/bin/bash
+# this adds test user for user interface tests
+
+echo "from django.contrib.auth.models import User; User.objects.create_user('creator', 'myemail@example.com', 'creator')" | python manage.py shell
+echo "from django.contrib.auth.models import User; User.objects.create_user('viewer', 'myemail@example.com', 'viewer')" | python manage.py shell
