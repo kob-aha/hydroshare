@@ -292,6 +292,7 @@ INSTALLED_APPS = (
     "hs_modelinstance",
     "hs_tools_resource",
     "hs_swat_modelinstance",
+    "django_jenkins",
 )
 
 # List of processors used by RequestContext to populate the context.
@@ -422,3 +423,17 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',
     )
 }
+PROJECT_APPS = (
+   "hs_core",
+    "hs_metrics",
+    "ref_ts",
+    "hs_app_timeseries",
+    )
+    
+JENKINS_TASKS = (
+    'django_jenkins.tasks.run_pep8',
+    'django_jenkins.tasks.run_pyflakes',
+    'django_jenkins.tasks.run_jslint',
+    'django_jenkins.tasks.run_csslint',    
+    'django_jenkins.tasks.run_sloccount'
+)
