@@ -69,7 +69,7 @@ def get_resource_by_doi(doi, or_404=True):
         raise ObjectDoesNotExist(doi)
 
 
-def user_from_id(user):
+def user_from_id(user, raise404=True):
     if isinstance(user, User):
         return user
 
@@ -82,9 +82,15 @@ def user_from_id(user):
             try:
                 tgt = User.objects.get(pk=int(user))
             except ValueError:
-                raise Http404('User not found')
+                if raise404:
+                    raise Http404('User not found')
+                else:
+                    raise User.DoesNotExist
             except ObjectDoesNotExist:
-                raise Http404('User not found')
+                if raise404:
+                    raise Http404('User not found')
+                else:
+                    raise
     return tgt
 
 
@@ -145,11 +151,6 @@ def resource_modified(resource, by_user=None, overwrite_bag=True):
 
     if overwrite_bag:
         for bag in resource.bags.all():
-            try:
-                bag.bag.delete()
-            except:
-                pass
-
             try:
                 bag.delete()
             except:
@@ -310,15 +311,25 @@ def prepare_resource_default_metadata(resource, metadata, res_title):
     metadata.append({'date': {'type': 'created', 'start_date': resource.created}})
     metadata.append({'date': {'type': 'modified', 'start_date': resource.updated}})
 
-    if resource.creator.first_name:
-        first_creator_name = "{first_name} {last_name}".format(first_name=resource.creator.first_name,
-                                                                   last_name=resource.creator.last_name)
+    creator_data = get_party_data_from_user(resource.creator)
+    metadata.append({'creator': creator_data})
+
+
+def get_party_data_from_user(user):
+    party_data = {}
+    user_profile = get_profile(user)
+    user_full_name = user.get_full_name()
+    if user_full_name:
+        party_name = user_full_name
     else:
-        first_creator_name = resource.creator.username
+        party_name = user.username
 
-    first_creator_email = resource.creator.email
-
-    metadata.append({'creator': {'name': first_creator_name, 'email': first_creator_email, 'order': 1}})
+    party_data['name'] = party_name
+    party_data['email'] = user.email
+    party_data['description'] = '/user/{uid}/'.format(uid=user.pk)
+    party_data['phone'] = user_profile.phone_1
+    party_data['organization'] = user_profile.organization
+    return party_data
 
 
 def resource_file_add_pre_process(resource, files, user, extract_metadata=False, **kwargs):
@@ -344,4 +355,3 @@ def resource_file_add_process(resource, files, user, extract_metadata=False, **k
 
     resource_modified(resource, user)
     return resource_file_objects
-

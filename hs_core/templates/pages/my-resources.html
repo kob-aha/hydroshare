@@ -10,14 +10,14 @@
     <div class="row">
         <div class="col-lg-2" id="folders">
             <ul class="nav nav-stacked">
-                <li><a href="?creator={{ user.pk }}">Owned by me</a></li>
+                <li><a href="?owner={{ user.username }}&user={{ user.pk }}&edit_permission=true">Owned by me</a></li>
                 <li><a href="?user={{ user.pk }}&edit_permission=true">Editable by me</a></li>
                 {% if user.pk %}
                     <li><a href="?user={{ user.pk }}">Viewable by me</a></li>
                 {% else %}
                     <li><a href="/my-resources">Viewable by me</a></li>
                 {%  endif %}
-                <li><a class="btn btn-success" href="/hsapi/_internal/create-resource"><i class="fa fa-plus"></i> Create new</a></li>
+                <li><span><a class="btn btn-success" href="/hsapi/_internal/create-resource"><i class="fa fa-plus"></i> Create new</a></span></li>
             </ul>
         </div>
         <div class="col-lg-10" id="items">
@@ -43,7 +43,12 @@
                         <td><a href="{{ res.get_absolute_url }}">{{ res.title }}</a></td>
                         {# <th><i class="text-warning fa {% if starred %}fa-star{% else %}fa-star-o{% endif %}"></i></th>  #}
                         <td>{{ res|resource_type }}</td>
-                        <td>{{ res.user|contact|safe }}</td>
+                        {% if res.first_creator.description %}
+                            <td><a href="{{ res.first_creator.description }}">{{ res.first_creator.name  }}</a></td>
+                        {% else %}
+                            <td>{{ res.first_creator.name }}</td>
+                        {% endif %}
+
                         <td>{{ res.updated|date }}, {{ res.updated|time }}</td>
                     </tr>
                 {% endfor %}
@@ -140,11 +145,13 @@
 
                 // Find existing search and populate the search field
                 $input.val("");
-                if (typeof urlParams.type !== "undefined") {
-                    for (var i=0; i < urlParams.type.length; i++) {
-                        this.addItem("type", urlParams.type[i], urlParams.type[i]);
+                $.each(["type", "author", "contributor", "owner", "subject"], function(){
+                    if (urlParams[this]) {
+                        for (var i=0; i < urlParams[this].length; i++) {
+                            self.addItem(this, urlParams[this][i], urlParams[this][i]);
+                        }
                     }
-                }
+                });
                 $input.val(urlParams.text[0]);
                 $input.focus();
 
@@ -197,9 +204,7 @@
 
                             for (var i=0; i < items.length; i++) {
                                 var item = items[i];
-                                if (item.type == "type") {
-                                    qs += "&type=" + item.id;
-                                }
+                                qs += "&" + item.type.toLowerCase() + "=" + item.id;
                             }
                             qs += "&text=" + textsearch;
                             window.location.search = qs;
@@ -217,7 +222,7 @@
                     default: // While Typing ...
                         var self = this;
                         var text = this.$input.val();
-                        var termPos = text.search(/\w+:\w+ $/);
+                        var termPos = text.search(/\w+:[\w\-_@\.]+ $/);
                         if (termPos >= 0) {
                             var remaining = text.slice(0, termPos);
                             var term = text.slice(termPos);
@@ -226,7 +231,8 @@
                             this.$input.val(remaining);
                             this.addItem(term_parts[0], term_parts[1]);
                         } else {
-                            var current = text.slice(text.search(/\w+$/));
+                            var current = text.slice(text.search(/[\w\-_@\.]+$/));
+                            console.log(current);
                             this.searchForTerm(current).then(this.showOptions.bind(this));
                         }
                 }

@@ -2,6 +2,10 @@
 
 {% load geoanalytics_tags ratings_tags pages_tags mezzanine_tags comments_tags keyword_tags hydroshare_tags crispy_forms_tags inplace_edit %}
 
+{% block extra_head %}
+      <link href="{{ STATIC_URL }}css/site_base_irods.css" rel="stylesheet"/>
+{% endblock %}
+
 {% block main %}
 
     {% with page.get_content_model as cm %}
@@ -19,14 +23,17 @@
                  </div>
             {%  endif %}
         {% endblock %}
-{#        ======= Missing fields notification =======#}
 
+            {#  ======= Missing fields notification =======#}
             {% if not metadata_form and page.perms.change %}
                 {% if missing_metadata_elements or title|stringformat:"s" == "Untitled resource" %}
                     <div class="alert alert-success alert-dismissible" role="alert">
                       <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                      {% if just_created %}<strong>Congratulations! </strong>{% endif %}<span>Now that your resource has been created click on the edit button below to add additional metadata.</span>
-                      <p>The following metadata are still required before you can make the resource public:</p>
+                      {% if just_created %}
+                          <strong>Congratulations! </strong><span>Now that your resource has been created the following metadata are still required:</span>
+                      {% else %}
+                          <span>The following metadata are still required:</span>
+                      {% endif %}
                         <ul>
                         {% for element in missing_metadata_elements %}
                             <li>{{ element }}</li>
@@ -35,17 +42,14 @@
                            <li>Title: needs to be changed</li>
                         {% endif %}
                     </ul>
-
                     <hr>
-
                     <span class="glyphicon glyphicon-question-sign"></span>
                     <small> Click on the edit button ( <span class="glyphicon glyphicon-pencil"></span> ) below to edit this resource.</small>
-
                  </div>
                 {% endif %}
             {% endif %}
 
-            {#        ======= Title =======#}
+            {# ======= Title ======= #}
             {% if not metadata_form %}
             <h2>{{ title }}</h2>
             {% else %}
@@ -194,6 +198,54 @@
                     </fieldset>
                 </form>
                 {% endif %}
+            {% endif %}
+
+            {#        ======= Subjects =======#}
+            {% if not metadata_form %}
+                {% if keywords %}
+                <div class="content-block">
+                    <h3>Subject</h3>
+
+                    <p id="keywords">{{ keywords }}</p>
+
+                    <div class="tags">
+                        <ul id="list-keywords" class="tag-list custom-well">
+                        </ul>
+                    </div>
+                </div>
+                {% endif %}
+            {% else %}
+                <div class="content-block">
+                    <h3>Subject</h3>
+                    <form action="/hsapi/_internal/{{ cm.short_id }}/subject/add-metadata/" id="id-subject"
+                          method="post">
+                        {% csrf_token %}
+                        <div class="tags">
+                            <div id="add-keyword-wrapper" class="input-group">
+                                <input id="txt-keyword" type="text" class="form-control" placeholder="Keyword">
+                            <span class="input-group-btn">
+                                <a id="btn-add-keyword" class="btn btn-success" type="button">Add</a>
+                            </span>
+                            </div>
+                            <ul id="lst-tags" class="custom-well tag-list">
+                            </ul>
+                        </div>
+
+                        <fieldset>
+                            <div id="div_id_value" class="control-group">
+                                <div class="controls"><input class="form-control input-sm textInput" id="id_value"
+                                                             maxlength="500" name="value" type="text"
+                                                             style="display: none;">{{ cm.keywords_string }}</div>
+                            </div>
+                            <div style="margin-top:10px">
+                                <button type="button" class="btn btn-primary pull-right"
+                                        onclick="metadata_update_ajax_submit('id-subject'); return false;"
+                                        style="display: none;">Save changes
+                                </button>
+                            </div>
+                        </fieldset>
+                    </form>
+                </div>
             {% endif %}
 
             {#        ======= Citation =======#}
@@ -561,51 +613,6 @@
                 </div>
             </div>
 
-            {#        ======= Keywords =======#}
-            {% if not metadata_form %}
-                {% if keywords %}
-                <div class="content-block">
-                    <h3>Keywords</h3>
-
-                    <p id="keywords">{{ keywords }}</p>
-
-                    <div class="tags">
-                        <ul id="list-keywords" class="tag-list custom-well">
-                        </ul>
-                    </div>
-                </div>
-                {% endif %}
-            {% else %}
-                <h3>Keywords</h3>
-                <form action="/hsapi/_internal/{{ cm.short_id }}/subject/add-metadata/" id="id-subject"
-                      method="post">
-                    {% csrf_token %}
-                    <div class="tags">
-                        <div id="add-keyword-wrapper" class="input-group">
-                            <input id="txt-keyword" type="text" class="form-control" placeholder="Keyword">
-                        <span class="input-group-btn">
-                            <a id="btn-add-keyword" class="btn btn-success" type="button">Add</a>
-                        </span>
-                        </div>
-                        <ul id="lst-tags" class="custom-well tag-list">
-                        </ul>
-                    </div>
-
-                    <fieldset>
-                        <div id="div_id_value" class="control-group">
-                            <div class="controls"><input class="form-control input-sm textInput" id="id_value"
-                                                         maxlength="500" name="value" type="text"
-                                                         style="display: none;">{{ cm.keywords_string }}</div>
-                        </div>
-                        <div style="margin-top:10px">
-                            <button type="button" class="btn btn-primary pull-right"
-                                    onclick="metadata_update_ajax_submit('id-subject'); return false;"
-                                    style="display: none;">Save changes
-                            </button>
-                        </div>
-                    </fieldset>
-                </form>
-            {% endif %}
 
             {#        ======= Content =======#}
             <div>
@@ -681,19 +688,34 @@
                     {% endif %}
                     <!-- Buttons -->
                     {% for b in cm.bags.all %}
-                        <a id="btn-download-all" type="button" class="btn btn-default" href="{{ cm.bags.first.bag.url }}">
+                        <a id="btn-download-all" type="button" class="btn btn-default" href="{{ bag_url }}">
                             <span class="glyphicon glyphicon-download-alt">
-                                <span class="button-label">Download All ({{ b.bag.size|filesizeformat }})</span>
+                                <span title='Download All Content as Zipped BagIt Archive' class="button-label">Download All Content as Zipped BagIt Archive</span>
                             </span>
                         </a>
                     {% endfor %}
 
                     {% if page.perms.change %}
-                        <td><a id="btn-add-file" type="button" class="btn btn-success" data-toggle="modal" data-target="#add-file-dialog"
+                        <a id="btn-add-file" type="button" class="btn btn-success" data-toggle="modal" data-target="#add-file-dialog"
                                multiple="multiple">
                             <span class="glyphicon glyphicon-plus"><span class="button-label"> Add file...</span></span>
-                        </a></td>
+                        </a>
+                        <a id="btn-signin-irods"  type="button" class="btn btn-success" data-toggle="modal" data-target="#irodsSignin">
+                            <span class="glyphicon glyphicon-plus"><span class="button-label">Sign in iRODS...</span></span>
+                        </a>
+
+                        <span id="sign-in-info"></span>
+                        <a id="btn-select-irods-file"  type="button" class="btn btn-success" data-toggle="modal" data-target="#irodsContent" style="display:none;">
+                            <span class="glyphicon glyphicon-plus"><span class="button-label">Add file from iRODS...</span></span>
+                        </a>
+                        {% if file_type_error %}
+                          <div class="alert alert-danger alert-dismissible" role="alert">
+                            <button id="validation-error-close" type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            <strong>Uploaded File Type Validation Error: {{ file_type_error }}</strong>
+                          </div>
+                        {% endif %}
                     {% endif %}
+                    <div class="col-lg-12"><a target="_blank" href="http://en.wikipedia.org/wiki/BagIt">Learn more about the Bagit archive format</a></div>
                 </div>
             </div>
 
@@ -1503,7 +1525,6 @@
                                             <select class="form-control input-sm select" id="id_relation-{{ forloop.counter0 }}-type" name="relation-{{ forloop.counter0 }}-type">
                                                 <option value="">---------</option>
                                                 <option value="isPartOf" {% if relation.type == "isPartOf" %} selected="selected" {% endif %}>Part Of</option>
-                                                <option value="isExecutedBy" {% if relation.type == "isExecutedBy" %}selected="selected"{% endif %}>Executed By</option>
                                                 <option value="isCreatedBy" {% if relation.type == "isCreatedBy" %}selected="selected"{% endif %}>Created By</option>
                                                 <option value="isVersionOf" {% if relation.type == "isVersionOf" %}selected="selected"{% endif %}>Version Of</option>
                                                 <option value="isDataFor" {% if relation.type == "isDataFor" %}selected="selected"{% endif %}>Data For</option>
@@ -1569,7 +1590,9 @@
                                         <div class="controls"><input
                                                 class="form-control input-sm urlinput"
                                                 id="id_contributor-{{ contributor.order|add:"- 1" }}-description" maxlength="200"
-                                                name="contributor-{{ contributor.order|add:"- 1" }}-description" type="url" value="{% if contributor.description %}{{ contributor.description }}{% endif %}"></div>
+                                                name="contributor-{{ contributor.order|add:"- 1" }}-description" type="url"
+                                                value="{% if contributor.description %}{{ contributor.description }}{% endif %}"
+                                                {% if contributor.description %} readonly {% endif %}></div>
                                     </div>
                                     <div id="div_id_organization" class="control-group">
                                         <label class="control-label">Organization</label>
@@ -1683,7 +1706,9 @@
                                         <div class="controls"><input
                                                 class="form-control input-sm urlinput"
                                                 id="id_creator-{{ author.order|add:"- 1" }}-description" maxlength="200"
-                                                name="creator-{{ author.order|add:"- 1" }}-description" type="url" value="{% if author.description %}{{ author.description }}{% endif %}"></div>
+                                                name="creator-{{ author.order|add:"- 1" }}-description" type="url"
+                                                value="{% if author.description %}{{ author.description }}{% endif %}"
+                                                {% if author.description %} readonly {% endif %}></div>
                                     </div>
                                     <div id="div_id_organization" class="control-group">
                                         <label class="control-label">Organization</label>
@@ -1768,6 +1793,8 @@
         </div>
         {% endfor %}
 
+            {% include "irods_signin.html" %}
+            {% include "irods_upload_add.html" %}
         {%  block modal_publish_resource %}
             <div class="modal fade" id="submit-for-publication-dialog" tabindex="-1" role="dialog"
                  aria-labelledby="myModalLabel" aria-hidden="true">
@@ -1862,7 +1889,6 @@
                                                                       name="type">
                                             <option value="" selected="selected">---------</option>
                                             <option value="isPartOf">Part Of</option>
-                                            <option value="isExecutedBy">Executed By</option>
                                             <option value="isCreatedBy">Created By</option>
                                             <option value="isVersionOf">Version Of</option>
                                             <option value="isDataFor">Data For</option>
@@ -2176,6 +2202,7 @@
     {% endwith %}
 
     {% block extra_js %}
+    <script type="text/javascript" src="{{STATIC_URL}}js/irods.js" ></script>
     <script type="text/javascript">
     function onRemoveKeyword(event){
         $($(this).closest(".tags").parent().find(".btn-primary")[0]).show();    // Show save button
@@ -2330,7 +2357,12 @@
     },duration);
         document.body.appendChild(el);
     }
+
     $(document).ready(function () {
+        if (sessionStorage.signininfo) {
+            $("#sign-in-info").text(sessionStorage.signininfo);
+            $("#btn-select-irods-file").show();
+        }
         var keywordString = "{% for k, v in subjects_form.initial.iteritems  %}{{ v }}{% endfor %}";
         $("#id-subject").find("#id_value").val(keywordString);
 
@@ -2363,28 +2395,38 @@
         if(file_types!= ".*"){
             var display_file_types = file_types.substring(0, file_types.length-2) + ').'
             $("#file-types").text("Only the listed file types can be uploaded: " + display_file_types);
+            $("#file-types-irods").text("Only the listed file types can be uploaded: " + display_file_types);
         }
         else{
            $("#file-types").text("Any file type can be uploaded.");
+           $("#file-types-irods").text("Any file type can be uploaded.");
         }
         // set if multiple file can be uploaded
         var allow_multiple_file_upload = $("#allow-multiple-file-upload").attr('value');
         if(allow_multiple_file_upload === "True"){
             $("#file-multiple").text("Multiple file upload is allowed.");
+            $("#file-multiple-irods").text("Multiple file upload is allowed.");
             $("#btn-add-file").attr('multiple', 'multiple');
             $("#add-file-input").attr('multiple', 'multiple');
         }
         else{
             $("#file-multiple").text("Only one file can be uploaded.");
+            $("#file-multiple-irods").text("Only one file can be uploaded.");
             $("#btn-add-file").removeAttr('multiple');
             $("#add-file-input").removeAttr('multiple');
             if(file_count > 0){
                 $("#btn-add-file").hide();
+                $("#btn-signin-irods").hide();
+                $("#sign-in-info").hide();
+                $("#btn-select-irods-file").hide();
             }
         }
         // hide add file button if file upload is not allowed for the resource type
         if(file_types == "()"){
             $("#btn-add-file").hide();
+            $("#btn-signin-irods").hide();
+            $("#sign-in-info").hide();
+            $("#btn-select-irods-file").hide();
         }
 
         // file upload validation when file is selected for upload
@@ -2725,31 +2767,7 @@
             }
             return false;
         }
-        // Register the click event handlers
-{#        $("#addCreator").click(function () {#}
-{#            return addForm(this, "creator");#}
-{#        });#}
-{#        $(".delete-creator").click(function () {#}
-{#            return deleteForm(this, "creator");#}
-{#        });#}
-{#        $("#addContributor").click(function () {#}
-{#            return addForm(this, "contributor");#}
-{#        });#}
-{#        $("#addLinkCreator").click(function () {#}
-{#            return addLink(this, "creator");#}
-{#        });#}
-{#        $(".delete-contributor").click(function () {#}
-{#            return deleteForm(this, "contributors");#}
-{#        });#}
-{#        $(".delete-link-contributor").click(function () {#}
-{#            return deleteLink(this, "contributors");#}
-{#        });#}
-{#        $(".delete-link-creator").click(function () {#}
-{#            return deleteLink(this, "creator");#}
-{#        });#}
-{#        $("#addSource").click(function () {#}
-{#            return addForm(this, "source");#}
-{#        });#}
+
         $("form input:radio").change(function () {
             if ($(this).val() == "point") {
                 //alert('you select the point radio button');
