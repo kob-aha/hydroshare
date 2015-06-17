@@ -2,6 +2,7 @@ from __future__ import absolute_import
 from collections import defaultdict
 import json
 import requests
+import os
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group, User
@@ -14,16 +15,19 @@ from django.template import RequestContext
 from django.core import signing
 from django import forms
 
+from rest_framework.decorators import api_view
+
 from mezzanine.conf import settings
 from mezzanine.pages.page_processors import processor_for
 import autocomplete_light
 from inplaceeditform.commons import get_dict_from_obj, apply_filters
 from inplaceeditform.views import _get_http_response, _get_adaptor
+from django_irods.storage import IrodsStorage
 
 from hs_core import hydroshare
 from hs_core.hydroshare import get_resource_list
 from hs_core.hydroshare.utils import get_resource_by_shortkey, resource_modified, user_from_id
-from .utils import authorize
+from .utils import authorize, upload_from_irods
 from hs_core.models import ResourceFile, GenericResource, resource_processor, CoreMetaData
 
 from . import resource_rest_api
@@ -33,7 +37,6 @@ from hs_core.hydroshare import utils
 from . import utils as view_utils
 from hs_core.hydroshare import file_size_limit_for_display
 from hs_core.signals import *
-
 
 def short_url(request, *args, **kwargs):
     try:
@@ -120,6 +123,7 @@ def is_multiple_file_allowed_for_resource_type(request, resource_type, *args, **
         return HttpResponse(json.dumps(ajax_response_data))
     else:
         return HttpResponseRedirect(request.META['HTTP_REFERER'])
+
 
 def add_metadata_element(request, shortkey, element_name, *args, **kwargs):
     res, _, _ = authorize(request, shortkey, edit=True, full=True, superuser=True)
@@ -208,6 +212,15 @@ def update_metadata_element(request, shortkey, element_name, element_id, *args, 
 
     return HttpResponseRedirect(request.META['HTTP_REFERER'])
 
+@api_view(['GET'])
+def file_download_url_mapper(request, shortkey, filename):
+    """ maps the file URIs in resourcemap document to django_irods download view function"""
+
+    authorize(request, shortkey, view=True, edit=True, full=True, superuser=True)
+    irods_file_path = '/'.join(request.path.split('/')[2:-1])
+    istorage = IrodsStorage()
+    file_download_url = istorage.url(irods_file_path)
+    return HttpResponseRedirect(file_download_url)
 
 def delete_metadata_element(request, shortkey, element_name, element_id, *args, **kwargs):
     res, _, _ = authorize(request, shortkey, edit=True, full=True, superuser=True)
@@ -380,7 +393,7 @@ class FilterForm(forms.Form):
     start = forms.IntegerField(required=False)
     published = forms.BooleanField(required=False)
     edit_permission = forms.BooleanField(required=False)
-    creator = forms.ModelChoiceField(queryset=User.objects.all(), required=False)
+    owner = forms.CharField(required=False)
     user = forms.ModelChoiceField(queryset=User.objects.all(), required=False)
     from_date = forms.DateTimeField(required=False)
 
@@ -392,10 +405,11 @@ def my_resources(request, page):
     # sys.path.append("/home/docker/pycharm-debug")
     # import pydevd
     # pydevd.settrace('172.17.42.1', port=21000, suspend=False)
+
     frm = FilterForm(data=request.REQUEST)
     if frm.is_valid():
         res_cnt = 20 # 20 is hardcoded for the number of resources to show on one page, which is also hardcoded in my-resources.html
-        owner = frm.cleaned_data['creator'] or None
+        owner = frm.cleaned_data['owner'] or None
         user = frm.cleaned_data['user'] or (request.user if request.user.is_authenticated() else None)
         edit_permission = frm.cleaned_data['edit_permission'] or False
         published = frm.cleaned_data['published'] or False
@@ -404,10 +418,13 @@ def my_resources(request, page):
             startno = 0
         start = startno or 0
         from_date = frm.cleaned_data['from_date'] or None
-        keywords = [k.strip() for k in request.REQUEST['keywords'].split(',')] if request.REQUEST.get('keywords', None) else None
         words = request.REQUEST.get('text', None)
         public = not request.user.is_authenticated()
-        types = [t.strip() for t in request.REQUEST.getlist('type')]
+
+        search_items = dict(
+            (item_type, [t.strip() for t in request.REQUEST.getlist(item_type)])
+            for item_type in ("type", "author", "contributor", "subject")
+        )
 
         # TODO ten separate SQL queries for basically the same data
         res = set()
@@ -417,10 +434,9 @@ def my_resources(request, page):
             published=published,
             edit_permission=edit_permission,
             from_date=from_date,
-            keywords=keywords,
             full_text_search=words,
             public=public,
-            types=types
+            **search_items
         ).values():
             res = res.union(lst)
         total_res_cnt = len(res)
@@ -479,73 +495,33 @@ def add_generic_context(request, page):
 
 res_cls = ""
 resource = None
-@login_required
-def describe_resource(request, *args, **kwargs):
-    resource_type=request.POST['resource-type']
-    res_title = request.POST['title']
-    global res_cls, resource
-    resource_files=request.FILES.getlist('files')
-    valid = hydroshare.check_resource_files(resource_files)
-    if not valid:
-        context = {
-            'file_size_error' : 'The resource file is larger than the supported size limit %s. Select resource files within %s to create resource.' % (file_size_limit_for_display, file_size_limit_for_display)
-        }
-        return render_to_response('pages/resource-selection.html', context, context_instance=RequestContext(request))
-    res_cls = hydroshare.check_resource_type(resource_type)
-    # Send pre_describe_resource signal for other resource type apps to listen, extract, and add their own metadata
-    ret_responses = pre_describe_resource.send(sender=res_cls, files=resource_files, title=res_title)
-
-    create_res_context = {
-        'resource_type': resource_type,
-        'res_title': res_title,
-    }
-    page_url = 'pages/create-resource.html'
-    use_generic = True
-    for receiver, response in ret_responses:
-        if response is not None:
-            for key in response:
-                if key != 'create_resource_page_url':
-                    create_res_context[key] = response[key]
-                else:
-                    page_url = response.get('create_resource_page_url', 'pages/create-resource.html')
-                    use_generic = False
-
-    if use_generic:
-        # create barebone resource with resource_files to database model for later update since on Django 1.7, resource_files get closed automatically at the end of each request
-        owner = user_from_id(request.user)
-        resource = res_cls.objects.create(
-                user=owner,
-                creator=owner,
-                title=res_title,
-                last_changed_by=owner,
-                in_menus=[],
-                **kwargs
-        )
-        for file in resource_files:
-            ResourceFile.objects.create(content_object=resource, resource_file=file)
-
-    return render_to_response(page_url, create_res_context, context_instance=RequestContext(request))
-
 
 @login_required
 def create_resource_select_resource_type(request, *args, **kwargs):
     return render_to_response('pages/create-resource.html', context_instance=RequestContext(request))
-
-
-class CreateResourceForm(forms.Form):
-    title = forms.CharField(required=True)
-    creators = forms.CharField(required=False, min_length=0)
-    contributors = forms.CharField(required=False, min_length=0)
-    abstract = forms.CharField(required=False, min_length=0)
-    keywords = forms.CharField(required=False, min_length=0)
 
 @login_required
 def create_resource(request, *args, **kwargs):
     resource_type = request.POST['resource-type']
     res_title = request.POST['title']
 
-    url_key = "page_redirect_url"
     resource_files = request.FILES.getlist('files')
+
+    irods_fname = request.POST.get('irods_file_name')
+    if irods_fname:
+        user = request.POST.get('irods-username')
+        password = request.POST.get("irods-password")
+        port = request.POST.get("irods-port")
+        host = request.POST.get("irods-host")
+        zone = request.POST.get("irods-zone")
+        try:
+            upload_from_irods(username=user, password=password, host=host, port=port,
+                                  zone=zone, irods_fname=irods_fname, res_files=resource_files)
+        except Exception as ex:
+            context = {'resource_creation_error': ex.message}
+            return render_to_response('pages/create-resource.html', context, context_instance=RequestContext(request))
+
+    url_key = "page_redirect_url"
 
     try:
         page_url_dict, res_title, metadata = hydroshare.utils.resource_pre_create_actions(resource_type=resource_type, files=resource_files,
@@ -573,7 +549,7 @@ def create_resource(request, *args, **kwargs):
                 title=res_title,
                 keywords=None,
                 metadata=metadata,
-                files=request.FILES.getlist('files'),
+                files=resource_files,
                 content=res_title
         )
     except Exception as ex:

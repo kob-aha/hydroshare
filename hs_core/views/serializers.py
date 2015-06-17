@@ -11,6 +11,9 @@ from .utils import validate_json, validate_user_name,  validate_group_name
 
 RESOURCE_TYPES = [rtype.__name__ for rtype in utils.get_resource_types()]
 
+class StringListField(serializers.ListField):
+    child = serializers.CharField()
+
 class ResourceUpdateRequestValidator(serializers.Serializer):
     title = serializers.CharField(required=False)
     #metadata = serializers.CharField(validators=[validate_json], required=False)
@@ -18,6 +21,8 @@ class ResourceUpdateRequestValidator(serializers.Serializer):
     edit_groups = serializers.CharField(required=False)
     view_users = serializers.CharField(required=False)
     view_groups = serializers.CharField(required=False)
+    keywords = StringListField(required=False)
+    abstract = serializers.CharField(required=False)
 
     def validate_edit_users(self, value):
         return self._validate_users(value)
@@ -45,12 +50,17 @@ class ResourceUpdateRequestValidator(serializers.Serializer):
                 raise serializers.ValidationError("%s in not a valid group name." % value)
         return values
 
+
 class ResourceCreateRequestValidator(ResourceUpdateRequestValidator):
     resource_type = serializers.ChoiceField(
             choices=zip(
                 [x.__name__ for x in hydroshare.get_resource_types()],
                 [x.__name__ for x in hydroshare.get_resource_types()]
             ), default='GenericResource')
+
+
+class ResourceTypesSerializer(serializers.Serializer):
+    resource_type = serializers.CharField(max_length=100, required=True, validators=[lambda x: x in RESOURCE_TYPES])
 
 
 class ResourceListRequestValidator(serializers.Serializer):
@@ -66,7 +76,7 @@ class ResourceListRequestValidator(serializers.Serializer):
     full_text_search = serializers.CharField(required=False)
     edit_permission = serializers.BooleanField(required=False, default=False)
     published = serializers.BooleanField(required=False, default=False)
-    types = serializers.MultipleChoiceField(choices=RESOURCE_TYPES, required=False, default=None)
+    type = serializers.MultipleChoiceField(choices=RESOURCE_TYPES, required=False, default=None)
 
 
 class ResourceListItemSerializer(serializers.Serializer):
@@ -79,6 +89,11 @@ class ResourceListItemSerializer(serializers.Serializer):
     public = serializers.BooleanField()
     bag_url = serializers.URLField()
     science_metadata_url = serializers.URLField()
+
+
+class ResourceType(object):
+    def __init__(self, resource_type):
+        self.resource_type = resource_type
 
 
 ResourceListItem = namedtuple('ResourceListItem',
@@ -96,3 +111,8 @@ ResourceListItem = namedtuple('ResourceListItem',
 class UserAuthenticateRequestValidator(serializers.Serializer):
     username = serializers.CharField()
     password = serializers.CharField()
+
+
+class AccessRulesRequestValidator(serializers.Serializer):
+    public = serializers.BooleanField(default=False)
+

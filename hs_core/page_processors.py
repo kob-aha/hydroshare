@@ -1,9 +1,10 @@
 from mezzanine.pages.page_processors import processor_for
 
-from hs_core.models import GenericResource
+from hs_core.models import GenericResource, AbstractResource
 from hs_core import languages_iso
 from forms import *
 from hs_tools_resource.models import ToolResourceType
+from django_irods.storage import IrodsStorage
 
 @processor_for(GenericResource)
 def landing_page(request, page):
@@ -22,6 +23,12 @@ def landing_page(request, page):
 # resource type specific app needs to call this method to inject a crispy_form layout
 # object for displaying metadata UI for the extended metadata for their resource
 def get_page_context(page, user, resource_edit=False, extended_metadata_layout=None, request=None):
+    file_type_error=''
+    if request:
+        file_type_error = request.session.get("file_type_error", None)
+        if file_type_error:
+            del request.session["file_type_error"]
+
     content_model = page.get_content_model()
     edit_mode = False
     file_validation_error = None
@@ -35,9 +42,9 @@ def get_page_context(page, user, resource_edit=False, extended_metadata_layout=N
     relevant_tools = []
     for res_type in ToolResourceType.objects.all():
         if str(content_model.content_model).lower() in str(res_type.tool_res_type).lower():
-            url = res_type.content_object.resource.metadata.url_bases.first()
+            url = res_type.content_object.url_bases.first()
             if url:
-                tl = {'title': res_type.content_object.resource.title,
+                tl = {'title': res_type.content_object.title,
                       'url': "{}{}{}".format(url.value, "/?res_id=", content_model.short_id)}
                 relevant_tools.append(tl)
 
@@ -49,6 +56,8 @@ def get_page_context(page, user, resource_edit=False, extended_metadata_layout=N
         just_created = request.session.get('just_created', False)
         if 'just_created' in request.session:
             del request.session['just_created']
+
+    bag_url = AbstractResource.bag_url(content_model.short_id)
 
     if not resource_edit:
         temporal_coverages = content_model.metadata.coverages.all().filter(type='period')
@@ -109,7 +118,9 @@ def get_page_context(page, user, resource_edit=False, extended_metadata_layout=N
                    'allow_multiple_file_upload': content_model.can_have_multiple_files(),
                    'file_validation_error': file_validation_error if file_validation_error else None,
                    'relevant_tools': relevant_tools,
-                   'just_created': just_created
+                   'file_type_error': file_type_error,
+                   'just_created': just_created,
+                   'bag_url': bag_url
         }
         return context
 
@@ -284,6 +295,7 @@ def get_page_context(page, user, resource_edit=False, extended_metadata_layout=N
                'metadata_status': metadata_status,
                'citation': content_model.get_citation(),
                'extended_metadata_layout': extended_metadata_layout,
+               'bag_url': bag_url,
                'file_validation_error': file_validation_error if file_validation_error else None
     }
 
