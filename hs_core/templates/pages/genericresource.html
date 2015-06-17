@@ -758,14 +758,14 @@
                             {% endif %}
                         {% endif %}
                     {% endif %}
-{#                    {% if relevant_tools or metadata_form %}#}
-{#                        <li class="col-xs-2 col-md-2">#}
-{#                            <a href="#relevantTools" data-toggle="tab">#}
-{#                                <span class="glyphicon glyphicon-wrench"></span>#}
-{#                                &nbsp;Relevant Tools#}
-{#                            </a>#}
-{#                        </li>#}
-{#                    {% endif %}#}
+                    {% if relevant_tools or metadata_form %}
+                        <li class="col-xs-2 col-md-2">
+                            <a href="#relevantTools" data-toggle="tab">
+                                <span class="glyphicon glyphicon-wrench"></span>
+                                &nbsp;Relevant Tools
+                            </a>
+                        </li>
+                    {% endif %}
                 </ul>
             </div>
             <div class="tabs-body">
@@ -1398,7 +1398,7 @@
                     {%  endif %}
                 {%  endif %}
             {%  endif %}
-{#                <!-- ========= RELEVANT TOOLS TAB ========= -->#}
+                <!-- ========= RELEVANT TOOLS TAB ========= -->
 {#            {% if relevant_tools or metadata_form %}#}
 {#                <div class="tab-pane" id="relevantTools">#}
 {#                {% if not metadata_form %}#}
