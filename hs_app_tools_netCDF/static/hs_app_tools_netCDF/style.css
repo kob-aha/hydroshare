@@ -1,0 +1,91 @@
+/* General Style */
+ul {
+    padding-left: 0;
+    margin-left:1.2em;
+}
+
+.tab-elements {
+    max-height:1000px;
+    backgroud-color:blue;
+}
+
+#ncToolTabsBody {
+    border-color:gainsboro;
+    max-height:1000px;
+    padding-bottom:20px;
+    padding-top:20px;
+    padding-right:2px;
+    padding-left:2px;
+    overflow:auto;
+}
+
+#waitDialog
+{
+    width: 500px;
+    height: 300px;
+    background-color: #000000;
+    opacity:0.6;
+    text-align:center;
+    position:absolute;
+    left: 50%;
+    top: 50%;
+    margin-left:-250px; /*half size of the width to keep the div in the center*/
+    margin-top: -150px; /*half size of the height to keep the div in the center*/
+    display:none
+ }
+
+/* Meta Edit Tab Style */
+#metaEditTable{
+    margin-bottom:10px;
+}
+
+#metaEditTable td {
+    border: 1px solid #357ebd;
+}
+
+#metaEditTable th {
+    color: white;
+    background-color: #428bca;
+    border: 1px solid #357ebd;
+}
+
+#metaEditTable tr:nth-child(even) {
+    background-color: #d7ebf9;
+}
+
+#metaEditForm {
+    margin-top:30px;
+    margin-left:30px;
+}
+
+#metaEditBtn {
+    margin-top:30px;
+}
+
+/* Data Subset Tab Style */
+
+#dimensionFormset {
+    overflow-y: auto;
+    height: 220px;
+    border-style: solid;
+    border-color: gainsboro;
+    border-width: thin;
+    margin-bottom:30px;
+    padding:5px;
+}
+
+#variableNamesForm {
+    overflow-y: auto;
+    height: 220px;
+    border-style: solid;
+    border-color: gainsboro;
+    border-width: thin;
+    padding:5px;
+    margin-bottom:30px;
+}
+
+#dataSubsetIntro {
+    padding-left: 0;
+    margin-left:1.2em;
+}
+

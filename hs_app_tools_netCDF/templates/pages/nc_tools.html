@@ -1,0 +1,384 @@
+{# This template is used as the landing page for NetCDF Resource #}
+
+{% extends "pages/page.html" %}
+{% load staticfiles %}
+{% load geoanalytics_tags ratings_tags pages_tags mezzanine_tags comments_tags keyword_tags hydroshare_tags crispy_forms_tags inplace_edit %}
+
+{# load extra css #}
+{% block extra_css %}
+    <link rel="stylesheet" type="text/css" href="{% static 'hs_app_tools_netCDF/style.css'%}"/>
+{% endblock %}
+
+
+{# Page content #}
+{% block main %}
+
+    <!-- Page Title -->
+    <div id="title" style="margin-bottom:30px">
+        <h1>NetCDF Tools</h1>
+    </div>
+
+    <!-- Resource Info -->
+    {% if nc_res %}
+        <div id="resource-info" style="margin-bottom:30px">
+            <div id="res-back-btn">
+                <a href="{{ nc_res.get_absolute_url }}" type="button" class="btn btn-success pull-right">Back to Resource Landing Page</a>
+            </div>
+
+            <div id="ncFileName">
+                {% for f in nc_res.files.all %}
+                    {% if f.resource_file.name|slice:"-3:" == '.nc'%}
+                        <h4>Resource NetCDF File:  <a href="{{ f.resource_file.url }}"> {{ f.resource_file.name|slice:"33:" }}</a> </h4>
+                    {% endif %}
+                {% endfor %}
+            </div>
+
+{#            <div id="ncToolObjFilesLinks">#}
+{#                {% if nc_tools_obj %}#}
+{#                    {% if nc_tools_obj.meta_edit_file %}#}
+{#                        <h4>Metadata Editing File:#}
+{#                        <a href="{{ nc_tools_obj.meta_edit_file.url }}">{{ nc_tools_obj.meta_edit_file.name|slice:"2:" }}</a>#}
+{#                        </h4>#}
+{#                    {% endif %}#}
+{#                {% endif %}#}
+{#            </div>#}
+        </div>
+
+    {% else %}
+        <div class="content-block" id="error-info"><h4> There is no netCDF file available for the tools </h4></div>
+        <!--TODO:make this section for uploading new netcdf file from local computer-->
+
+    {% endif %}
+
+    <!-- Tool Tabs Section-->
+    <div class="tab-elements">
+        <!-- tab header -->
+        <div class="panel-tabs">
+            <ul class="nav nav-tabs">
+                <li class="active col-md-2 col-sm-2 col-xs-12">
+                    <a href="#metaEditTab" data-toggle="tab">Metadata Editing</a>
+                </li>
+                <li class="col-md-2 col-sm-2 col-xs-12">
+                    <a href="#dataInspectorTab" data-toggle="tab">Data Inspector</a>
+                </li>
+                <li class="col-md-2 col-sm-2 col-xs-12">
+                    <a href="#dataSubsetTab" data-toggle="tab">Data Subset</a>
+                </li>
+
+            </ul>
+        </div>
+
+         <!-- tab body -->
+        <div class="tabs-body" id="ncToolTabsBody">
+            <div class="tab-content">
+
+                <!-- meta edit tab-->
+                <div class="active tab-pane" id="metaEditTab">
+
+                    {# meta edit tool intro and mapping table #}
+                    <div class="col-md-6">
+                        {# meta edit tool intro #}
+                        <p><strong style="font-size:130%">Metadata Editing Tool</strong></p>
+                            <ul id="metaEditIntro">
+                                <li>This tool will write the resource metadata which is stored in HydroShare into the existing ".nc" resource file.</li>
+                                <li>Please select the "Meta Elements" on the right and click on "Write Metadata to NetCDF File" to run this tool. </li>
+                                <li>The mapping between the HydroShare resource metadata information and the NetCDF conventions terms is shown in the table.</li>
+
+                            </ul>
+
+                        {# meta terms mapping table #}
+                        <div  id="metaEditTable">
+                            <table id="metaEditTable">
+                            <col width="150px">
+                            <col width="350px">
+                            <tr>
+                                <th>Meta Element</th>
+                                <th>Conventions Term</th>
+                            </tr>
+                            <tr>
+                                <td>Title</td>
+                                <td>ACDD:title</td>
+                            </tr>
+                            <tr>
+                                <td>Creator</td>
+                                <td>ACDD:creator_name, creator_email, creator_url</td>
+                            </tr>
+                            <tr>
+                                <td>Contributor</td>
+                                <td>ACDD:contributor_name</td>
+                            </tr>
+                            <tr>
+                                <td>Abstract</td>
+                                <td>ACDD:summary</td>
+                            </tr>
+                            <tr>
+                                <td>Keyword</td>
+                                <td>ACDD:keywords</td>
+                            </tr>
+                            <tr>
+                                <td>Spatial Coverage</td>
+                                <td>ACDD:geospatial_lat_min, geospatial_lat_max, geospatial_lon_max, getospatial_lon_min</td>
+                            </tr>
+                            <tr>
+                                <td>Temporal Coverage</td>
+                                <td>ACDD:time_coverage_start, time_coverage_end</td>
+                            </tr>
+                            <tr>
+                                <td>Right</td>
+                                <td>ACDD:license</td>
+                            </tr>
+                            <tr>
+                                <td>Source</td>
+                                <td>ACDD:source</td>
+                            </tr>
+                            <tr>
+                                <td>Publisher</td>
+                                <td>ACDD:publisher_name, publisher_url</td>
+                            </tr>
+                            <tr>
+                                <td>Permanent Link</td>
+                                <td>ACDD:id</td>
+                            </tr>
+                            <tr>
+                                <td>Relation:cites</td>
+                                <td>ACDD:references</td>
+                            </tr>
+                            <tr>
+                                <td>Variable</td>
+                                <td>CF:units, long_name, missing_value, comment</td>
+                            </tr>
+                        </table>
+                            <p id='metaEditTableInfo'>
+                                *ACDD:<a target="_blank" href= "http://wiki.esipfed.org/index.php/Attribute_Convention_for_Data_Discovery_(ACDD)">
+                                    Attribute Convention for Data Discovery
+                                    </a>
+                            </p>
+                            <p id="metaEditTableInfo">
+                                *CF:<a target="_blank" href="http://cfconventions.org/">
+                                Climate and Forecast metadata Convention
+                                </a>
+                            </p>
+                        </div>
+                    </div>
+
+                    {# meta editing tool forms #}
+                    <div class="col-md-6">
+                        <form id="metaEditForm" action="{% url "nc_tools:meta_edit" nc_res.short_id %}" method="post"> {% csrf_token %}
+                            {{ meta_elements_form.as_p }}
+                            <input id="metaEditBtn" type="submit" value="Write Metadata to NetCDF File" class="btn btn-primary pull-right"/>
+                        </form>
+                    </div>
+
+                </div>
+
+                <!-- data inspector tab -->
+                <div class="tab-pane" id="dataInspectorTab">
+                    {# data inspector tool intro #}
+                    <div class="col-md-5">
+                        <p><strong style="font-size:130%">Data Inspector Tool</strong></p>
+                        <ul id="metaEditIntro">
+                            <li>This tool will help you to look into the .nc resource file and get information of the attributes and data for selected variable name.</li>
+                            <li>Please select the "Variable Name" from the drop-down list and click on "Inspect NetCDF Variable" to run this tool.</li>
+                            <li>Notes for "Variable Data":
+                                <ol>
+                                    <li>If the size of the variable data is too large, it will show the "snippet" of the data as a summary of beginning and end of each dimension.</li>
+                                    <li>If the netCDF data follows CF convention to define the time coordinate variable with "units" and "calendar" attributes, the variable data will be converted as datetime string.</li>
+                                </ol>
+                            </li>
+                        </ul>
+                    </div>
+
+                    {# data inspector form #}
+                    <div class="col-md-7">
+                            {% if data_inspector_form %}
+                                <form id="dataInspectorForm" action="{% url 'nc_tools:data_inspector' nc_res.short_id %}" method="post"> {% csrf_token %}
+                                    {{ data_inspector_form.as_p }}
+                                    <input id="dataInspectorBtn" type="submit" value="Inspect NetCDF Variable" class="btn btn-primary pull-right"/>
+                                </form>
+                            {% else %}
+                                <p style="color:red;">
+                                    Failed to get the variable names information.
+                                    <br/>Please check if the .nc file includes valid data and metadata information.
+                                </p>
+                            {% endif %}
+                    </div>
+
+                </div>
+
+                <!-- data subset tab -->
+                <div class="tab-pane" id="dataSubsetTab">
+
+                    {# data subset tool intro  #}
+                    <div class="col-md-5">
+                        {# data subset tool intro #}
+                        <p><strong style="font-size:130%">Data Subset Tool</strong></p>
+                        <ul id='dataSubsetIntro'>
+                            <li>This tool will subset the data from the existing .nc resource file and create a new "Multidimensional (NetCDF)" resource.</li>
+                            <li>Please specify "Subset index" and "Data Variable Names" information on the right and click on "Subset NetCDF Data" to run this tool.</li>
+                            <li>Notes for "Dimension Subset Index":
+                                <ol>
+                                    <li>The "start" and "end" index need to be non-negative integers.</li>
+                                    <li>The "step" index needs to be positive integer. </li>
+                                    <li>The "start" index should be smaller or equal to the "end" index. </li>
+                                    <li>The "step" index can be larger than "end" index. </li>
+                                    <li>If the dimensions are not related to the selected variables, keep the default subset index values unchanged.</li>
+                                </ol>
+
+                            </li>
+                        </ul>
+                    </div>
+
+                    {# Datasubset tool forms #}
+                    <div class="col-md-7">
+                        <form id="dataSubsetForm" action="{% url 'nc_tools:data_subset' nc_res.short_id %} " method="post"> {% csrf_token %}
+                            {# dimension formset #}
+                            <div id="dimensionFormset">
+                            <p><strong>Define Dimension Subset Index in the Form of "Start:Step:End" (Required):</strong></p>
+                            {% if dimension_formset %}
+                                {{ dimension_formset.management_form }}
+                                    {% for form in dimension_formset %}
+                                        {{ form.as_table}}
+                                    {% endfor %}
+                            {% else %}
+                                <p>Failed to extract the dimension info for data subset.</p>
+                            {% endif %}
+                            </div>
+
+                            {# variable names form #}
+                            <div id="variableNamesForm">
+                            {% if variable_names_form %}
+                                {{ variable_names_form }}
+                            {% else %}
+                                <p>Failed to extract the data variable information for data subset.</p>
+                            {% endif %}
+                            </div>
+
+                            {# file process form #}
+{#                            <p style="margin-bottom:30px"></p>#}
+{#                            {{ file_process_form.as_p }}#}
+
+                            {# submit button #}
+                            {% if dimension_formset and variable_names_form %}
+                                <input id="dataSubsetBtn" type="submit" value="Subset NetCDF Data" class="btn btn-primary pull-right "/>
+                            {% endif %}
+
+                        </form>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <!-- wait dialog for Ajax Call -->
+    <div id="waitDialog">
+      <img src="{% static 'hs_app_tools_netCDF/loading.gif' %}" alt="loading" style="margin-top:80px; width:400px; height:30px"/>
+      <p style="color:gray;font-weight:normal;font-size:200%;margin-top:40px">Please wait while running the tool....</p>
+    </div>
+
+
+{% endblock %}
+
+
+{# Load javascript #}
+{% block extra_js %}
+<script>
+
+    // Meta Edit Tab js //////////////////////////////////////////////////////////////////
+    $(document).ready(function(){
+
+        //disable meta edit button and clean checked box
+        $('input[id^="id_meta_elements_"]').attr('checked', false);
+{#        $('input[id^="id_meta_edit_file_process_"]').attr('checked', false);#}
+        $('#metaEditBtn').attr('disabled', true);
+
+        // enable meta edit button after valid check box
+        $('#metaEditForm').on('change', function(){
+            var meta_elements_checkbox = $('#metaEditForm').find('input[id^="id_meta_elements_"]:checked').length > 0;
+{#            var file_process_checkbox = $('#metaEditForm').find('input[id^="id_meta_edit_file_process_"]:checked').length > 0;#}
+
+            if (meta_elements_checkbox) {
+                $('#metaEditBtn').attr('disabled', false);
+            }
+            else {
+                $('#metaEditBtn').attr('disabled',true);
+            }
+        })
+    })
+
+
+    // Data Inspector Tab js ///////////////////////////////////////////////////////////////
+    $(document).ready(function(){
+
+{#        // Test for getting the element#}
+{#        $('#id_var_name').change(function() {#}
+{#            var a = $("#id_var_name option:selected").val();#}
+{#            alert(a);#}
+{#            $('#id_var_data').text(a);#}
+{#            $('#id_var_attr').text(a)})#}
+
+        // ajax call function to get var_attribute and var_data info
+        var data_inspector_form= $('#dataInspectorForm');
+        data_inspector_form.submit(function(){
+            $('#waitDialog').show();
+            $.ajax({
+                type: data_inspector_form.attr('method'),
+                url: data_inspector_form.attr('action'),
+                data: data_inspector_form.serialize(),
+                success: function(result) {
+                    console.log(result);
+                    json_response = JSON.parse(result);
+                    console.log(json_response);
+                    $('#waitDialog').hide();
+                    $("#id_var_data").text(json_response.var_data);
+                    $('#id_var_attr').text(json_response.var_attr);
+
+                },
+                error: function(data) {
+                    $('#waitDialog').hide();
+                    $('#id_var_data').text('Oops, please click the button again or try other variables.');
+                    $('#id_var_attr').text('Oops, please click the button again or try other variables.');
+                }
+            });
+            return false;
+
+        });
+    })
+
+
+
+    // Data Subsetting Tab js /////////////////////////////////////////
+    $(document).ready(function(){
+
+        //disable data subset button and clean checked box
+        $('input[id^="id_variable_names_"]').attr('checked', false);
+{#        $('input[id^="id_file_process_"]').attr('checked', false);#}
+        $('#dataSubsetBtn').attr('disabled', true);
+
+        // enable data subset button after valid check box
+        $('#dataSubsetForm').on('change', function(){
+            var variable_names_checkbox = $('#dataSubsetForm').find('input[id^="id_variable_names_"]:checked').length > 0;
+{#            var file_process_checkbox= $('#dataSubsetForm').find('input[id^="id_file_process_"]:checked').length > 0;#}
+            if (variable_names_checkbox) {
+
+                $('#dataSubsetBtn').attr('disabled', false);
+
+                $('#dataSubsetForm input:text').each(function(){
+
+                    if (!$(this).val()){
+                        $('#dataSubsetBtn').attr('disabled',true);
+                    }
+                })
+            }
+            else {
+                $('#dataSubsetBtn').attr('disabled',true);
+            }
+        })
+
+    })
+
+</script>
+
+{% endblock %}

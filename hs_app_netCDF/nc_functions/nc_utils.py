@@ -19,7 +19,6 @@ import numpy
 def get_nc_dataset(nc_file_name):
     """
     (string)-> object
-
     Return: the netCDF dataset
     """
     try:
@@ -33,7 +32,6 @@ def get_nc_dataset(nc_file_name):
 def get_nc_variable(nc_file_name, nc_variable_name):
     """
     (string, string) -> obj
-
     Return: netcdf variable by the given variable name
     """
 
@@ -42,18 +40,76 @@ def get_nc_variable(nc_file_name, nc_variable_name):
     else:
         nc_dataset = get_nc_dataset(nc_file_name)
 
-    if nc_variable_name in nc_dataset.variables.keys():
-        nc_variable = nc_dataset.variables[nc_variable_name]
-    else:
-        nc_variable = None
+    if nc_dataset:
+        if nc_variable_name in nc_dataset.variables.keys():
+            nc_variable = nc_dataset.variables[nc_variable_name]
+        else:
+            nc_variable = None
 
     return nc_variable
 
 
+def get_nc_variable_data(nc_file_name, nc_variable_name, time_convert=False):
+    """
+    (String, string, bool) -> numpy array
+    Return: numpy array of the variable data
+            if time_convert = True, the time coordinate variable will be changed as time string format.
+    """
+
+    nc_variable = get_nc_variable(nc_file_name, nc_variable_name)
+
+    if nc_variable is not None and nc_variable.shape:
+        try:
+            nc_variable_data = nc_variable[:]
+        except:
+            nc_variable_data = None
+    else:
+        nc_variable_data = None
+
+    if time_convert and nc_variable_data is not None:
+        coordinate_type = get_nc_variable_coordinate_type(nc_variable)
+        if coordinate_type == "T" and len(nc_variable.shape) == 1:
+            time_values = []
+            time_units = nc_variable.units if hasattr(nc_variable, 'units') else ''
+            time_calendar = nc_variable.calendar if hasattr(nc_variable, 'calendar') else 'standard'
+            if time_units and time_calendar:
+                try:
+                    for value in numpy.nditer(nc_variable_data, op_flags=['readwrite']):
+                        time_obj = netCDF4.num2date(value, units=time_units, calendar=time_calendar)
+                        time_str = time_obj.strftime('%Y-%m-%d %H:%M:%S')
+                        time_values.append(time_str)
+                    nc_variable_data = numpy.array(time_values)
+                except:
+                    pass
+
+    return nc_variable_data
+
+
+def get_nc_variable_attr(nc_file_name, nc_variable_name):
+    """
+    (String, string) -> Dict
+    Return: attribute information and attribute name of the variable
+    """
+    nc_variable = get_nc_variable(nc_file_name, nc_variable_name)
+    nc_variable_attr = OrderedDict()
+    if nc_variable.__dict__:
+        try:
+            nc_variable_attr['variable_dimension'] = "({0})".format(', '.join(nc_variable.dimensions))
+            nc_variable_attr['variable_shape'] = str(nc_variable.shape)
+            nc_variable_attr['variable_datatype'] = nc_variable.dtype
+        except:
+            pass
+
+        for attr_name, attr_value in nc_variable.__dict__.items():
+            nc_variable_attr[attr_name] = str(attr_value)
+
+    return nc_variable_attr
+
+
+# Deprecated Function
 def get_nc_variable_original_meta(nc_dataset, nc_variable_name):
     """
     (object, string)-> OrderedDict
-
     Return: netCDF variable original metadata information defined in the netCDF file
     """
 
