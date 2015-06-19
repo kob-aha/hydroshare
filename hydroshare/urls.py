@@ -54,6 +54,7 @@ urlpatterns += patterns('',
     #url('^hs_party/', include('hs_party.urls')),
     url('^hs_metrics/', include('hs_metrics.urls')),
     url('^hsapi/', include('hs_model_program.urls')),
+    url('^hsapi/', include('hs_app_tools_netCDF.urls', namespace='nc_tools')),
 )
 
 if settings.DEBUG is False:   #if DEBUG is True it will be served automatically

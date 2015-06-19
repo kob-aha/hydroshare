@@ -293,6 +293,7 @@ INSTALLED_APPS = (
     "hs_modelinstance",
     "hs_tools_resource",
     "hs_swat_modelinstance",
+    "hs_app_tools_netCDF"
 )
 
 # List of processors used by RequestContext to populate the context.
