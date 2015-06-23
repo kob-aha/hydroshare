@@ -5,6 +5,7 @@ from hs_core import languages_iso
 from forms import *
 from hs_tools_resource.models import ToolResourceType
 from django_irods.storage import IrodsStorage
+from hs_core import hydroshare
 
 @processor_for(GenericResource)
 def landing_page(request, page):
@@ -40,14 +41,16 @@ def get_page_context(page, user, resource_edit=False, extended_metadata_layout=N
     metadata_status = _get_metadata_status(content_model)
 
     relevant_tools = []
-    # for res_type in ToolResourceType.objects.all():
-    #     if str(content_model.content_model).lower() in str(res_type.tool_res_type).lower():
-    #         url = res_type.content_object.url_bases.first()
-    #         if url:
-    #             if res_type.content_object.public or edit_mode:
-    #                 tl = {'title': res_type.content_object.title,
-    #                       'url': "{}{}{}".format(url.value, "/?res_id=", content_model.short_id)}
-    #                 relevant_tools.append(tl)
+    for res_type in ToolResourceType.objects.all():
+        if str(content_model.content_model).lower() in str(res_type.tool_res_type).lower():
+            url_obj = res_type.content_object.url_bases.first()
+            tool_res_obj = hydroshare.get_resource_by_shortkey(url_obj.resShortID)
+            tool_url = url_obj.value
+            if tool_res_obj:
+                if tool_res_obj.public or edit_mode:
+                    tl = {'title': res_type.content_object.title,
+                          'url': "{}{}{}".format(tool_url, "/?res_id=", content_model.short_id)}
+                    relevant_tools.append(tl)
 
 
     just_created = False

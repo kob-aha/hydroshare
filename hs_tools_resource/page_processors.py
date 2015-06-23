@@ -1,4 +1,4 @@
-__author__ = 'Shaun'
+__author__ = 'Drew, Jeff & Shaun'
 from mezzanine.pages.page_processors import processor_for
 from models import *
 from crispy_forms.layout import Layout, Fieldset, ButtonHolder, Submit, HTML
@@ -25,14 +25,19 @@ def landing_page(request, page):
         context['extended_metadata_exists'] = extended_metadata_exists
         context['url_base'] = content_model.metadata.url_bases.first()
         context['res_types'] = content_model.metadata.res_types.all()
-        context['fees'] = content_model.metadata.fees.all()
+        # context['fees'] = content_model.metadata.fees.all()
         context['version'] = content_model.metadata.versions.first()
     else:
         url_base = content_model.metadata.url_bases.first()
+        if not url_base:
+        #     url_base.update(element_id=url_base.id, resShortID=content_model.short_id, value=url_base.value)
+        # else:
+            url_base = RequestUrlBase.create(content_object=content_model.metadata,resShortID=content_model.short_id, value="")
         url_base_form = UrlBaseForm(instance=url_base,
                                     res_short_id=content_model.short_id,
                                     element_id=url_base.id
-                                    if url_base else None)
+                                    if url_base else None,
+                                    )
 
         res_type = content_model.metadata.res_types.first()
         res_type_form = ResTypeForm(instance=res_type,
@@ -41,11 +46,11 @@ def landing_page(request, page):
                                     if res_type else None)
 
 
-        fee = content_model.metadata.fees.first()
-        fees_form = FeeForm(instance=fee,
-                            res_short_id=content_model.short_id,
-                            element_id=fee.id
-                            if fee else None)
+        # fee = content_model.metadata.fees.first()
+        # fees_form = FeeForm(instance=fee,
+        #                     res_short_id=content_model.short_id,
+        #                     element_id=fee.id
+        #                     if fee else None)
 
         version = content_model.metadata.versions.first()
         version_form = VersionForm(instance=version,
@@ -61,10 +66,10 @@ def landing_page(request, page):
                                         '{% load crispy_forms_tags %} '
                                         '{% crispy res_type_form %} '
                                      '</div>'),
-                                HTML('<div class="form-group col-lg-6 col-xs-12" id="fees"> '
-                                        '{% load crispy_forms_tags %} '
-                                        '{% crispy fees_form %} '
-                                     '</div> '),
+                                # HTML('<div class="form-group col-lg-6 col-xs-12" id="fees"> '
+                                #         '{% load crispy_forms_tags %} '
+                                #         '{% crispy fees_form %} '
+                                #      '</div> '),
                                 HTML('<div class="form-group col-lg-6 col-xs-12" id="version"> '
                                         '{% load crispy_forms_tags %} '
                                         '{% crispy version_form %} '
@@ -82,7 +87,7 @@ def landing_page(request, page):
         context['resource_type'] = 'Tool Resource'
         context['url_base_form'] = url_base_form
         context['res_type_form'] = res_type_form
-        context['fees_form'] = fees_form
+        # context['fees_form'] = fees_form
         context['version_form'] = version_form
         context['res_types'] = res_type_names
 
